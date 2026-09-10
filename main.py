@@ -32,7 +32,7 @@ if not TOKEN:
     raise RuntimeError("BOT_TOKEN is missing. Set BOT_TOKEN as an environment variable.")
 
 DB_PATH = os.getenv("DB_PATH", "bot_database.db")
-WEBAPP_URL = "https://mohlahramoh-bit.github.io/rayan-coin-app/"
+WEBAPP_URL = "https://mohlahramoh-bit.github.io/rayan-coin/"
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8080"))
 
