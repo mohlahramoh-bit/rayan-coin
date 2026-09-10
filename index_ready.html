@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0f19">
+    <title>Rayan Coin</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root{
+            --bg:#090e18;
+            --surface:#121a2b;
+            --surface-2:#182238;
+            --border:#25314a;
+            --text:#f7f9fc;
+            --muted:#91a0b8;
+            --yellow:#f59e0b;
+            --green:#22c55e;
+            --blue:#0ea5e9;
+            --red:#ef4444;
+            --shadow:0 10px 30px rgba(0,0,0,.24);
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{background:var(--bg)}
+        body{
+            min-height:100vh;
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+            padding-bottom:92px;
+            -webkit-font-smoothing:antialiased;
+            text-rendering:optimizeLegibility;
+        }
+        button,input,select,textarea{font:inherit}
+        button{touch-action:manipulation}
+        .container{width:100%;max-width:620px;margin:auto;padding:12px}
+        .section{display:none}
+        .section.active{display:block}
+        .card{
+            background:linear-gradient(180deg,var(--surface),#101827);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:16px;
+            margin-bottom:12px;
+            box-shadow:var(--shadow);
+        }
+        .card-title{font-size:17px;font-weight:800;line-height:1.45}
+        .card-subtitle{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.7}
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:8px;
+            margin-top:14px;
+        }
+        .stat{
+            min-width:0;
+            background:rgba(255,255,255,.025);
+            border:1px solid var(--border);
+            border-radius:13px;
+            padding:11px 7px;
+            text-align:center;
+        }
+        .stat-label{color:var(--muted);font-size:11px;white-space:nowrap}
+        .stat-value{margin-top:4px;font-size:18px;font-weight:800;direction:ltr;unicode-bidi:isolate}
+        .yellow{color:var(--yellow)}
+        .green{color:var(--green)}
+        .blue{color:var(--blue)}
+        .empty-state{
+            color:var(--muted);
+            text-align:center;
+            padding:20px 10px;
+            font-size:12px;
+        }
+
+        .ticker{
+            overflow:hidden;
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:12px;
+            margin-bottom:12px;
+            padding:9px 12px;
+        }
+        .ticker-track{
+            display:flex;
+            width:max-content;
+            gap:34px;
+            animation:ticker 22s linear infinite;
+        }
+        .ticker-item{font-size:12px;color:var(--muted);white-space:nowrap}
+        .ticker-item strong{color:var(--green);direction:ltr;unicode-bidi:isolate}
+        @keyframes ticker{
+            from{transform:translateX(10%)}
+            to{transform:translateX(-55%)}
+        }
+
+        .task{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:15px;
+            padding:13px;
+            margin-bottom:10px;
+        }
+        .task-info{min-width:0;flex:1}
+        .task-title{font-size:14px;font-weight:750;line-height:1.5}
+        .task-meta{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.6}
+        .task-reward{color:var(--green);font-weight:750}
+        .task-action{flex:0 0 auto}
+        .btn{
+            border:0;
+            border-radius:11px;
+            padding:9px 16px;
+            font-size:13px;
+            font-weight:800;
+            cursor:pointer;
+        }
+        .btn:disabled{opacity:.45;cursor:not-allowed}
+        .btn-blue{background:linear-gradient(135deg,#18a8e8,#087fc1);color:#fff;box-shadow:0 5px 14px rgba(14,165,233,.2)}
+        .btn-yellow{background:var(--yellow);color:#10151e}
+        .btn-green{background:var(--green);color:#06130a}
+        .btn-red{background:var(--red);color:#fff}
+        .btn-done{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.7);color:var(--green)}
+        .btn-block{width:100%;margin-top:10px}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .option{
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:15px;
+            padding:14px;
+            cursor:pointer;
+            transition:.15s;
+        }
+        .option:active{transform:scale(.98)}
+        .option-title{font-size:13px;font-weight:800}
+        .option-desc{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.6}
+
+        .streak-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            background:var(--surface-2);
+            border:1px solid var(--border);
+            border-radius:14px;
+            padding:11px 13px;
+            margin-top:12px;
+        }
+        .streak-number{font-size:20px;font-weight:900;color:var(--yellow);direction:ltr}
+        .streak-caption{font-size:11px;color:var(--muted)}
+
+        .form-group{margin-bottom:12px}
+        label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+        input,select,textarea{
+            width:100%;
+            background:#0b111d;
+            color:var(--text);
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:11px;
+            outline:none;
+            direction:inherit;
+        }
+        input:focus,select:focus,textarea:focus{border-color:rgba(14,165,233,.7)}
+        input[dir="ltr"]{direction:ltr;text-align:left}
+        .balance-line{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            background:var(--surface-2);
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:11px 13px;
+            font-size:12px;
+        }
+        .balance-number{font-weight:900;color:var(--green);direction:ltr;unicode-bidi:isolate}
+
+        .leader-list{display:grid;gap:8px;margin-top:12px}
+        .leader{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            background:rgba(255,255,255,.025);
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:10px 12px;
+        }
+        .rank{width:28px;text-align:center;font-weight:900;color:var(--yellow);direction:ltr}
+        .leader-name{flex:1;font-size:12px;font-weight:700}
+        .leader-value{font-size:12px;color:var(--green);font-weight:800;direction:ltr;unicode-bidi:isolate}
+
+        .nav{
+            position:fixed;
+            left:0;right:0;bottom:0;
+            z-index:1000;
+            display:flex;
+            justify-content:space-around;
+            padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+            background:rgba(18,26,43,.96);
+            border-top:1px solid var(--border);
+            backdrop-filter:blur(14px);
+        }
+        .nav-item{
+            min-width:68px;
+            background:none;
+            border:0;
+            color:var(--muted);
+            padding:4px 7px;
+            cursor:pointer;
+            border-radius:10px;
+            font-size:10px;
+        }
+        .nav-item.active{color:var(--yellow);background:rgba(245,158,11,.07)}
+        .nav-icon{
+            width:22px;height:22px;
+            margin:0 auto 3px;
+            display:grid;place-items:center;
+        }
+        .nav-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+        .switch-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:15px;
+            background:rgba(255,255,255,.025);
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:11px;
+        }
+        .switch{position:relative;width:46px;height:25px;flex:0 0 auto}
+        .switch input{display:none}
+        .slider{position:absolute;inset:0;background:#334155;border-radius:30px;cursor:pointer;transition:.2s}
+        .slider:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+        .switch input:checked + .slider{background:var(--green)}
+        .switch input:checked + .slider:before{transform:translateX(21px)}
+
+        .modal{
+            position:fixed;inset:0;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:18px;
+            background:rgba(0,0,0,.78);
+            z-index:2000;
+        }
+        .modal.open{display:flex}
+        .modal-box{
+            width:100%;max-width:420px;
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:18px;
+            box-shadow:0 20px 60px rgba(0,0,0,.4);
+        }
+        .modal-actions{display:flex;gap:10px;margin-top:14px}
+        .modal-actions .btn{flex:1}
+
+        .toast{
+            position:fixed;
+            left:50%;
+            bottom:90px;
+            transform:translateX(-50%) translateY(15px);
+            z-index:3000;
+            max-width:90%;
+            background:#111827;
+            border:1px solid var(--border);
+            color:var(--text);
+            padding:10px 14px;
+            border-radius:11px;
+            font-size:12px;
+            opacity:0;
+            pointer-events:none;
+            transition:.2s;
+            text-align:center;
+        }
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+        .loading{opacity:.55;pointer-events:none}
+        .ltr{direction:ltr;unicode-bidi:isolate}
+        @media(max-width:390px){
+            .stats{gap:5px}
+            .stat{padding:10px 4px}
+            .stat-value{font-size:16px}
+            .task{padding:11px}
+            .btn{padding:8px 12px}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <section id="home" class="section active">
+        <div class="card">
+            <h2 class="card-title">لوحة أرباح Rayan Coin</h2>
+            <p class="card-subtitle">تابع رصيدك وإنجازاتك اليومية مباشرة.</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">المكتمل</div>
+                    <div class="stat-value yellow" id="completed-count">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Earnings</div>
+                    <div class="stat-value yellow" id="bot-coins">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">USDT</div>
+                    <div class="stat-value green" id="usdt-balance">0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticker" id="withdraw-ticker">
+            <div class="ticker-track" id="ticker-track">
+                <div class="ticker-item">لا توجد عمليات سحب حديثة للعرض.</div>
+            </div>
+        </div>
+
+        <div class="task">
+            <div class="task-info">
+                <div class="task-title">تسجيل الحضور اليومي</div>
+                <div class="task-meta" id="streak-info">جارٍ تحميل بيانات الحضور...</div>
+            </div>
+            <div class="task-action">
+                <button class="btn btn-done" id="daily-btn" onclick="completeDailyTask()" disabled>—</button>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="option" onclick="openTaskModal()">
+                <div class="option-title yellow">إضافة مهمة</div>
+                <div class="option-desc">أنشئ حملة جديدة بميزانية محددة.</div>
+            </div>
+            <div class="option" onclick="showGuide()">
+                <div class="option-title">الدليل الرسمي</div>
+                <div class="option-desc">تعرف على طريقة استخدام المنصة.</div>
+            </div>
+        </div>
+
+        <div id="dynamic-tasks-container"></div>
+
+        <div class="task">
+            <div class="task-info">
+                <div class="task-title">متابعة حسابنا على X</div>
+                <div class="task-meta task-reward">مكافأة المهمة حسب إعدادات السيرفر</div>
+            </div>
+            <div class="task-action">
+                <button class="btn btn-blue" id="x-btn" onclick="openFixedTask('x')" disabled>—</button>
+            </div>
+        </div>
+
+        <div class="task">
+            <div class="task-info">
+                <div class="task-title">انضم للقناة الرسمية</div>
+                <div class="task-meta task-reward">مكافأة المهمة حسب إعدادات السيرفر</div>
+            </div>
+            <div class="task-action">
+                <button class="btn btn-blue" id="tg-btn" onclick="openFixedTask('telegram')" disabled>—</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tasks" class="section">
+        <div class="card">
+            <h2 class="card-title">مركز المهام والمكافآت</h2>
+            <p class="card-subtitle">المهام والإعلانات المتاحة يتم تحميلها من السيرفر.</p>
+
+            <div class="streak-row">
+                <div>
+                    <div class="card-title" style="font-size:13px">الإعلانات اليومية</div>
+                    <div class="streak-caption">المتبقي اليوم</div>
+                </div>
+                <div class="streak-number" id="ads-counter">0</div>
+            </div>
+
+            <button class="btn btn-yellow btn-block" id="watch-ad-btn" onclick="watchAd()" disabled>
+                مشاهدة إعلان مكافأة
+            </button>
+        </div>
+
+        <div id="tasks-list"></div>
+    </section>
+
+    <section id="leaderboard" class="section">
+        <div class="card">
+            <h2 class="card-title">لوحة المتصدرين</h2>
+            <p class="card-subtitle">الترتيب الحقيقي من قاعدة البيانات.</p>
+            <div id="leaderboard-list" class="leader-list">
+                <div class="empty-state">جارٍ تحميل الترتيب...</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="account" class="section">
+        <div class="card">
+            <h2 class="card-title">حسابي والإعدادات</h2>
+
+            <div class="form-group" style="margin-top:14px">
+                <label for="lang-select">لغة التطبيق</label>
+                <select id="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="country-select">البلد / المنطقة</label>
+                <select id="country-select" onchange="changeCountry(this.value)">
+                    <option value="DZ">الجزائر</option>
+                    <option value="SA">السعودية</option>
+                    <option value="EG">مصر</option>
+                    <option value="MA">المغرب</option>
+                    <option value="AE">الإمارات</option>
+                    <option value="TN">تونس</option>
+                    <option value="FR">فرنسا</option>
+                    <option value="DE">ألمانيا</option>
+                    <option value="TR">تركيا</option>
+                    <option value="US">الولايات المتحدة</option>
+                </select>
+            </div>
+
+            <div class="switch-row">
+                <div>
+                    <div style="font-size:13px;font-weight:800">الوضع الداكن</div>
+                    <div class="card-subtitle">حفظ المظهر على هذا الجهاز.</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle" checked onchange="toggleTheme(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">إحالات الأصدقاء</h2>
+            <p class="card-subtitle">رابط الإحالة يتم توليده من Telegram ID الحقيقي.</p>
+            <input id="ref-link" type="text" readonly dir="ltr" value="جارٍ التحميل...">
+            <button class="btn btn-yellow btn-block" onclick="copyRefLink()">نسخ رابط الإحالة</button>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">سحب الأرباح USDT</h2>
+            <p class="card-subtitle">الرصيد المتاح للسحب:</p>
+            <div class="balance-line" style="margin-top:9px">
+                <span>USDT</span>
+                <span class="balance-number" id="wallet-usdt">0.00</span>
+            </div>
+
+            <div class="form-group" style="margin-top:12px">
+                <label for="wallet-address">عنوان محفظتك</label>
+                <input id="wallet-address" type="text" dir="ltr" placeholder="USDT TRC20 address">
+            </div>
+            <button class="btn btn-green btn-block" onclick="requestWithdraw()">إرسال طلب السحب</button>
+        </div>
+    </section>
+</div>
+
+<nav class="nav">
+    <button class="nav-item active" onclick="switchTab('home',this)">
+        <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+        </span>
+        الرئيسية
+    </button>
+    <button class="nav-item" onclick="switchTab('tasks',this)">
+        <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m12 7 1.7 3.5L17 12l-3.3 1.5L12 17l-1.7-3.5L7 12l3.3-1.5z"/></svg>
+        </span>
+        المهام
+    </button>
+    <button class="nav-item" onclick="switchTab('leaderboard',this)">
+        <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM5 6H3v2a4 4 0 0 0 4 4M19 6h2v2a4 4 0 0 1-4 4"/></svg>
+        </span>
+        التصنيف
+    </button>
+    <button class="nav-item" onclick="switchTab('account',this)">
+        <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </span>
+        حسابي
+    </button>
+</nav>
+
+<div id="taskModal" class="modal" onclick="if(event.target===this)closeTaskModal()">
+    <div class="modal-box">
+        <h2 class="card-title">إضافة مهمة جديدة</h2>
+        <p class="card-subtitle">سيتم إرسال البيانات إلى API؛ لا يتم حفظ المهمة في localStorage.</p>
+
+        <div class="form-group" style="margin-top:14px">
+            <label for="newTaskTitle">عنوان المهمة</label>
+            <input id="newTaskTitle" type="text" placeholder="مثال: الاشتراك في قناة">
+        </div>
+        <div class="form-group">
+            <label for="newTaskLink">رابط التنفيذ</label>
+            <input id="newTaskLink" type="url" dir="ltr" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label for="newTaskReward">المكافأة بالـ Earnings</label>
+            <input id="newTaskReward" type="number" min="1" step="1" placeholder="5">
+        </div>
+        <div class="form-group">
+            <label for="newTaskBudget">ميزانية المهمة</label>
+            <input id="newTaskBudget" type="number" min="1" step="1" placeholder="100">
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-red" onclick="closeTaskModal()">إلغاء</button>
+            <button class="btn btn-green" onclick="saveNewTask()">نشر المهمة</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+
+/*
+  API contract المتوقع في المرحلة الثانية:
+  GET  /api/me
+  GET  /api/tasks
+  POST /api/tasks
+  POST /api/tasks/{id}/complete
+  POST /api/tasks/daily-checkin
+  POST /api/ads/watch
+  GET  /api/leaderboard
+  POST /api/withdrawals
+  GET  /api/referral
+  PATCH /api/settings
+
+  Telegram initData يتم إرساله في X-Telegram-Init-Data.
+  لا نثق بـ user ID القادم من JavaScript؛ السيرفر يجب أن يتحقق من initData.
+*/
+
+const API_BASE = "https://rayan-coin.onrender.com";
+
+// الروابط التي زودني بها المستخدم
+const TASK_LINKS = {
+    x: "https://x.com/mohlahra18042",
+    telegram: "https://t.me/Arba7y_Official"
+};
+const ADSTERAA_LINK = "https://www.profitableratecpmnetwork.com/u19dhqyq?key=6c2a30702a80cbfb6bc129abb22d894a";
+const tg = window.Telegram?.WebApp;
+if (tg) {
+    tg.ready();
+    tg.expand();
+}
+
+const state = {
+    user: null,
+    tasks: [],
+    leaderboard: [],
+    settings: { lang: "ar", country: "DZ", darkMode: true },
+    loading: false
+};
+
+function telegramHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "X-Telegram-Init-Data": tg?.initData || ""
+    };
+}
+
+async function api(path, options = {}) {
+    const response = await fetch(API_BASE + path, {
+        credentials: "include",
+        ...options,
+        headers: {...telegramHeaders(), ...(options.headers || {})}
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+    if (!response.ok) {
+        const message = typeof data === "object" && data?.detail ? data.detail : "حدث خطأ في الاتصال بالسيرفر.";
+        throw new Error(message);
+    }
+    return data;
+}
+
+function formatNumber(value, decimals = 0) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return decimals ? "0." + "0".repeat(decimals) : "0";
+    return n.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+function showToast(message) {
+    const el = document.getElementById("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+function setLoading(on) {
+    state.loading = on;
+    document.body.classList.toggle("loading", on);
+}
+
+function switchTab(tabId, element) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+    const section = document.getElementById(tabId);
+    if (section) section.classList.add("active");
+    if (element) element.classList.add("active");
+
+    if (tabId === "tasks") loadTasks();
+    if (tabId === "leaderboard") loadLeaderboard();
+}
+
+function openTaskModal() {
+    document.getElementById("taskModal").classList.add("open");
+}
+function closeTaskModal() {
+    document.getElementById("taskModal").classList.remove("open");
+}
+
+function renderUser() {
+    const u = state.user || {};
+    document.getElementById("completed-count").textContent = formatNumber(u.completed_tasks);
+    document.getElementById("bot-coins").textContent = formatNumber(u.earnings);
+    document.getElementById("usdt-balance").textContent = formatNumber(u.usdt_balance, 2);
+    document.getElementById("wallet-usdt").textContent = formatNumber(u.usdt_balance, 2);
+
+    const streak = Number(u.current_streak || 0);
+    const totalDays = Number(u.total_checkins || 0);
+    document.getElementById("streak-info").textContent =
+        `إجمالي الحضور: ${formatNumber(totalDays)} يوم | التسلسل الحالي: ${formatNumber(streak)} يوم`;
+
+    const dailyBtn = document.getElementById("daily-btn");
+    if (u.daily_checkin_done) {
+        dailyBtn.textContent = "تم";
+        dailyBtn.disabled = true;
+        dailyBtn.className = "btn btn-done";
+    } else {
+        dailyBtn.textContent = "تسجيل";
+        dailyBtn.disabled = false;
+        dailyBtn.className = "btn btn-green";
+    }
+
+    const adsLeft = Number(u.ads_left_today || 0);
+    document.getElementById("ads-counter").textContent = formatNumber(adsLeft);
+    document.getElementById("watch-ad-btn").disabled = adsLeft <= 0;
+    document.getElementById("watch-ad-btn").textContent =
+        adsLeft > 0 ? "مشاهدة إعلان مكافأة" : "لا توجد إعلانات متبقية اليوم";
+
+    const xBtn = document.getElementById("x-btn");
+    xBtn.disabled = !!u.fixed_tasks?.x_done;
+    xBtn.textContent = u.fixed_tasks?.x_done ? "تم" : "تنفيذ";
+    xBtn.className = u.fixed_tasks?.x_done ? "btn btn-done" : "btn btn-blue";
+
+    const tgBtn = document.getElementById("tg-btn");
+    tgBtn.disabled = !!u.fixed_tasks?.telegram_done;
+    tgBtn.textContent = u.fixed_tasks?.telegram_done ? "تم" : "انضمام";
+    tgBtn.className = u.fixed_tasks?.telegram_done ? "btn btn-done" : "btn btn-blue";
+
+    const referral = u.referral_link || "";
+    document.getElementById("ref-link").value = referral || "غير متاح حالياً";
+}
+
+function renderTasks() {
+    const homeContainer = document.getElementById("dynamic-tasks-container");
+    const tasksContainer = document.getElementById("tasks-list");
+    homeContainer.innerHTML = "";
+    tasksContainer.innerHTML = "";
+
+    if (!state.tasks.length) {
+        const empty = `<div class="empty-state">لا توجد مهام متاحة حالياً.</div>`;
+        homeContainer.innerHTML = empty;
+        tasksContainer.innerHTML = empty;
+        return;
+    }
+
+    state.tasks.forEach(task => {
+        const completed = !!task.completed;
+        const card = document.createElement("div");
+        card.className = "task";
+        card.innerHTML = `
+            <div class="task-info">
+                <div class="task-title"></div>
+                <div class="task-meta">
+                    <span class="task-reward">+${formatNumber(task.reward)} Earnings</span>
+                    ${task.budget_remaining != null ? ` · الميزانية المتبقية: ${formatNumber(task.budget_remaining)}` : ""}
+                </div>
+            </div>
+            <div class="task-action">
+                <button class="${completed ? "btn btn-done" : "btn btn-blue"}" ${completed ? "disabled" : ""}>
+                    ${completed ? "تم" : "تنفيذ"}
+                </button>
+            </div>
+        `;
+        card.querySelector(".task-title").textContent = task.title || "مهمة";
+        const btn = card.querySelector("button");
+        if (!completed) btn.onclick = () => completeTask(task.id, task.link);
+
+        homeContainer.appendChild(card.cloneNode(true));
+        const taskCopy = card;
+        tasksContainer.appendChild(taskCopy);
+        const actualBtn = taskCopy.querySelector("button");
+        if (!completed) actualBtn.onclick = () => completeTask(task.id, task.link);
+    });
+}
+
+async function loadMe() {
+    const data = await api("/api/me");
+    state.user = data.user || data;
+    if (data.settings) state.settings = {...state.settings, ...data.settings};
+    renderUser();
+    applySettings();
+}
+
+async function loadTasks() {
+    try {
+        const data = await api("/api/tasks");
+        state.tasks = Array.isArray(data) ? data : (data.tasks || []);
+        renderTasks();
+    } catch (e) {
+        document.getElementById("tasks-list").innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+async function loadLeaderboard() {
+    const box = document.getElementById("leaderboard-list");
+    box.innerHTML = `<div class="empty-state">جارٍ تحميل الترتيب...</div>`;
+    try {
+        const data = await api("/api/leaderboard");
+        state.leaderboard = Array.isArray(data) ? data : (data.leaderboard || []);
+        box.innerHTML = "";
+        if (!state.leaderboard.length) {
+            box.innerHTML = `<div class="empty-state">لا توجد بيانات تصنيف بعد.</div>`;
+            return;
+        }
+        state.leaderboard.forEach((item, index) => {
+            const row = document.createElement("div");
+            row.className = "leader";
+            row.innerHTML = `
+                <div class="rank">${index + 1}</div>
+                <div class="leader-name"></div>
+                <div class="leader-value">${formatNumber(item.earnings)} Earnings</div>
+            `;
+            row.querySelector(".leader-name").textContent = item.name || `مستخدم ${item.telegram_id || ""}`;
+            box.appendChild(row);
+        });
+    } catch (e) {
+        box.innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+async function completeTask(taskId, link) {
+    try {
+        if (link) window.open(link, "_blank", "noopener,noreferrer");
+        await api(`/api/tasks/${encodeURIComponent(taskId)}/complete`, {method:"POST"});
+        await refresh();
+        showToast("تم تسجيل إنجاز المهمة وإضافة المكافأة.");
+    } catch (e) {
+        showToast(e.message);
+    }
+}
+
+async function openFixedTask(type) {
+    const link = TASK_LINKS[type];
+    if (link) window.open(link, "_blank", "noopener,noreferrer");
+
+    try {
+        const url = type === "x"
+            ? "/api/tasks/fixed/x/complete"
+            : "/api/tasks/fixed/telegram/complete";
+        await api(url, {method:"POST"});
+        await refresh();
+        showToast("تم فتح المهمة وتسجيلها لدى السيرفر.");
+    } catch (e) {
+        showToast("تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.");
+    }
+}
+
+async function completeDailyTask() {
+    try {
+        await api("/api/tasks/daily-checkin", {method:"POST"});
+        await refresh();
+        showToast("تم تسجيل حضورك اليومي.");
+    } catch (e) {
+        showToast(e.message);
+    }
+}
+
+async function watchAd() {
+    window.open(ADSTERAA_LINK, "_blank", "noopener,noreferrer");
+
+    try {
+        await api("/api/ads/watch", {method:"POST"});
+        await refresh();
+        showToast("تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر.");
+    } catch (e) {
+        showToast("تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر.");
+    }
+}
+
+async function saveNewTask() {
+    const title = document.getElementById("newTaskTitle").value.trim();
+    const link = document.getElementById("newTaskLink").value.trim();
+    const reward = Number(document.getElementById("newTaskReward").value);
+    const budget = Number(document.getElementById("newTaskBudget").value);
+
+    if (!title || !link || !Number.isFinite(reward) || reward <= 0 || !Number.isFinite(budget) || budget <= 0) {
+        showToast("أدخل بيانات المهمة والميزانية بشكل صحيح.");
+        return;
+    }
+
+    try {
+        await api("/api/tasks", {
+            method:"POST",
+            body:JSON.stringify({title, link, reward, budget})
+        });
+        closeTaskModal();
+        ["newTaskTitle","newTaskLink","newTaskReward","newTaskBudget"].forEach(id => document.getElementById(id).value = "");
+        await refresh();
+        showToast("تم إرسال المهمة للسيرفر.");
+    } catch (e) {
+        showToast(e.message);
+    }
+}
+
+async function requestWithdraw() {
+    const address = document.getElementById("wallet-address").value.trim();
+    const balance = Number(state.user?.usdt_balance || 0);
+
+    if (!address) return showToast("أدخل عنوان المحفظة.");
+    if (balance < 2) return showToast("الحد الأدنى للسحب هو 2 USDT.");
+
+    try {
+        await api("/api/withdrawals", {
+            method:"POST",
+            body:JSON.stringify({address})
+        });
+        document.getElementById("wallet-address").value = "";
+        await refresh();
+        showToast("تم إنشاء طلب السحب وحالته Pending.");
+    } catch (e) {
+        showToast(e.message);
+    }
+}
+
+async function copyRefLink() {
+    const value = document.getElementById("ref-link").value;
+    if (!value || value === "غير متاح حالياً") return;
+    try {
+        await navigator.clipboard.writeText(value);
+        showToast("تم نسخ رابط الإحالة.");
+    } catch {
+        const input = document.getElementById("ref-link");
+        input.select();
+        document.execCommand("copy");
+        showToast("تم نسخ رابط الإحالة.");
+    }
+}
+
+async function changeLanguage(lang) {
+    state.settings.lang = lang;
+    try {
+        await api("/api/settings", {method:"PATCH", body:JSON.stringify({lang})});
+        applySettings();
+    } catch(e) {
+        showToast(e.message);
+    }
+}
+async function changeCountry(country) {
+    state.settings.country = country;
+    try {
+        await api("/api/settings", {method:"PATCH", body:JSON.stringify({country})});
+    } catch(e) {
+        showToast(e.message);
+    }
+}
+async function toggleTheme(enabled) {
+    state.settings.darkMode = enabled;
+    document.body.dataset.theme = enabled ? "dark" : "light";
+    try {
+        await api("/api/settings", {method:"PATCH", body:JSON.stringify({darkMode:enabled})});
+    } catch(e) {
+        showToast(e.message);
+    }
+}
+
+function applySettings() {
+    document.documentElement.lang = state.settings.lang || "ar";
+    document.documentElement.dir = state.settings.lang === "ar" ? "rtl" : "ltr";
+    document.getElementById("lang-select").value = state.settings.lang || "ar";
+    document.getElementById("country-select").value = state.settings.country || "DZ";
+    document.getElementById("theme-toggle").checked = state.settings.darkMode !== false;
+    document.body.dataset.theme = state.settings.darkMode === false ? "light" : "dark";
+}
+
+function showGuide() {
+    showToast("أكمل المهام، راقب رصيدك، ثم أرسل طلب السحب عند بلوغ الحد الأدنى.");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+async function refresh() {
+    setLoading(true);
+    try {
+        await Promise.all([loadMe(), loadTasks()]);
+    } catch(e) {
+        showToast(e.message);
+    } finally {
+        setLoading(false);
+    }
+}
+
+(async function init(){
+    try {
+        await refresh();
+    } catch(e) {
+        showToast("تعذر الاتصال بالسيرفر. تأكد من تشغيل API.");
+        document.getElementById("streak-info").textContent = "لا توجد بيانات من السيرفر بعد.";
+    }
+})();
+</script>
+</body>
+</html>
