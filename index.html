@@ -571,7 +571,7 @@ function telegramHeaders() {
 
 async function api(path, options = {}) {
     const response = await fetch(API_BASE + path, {
-        credentials: "include",
+        credentials: "omit",
         ...options,
         headers: {...telegramHeaders(), ...(options.headers || {})}
     });
