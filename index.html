@@ -23,6 +23,41 @@
             --shadow:0 10px 30px rgba(0,0,0,.24);
         }
 
+        /* =========================
+           الوضع الفاتح
+        ========================= */
+        body[data-theme="light"]{
+            --bg:#f4f7fb;
+            --surface:#ffffff;
+            --surface-2:#eef3f9;
+            --border:#d7dfeb;
+            --text:#101827;
+            --muted:#64748b;
+            --shadow:0 10px 30px rgba(15,23,42,.08);
+            color-scheme:light;
+        }
+
+        body[data-theme="light"] .card{
+            background:linear-gradient(180deg,#ffffff,#f8fafc);
+        }
+
+        body[data-theme="light"] .nav{
+            background:rgba(255,255,255,.96);
+        }
+
+        body[data-theme="light"] input,
+        body[data-theme="light"] select,
+        body[data-theme="light"] textarea{
+            background:#ffffff;
+            color:var(--text);
+        }
+
+        body[data-theme="light"] .stat,
+        body[data-theme="light"] .ticker,
+        body[data-theme="light"] .campaign-preview{
+            background:rgba(15,23,42,.025);
+        }
+
         *{
             box-sizing:border-box;
             margin:0;
@@ -599,41 +634,6 @@
             pointer-events:none;
         }
 
-        .offerwall-card{
-            padding:0;
-            overflow:hidden;
-        }
-
-        .offerwall-header{
-            padding:16px;
-            border-bottom:1px solid var(--border);
-        }
-
-        .offerwall-frame-wrap{
-            width:100%;
-            min-height:72vh;
-            background:#fff;
-        }
-
-        #adgem-offerwall{
-            display:block;
-            width:100%;
-            min-height:72vh;
-            height:760px;
-            border:0;
-            background:#fff;
-        }
-
-        .offerwall-fallback{
-            padding:14px 16px 18px;
-            border-top:1px solid var(--border);
-        }
-
-        .offerwall-fallback .btn{
-            margin-top:8px;
-        }
-
-
         .ltr{
             direction:ltr;
             unicode-bidi:isolate;
@@ -663,7 +663,7 @@
     </style>
 </head>
 
-<body>
+<body data-theme="dark">
 
 <div class="container">
 
@@ -882,52 +882,6 @@
     </section>
 
 
-    <!-- العروض -->
-    <section id="offers" class="section">
-
-        <div class="card offerwall-card">
-
-            <div class="offerwall-header">
-
-                <h2 class="card-title">
-                    العروض والمكافآت 🎁
-                </h2>
-
-                <p class="card-subtitle">
-                    أكمل العروض المتاحة واربح Earnings. كل مكافأة تُؤكَّد عبر السيرفر.
-                </p>
-
-            </div>
-
-            <div class="offerwall-frame-wrap">
-                <iframe
-                    id="adgem-offerwall"
-                    title="AdGem Offers"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    allow="clipboard-write; fullscreen"
-                ></iframe>
-            </div>
-
-            <div class="offerwall-fallback">
-                <div class="card-subtitle">
-                    إذا لم تظهر العروض داخل الصفحة، افتحها مباشرة.
-                </div>
-
-                <button
-                    class="btn btn-blue btn-block"
-                    onclick="openAdGemDirect()"
-                >
-                    فتح العروض مباشرة ↗
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
     <!-- المتصدرين -->
     <section id="leaderboard" class="section">
 
@@ -969,7 +923,7 @@
                 style="margin-top:14px"
             >
 
-                <label for="lang-select">
+                <label id="settings-lang-label" for="lang-select">
                     لغة التطبيق
                 </label>
 
@@ -996,7 +950,7 @@
 
             <div class="form-group">
 
-                <label for="country-select">
+                <label id="settings-country-label" for="country-select">
                     البلد / المنطقة
                 </label>
 
@@ -1058,11 +1012,12 @@
                             font-size:13px;
                             font-weight:800
                         "
+                    id="theme-label"
                     >
                         الوضع الداكن
                     </div>
 
-                    <div class="card-subtitle">
+                    <div id="theme-desc" class="card-subtitle">
                         حفظ المظهر على هذا الجهاز.
                     </div>
 
@@ -1216,27 +1171,6 @@
         </span>
 
         المهام
-
-    </button>
-
-
-    <button
-        class="nav-item"
-        onclick="switchTab('offers',this)"
-    >
-
-        <span
-            class="nav-icon"
-            aria-hidden="true"
-        >
-
-            <svg viewBox="0 0 24 24">
-                <path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8M3 7h18v5H3zM12 7v15M12 7c-1.5 0-4-.7-4-2.5S9.3 2 11 3.2c.8.6 1 2.3 1 3.8zM12 7c1.5 0 4-.7 4-2.5S14.7 2 13 3.2c-.8.6-1 2.3-1 3.8z"/>
-            </svg>
-
-        </span>
-
-        العروض
 
     </button>
 
@@ -1929,13 +1863,6 @@ function switchTab(tabId, element) {
     }
 
 
-    if (tabId === "offers") {
-
-        loadAdGemOfferwall();
-
-    }
-
-
     if (tabId === "leaderboard") {
 
         loadLeaderboard();
@@ -2551,86 +2478,6 @@ function renderTasks() {
         );
 
     });
-
-}
-
-
-/* =========================
-   AdGem Offerwall
-========================= */
-
-const ADGEM_APP_ID = "33511";
-const ADGEM_WALL_BASE = "https://adunits.adgem.com/wall";
-
-function getAdGemPlayerId() {
-
-    const id =
-        state.user?.user_id ||
-        tg?.initDataUnsafe?.user?.id;
-
-    if (!id) return "";
-
-    return String(id).replace(/[^a-zA-Z0-9_-]/g, "");
-
-}
-
-function getAdGemWallUrl() {
-
-    const playerId = getAdGemPlayerId();
-
-    if (!playerId) return "";
-
-    return (
-        ADGEM_WALL_BASE +
-        "?appid=" +
-        encodeURIComponent(ADGEM_APP_ID) +
-        "&playerid=" +
-        encodeURIComponent(playerId)
-    );
-
-}
-
-function loadAdGemOfferwall() {
-
-    const frame =
-        document.getElementById("adgem-offerwall");
-
-    if (!frame) return;
-
-    const url = getAdGemWallUrl();
-
-    if (!url) {
-
-        showToast("تعذر تحديد حساب Telegram. أعد فتح التطبيق من Telegram.");
-
-        return;
-
-    }
-
-    if (frame.dataset.loadedUrl !== url) {
-
-        frame.src = url;
-        frame.dataset.loadedUrl = url;
-
-    }
-
-}
-
-function openAdGemDirect() {
-
-    const url = getAdGemWallUrl();
-
-    if (!url) {
-
-        return showToast("تعذر تحديد حساب Telegram.");
-
-    }
-
-    if (tg?.openLink) {
-        tg.openLink(url);
-    } else {
-        window.open(url, "_blank", "noopener,noreferrer");
-    }
 
 }
 
@@ -3551,194 +3398,154 @@ async function copyRefLink() {
 
 
 /* =========================
-   اللغة
+   الإعدادات واللغة والمظهر
 ========================= */
+
+const SETTINGS_TRANSLATIONS = {
+    ar: {
+        langLabel: "لغة التطبيق",
+        countryLabel: "البلد / المنطقة",
+        darkLabel: "الوضع الداكن",
+        darkDesc: "حفظ المظهر على هذا الجهاز.",
+        navHome: "الرئيسية",
+        navTasks: "المهام",
+        navAccount: "حسابي",
+        saved: "تم حفظ الإعدادات."
+    },
+    en: {
+        langLabel: "App Language",
+        countryLabel: "Country / Region",
+        darkLabel: "Dark mode",
+        darkDesc: "Save the appearance on this device.",
+        navHome: "Home",
+        navTasks: "Tasks",
+        navAccount: "Account",
+        saved: "Settings saved."
+    },
+    fr: {
+        langLabel: "Langue de l’application",
+        countryLabel: "Pays / Région",
+        darkLabel: "Mode sombre",
+        darkDesc: "Enregistrer l’apparence sur cet appareil.",
+        navHome: "Accueil",
+        navTasks: "Tâches",
+        navAccount: "Compte",
+        saved: "Paramètres enregistrés."
+    }
+};
+
+const COUNTRY_NAMES = {
+    ar: { DZ:"الجزائر", SA:"السعودية", EG:"مصر", MA:"المغرب", AE:"الإمارات", TN:"تونس", FR:"فرنسا", DE:"ألمانيا", TR:"تركيا", US:"الولايات المتحدة" },
+    en: { DZ:"Algeria", SA:"Saudi Arabia", EG:"Egypt", MA:"Morocco", AE:"United Arab Emirates", TN:"Tunisia", FR:"France", DE:"Germany", TR:"Türkiye", US:"United States" },
+    fr: { DZ:"Algérie", SA:"Arabie saoudite", EG:"Égypte", MA:"Maroc", AE:"Émirats arabes unis", TN:"Tunisie", FR:"France", DE:"Allemagne", TR:"Turquie", US:"États-Unis" }
+};
+
+function saveSettingsLocal() {
+    try {
+        localStorage.setItem("rayan_coin_settings", JSON.stringify(state.settings));
+    } catch (_) {}
+}
+
+function loadSettingsLocal() {
+    try {
+        const raw = localStorage.getItem("rayan_coin_settings");
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved === "object") {
+            state.settings = { ...state.settings, ...saved };
+        }
+    } catch (_) {}
+}
 
 async function changeLanguage(lang) {
-
-    state.settings.lang =
-        lang;
-
+    state.settings.lang = ["ar","en","fr"].includes(lang) ? lang : "ar";
+    saveSettingsLocal();
+    applySettings();
 
     try {
-
-        await api(
-
-            "/api/settings",
-
-            {
-
-                method:"PATCH",
-
-                body:JSON.stringify({
-
-                    lang
-
-                })
-
-            }
-
-        );
-
-
-        applySettings();
-
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({lang: state.settings.lang})
+        });
     } catch(e) {
-
-        showToast(
-            e.message
-        );
-
+        showToast(e.message);
     }
-
 }
-
-
-/* =========================
-   البلد
-========================= */
 
 async function changeCountry(country) {
-
-    state.settings.country =
-        country;
-
+    state.settings.country = country || "DZ";
+    saveSettingsLocal();
+    applySettings();
 
     try {
-
-        await api(
-
-            "/api/settings",
-
-            {
-
-                method:"PATCH",
-
-                body:JSON.stringify({
-
-                    country
-
-                })
-
-            }
-
-        );
-
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({country: state.settings.country})
+        });
+        showToast(SETTINGS_TRANSLATIONS[state.settings.lang || "ar"].saved);
     } catch(e) {
-
-        showToast(
-            e.message
-        );
-
+        showToast(e.message);
     }
-
 }
-
-
-/* =========================
-   الوضع الداكن
-========================= */
 
 async function toggleTheme(enabled) {
-
-    state.settings.darkMode =
-        enabled;
-
-
-    document.body.dataset.theme =
-        enabled
-            ? "dark"
-            : "light";
-
+    state.settings.darkMode = Boolean(enabled);
+    saveSettingsLocal();
+    applySettings();
 
     try {
-
-        await api(
-
-            "/api/settings",
-
-            {
-
-                method:"PATCH",
-
-                body:JSON.stringify({
-
-                    darkMode:
-                        enabled
-
-                })
-
-            }
-
-        );
-
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({darkMode: state.settings.darkMode})
+        });
     } catch(e) {
-
-        showToast(
-            e.message
-        );
-
+        showToast(e.message);
     }
-
 }
-
-
-/* =========================
-   تطبيق الإعدادات
-========================= */
 
 function applySettings() {
+    const lang = ["ar","en","fr"].includes(state.settings.lang)
+        ? state.settings.lang
+        : "ar";
+    const t = SETTINGS_TRANSLATIONS[lang];
 
-    document.documentElement.lang =
-        state.settings.lang ||
-        "ar";
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
+    const langSelect = document.getElementById("lang-select");
+    const countrySelect = document.getElementById("country-select");
+    const themeToggle = document.getElementById("theme-toggle");
 
-    document.documentElement.dir =
+    if (langSelect) langSelect.value = lang;
+    if (countrySelect) countrySelect.value = state.settings.country || "DZ";
+    if (themeToggle) themeToggle.checked = state.settings.darkMode !== false;
 
-        state.settings.lang ===
-        "ar"
+    document.body.dataset.theme = state.settings.darkMode === false ? "light" : "dark";
+    document.documentElement.style.colorScheme = state.settings.darkMode === false ? "light" : "dark";
 
-            ? "rtl"
+    const langLabel = document.getElementById("settings-lang-label");
+    const countryLabel = document.getElementById("settings-country-label");
+    const themeLabel = document.getElementById("theme-label");
+    const themeDesc = document.getElementById("theme-desc");
+    const navHome = document.getElementById("nav-home-label");
+    const navTasks = document.getElementById("nav-tasks-label");
+    const navAccount = document.getElementById("nav-account-label");
 
-            : "ltr";
+    if (langLabel) langLabel.textContent = t.langLabel;
+    if (countryLabel) countryLabel.textContent = t.countryLabel;
+    if (themeLabel) themeLabel.textContent = t.darkLabel;
+    if (themeDesc) themeDesc.textContent = t.darkDesc;
+    if (navHome) navHome.textContent = t.navHome;
+    if (navTasks) navTasks.textContent = t.navTasks;
+    if (navAccount) navAccount.textContent = t.navAccount;
 
-
-    document.getElementById(
-        "lang-select"
-    ).value =
-
-        state.settings.lang ||
-        "ar";
-
-
-    document.getElementById(
-        "country-select"
-    ).value =
-
-        state.settings.country ||
-        "DZ";
-
-
-    document.getElementById(
-        "theme-toggle"
-    ).checked =
-
-        state.settings.darkMode !==
-        false;
-
-
-    document.body.dataset.theme =
-
-        state.settings.darkMode ===
-        false
-
-            ? "light"
-
-            : "dark";
-
+    if (countrySelect) {
+        const names = COUNTRY_NAMES[lang];
+        Array.from(countrySelect.options).forEach(option => {
+            if (names[option.value]) option.textContent = names[option.value];
+        });
+    }
 }
-
 
 /* =========================
    الدليل
@@ -3832,6 +3639,9 @@ async function refresh() {
 ========================= */
 
 (async function init(){
+
+    loadSettingsLocal();
+    applySettings();
 
     try {
 
