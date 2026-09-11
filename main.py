@@ -63,12 +63,12 @@ CAMPAIGN_PRICES = {
         "subscribers": {
             "unit_quantity": 10,
             "advertiser_price": 2.00,
-            "user_reward": 0.10,
+            "user_reward": 0.02,
         },
         "views": {
             "unit_quantity": 100,
             "advertiser_price": 6.00,
-            "user_reward": 0.06,
+            "user_reward": 0.02,
         },
     },
 
@@ -76,12 +76,12 @@ CAMPAIGN_PRICES = {
         "followers": {
             "unit_quantity": 10,
             "advertiser_price": 1.50,
-            "user_reward": 0.08,
+            "user_reward": 0.02,
         },
         "views": {
             "unit_quantity": 100,
             "advertiser_price": 3.00,
-            "user_reward": 0.05,
+            "user_reward": 0.02,
         },
     },
 
@@ -89,12 +89,12 @@ CAMPAIGN_PRICES = {
         "followers": {
             "unit_quantity": 10,
             "advertiser_price": 1.50,
-            "user_reward": 0.08,
+            "user_reward": 0.02,
         },
         "views": {
             "unit_quantity": 100,
             "advertiser_price": 3.00,
-            "user_reward": 0.05,
+            "user_reward": 0.02,
         },
     },
 }
