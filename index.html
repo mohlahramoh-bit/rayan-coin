@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0b0f19">
     <title>Rayan Coin</title>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -21,8 +22,17 @@
             --red:#ef4444;
             --shadow:0 10px 30px rgba(0,0,0,.24);
         }
-        *{box-sizing:border-box;margin:0;padding:0}
-        html{background:var(--bg)}
+
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        html{
+            background:var(--bg);
+        }
+
         body{
             min-height:100vh;
             background:var(--bg);
@@ -32,11 +42,30 @@
             -webkit-font-smoothing:antialiased;
             text-rendering:optimizeLegibility;
         }
-        button,input,select,textarea{font:inherit}
-        button{touch-action:manipulation}
-        .container{width:100%;max-width:620px;margin:auto;padding:12px}
-        .section{display:none}
-        .section.active{display:block}
+
+        button,input,select,textarea{
+            font:inherit;
+        }
+
+        button{
+            touch-action:manipulation;
+        }
+
+        .container{
+            width:100%;
+            max-width:620px;
+            margin:auto;
+            padding:12px;
+        }
+
+        .section{
+            display:none;
+        }
+
+        .section.active{
+            display:block;
+        }
+
         .card{
             background:linear-gradient(180deg,var(--surface),#101827);
             border:1px solid var(--border);
@@ -45,14 +74,27 @@
             margin-bottom:12px;
             box-shadow:var(--shadow);
         }
-        .card-title{font-size:17px;font-weight:800;line-height:1.45}
-        .card-subtitle{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.7}
+
+        .card-title{
+            font-size:17px;
+            font-weight:800;
+            line-height:1.45;
+        }
+
+        .card-subtitle{
+            margin-top:5px;
+            color:var(--muted);
+            font-size:12px;
+            line-height:1.7;
+        }
+
         .stats{
             display:grid;
             grid-template-columns:repeat(3,1fr);
             gap:8px;
             margin-top:14px;
         }
+
         .stat{
             min-width:0;
             background:rgba(255,255,255,.025);
@@ -61,11 +103,33 @@
             padding:11px 7px;
             text-align:center;
         }
-        .stat-label{color:var(--muted);font-size:11px;white-space:nowrap}
-        .stat-value{margin-top:4px;font-size:18px;font-weight:800;direction:ltr;unicode-bidi:isolate}
-        .yellow{color:var(--yellow)}
-        .green{color:var(--green)}
-        .blue{color:var(--blue)}
+
+        .stat-label{
+            color:var(--muted);
+            font-size:11px;
+            white-space:nowrap;
+        }
+
+        .stat-value{
+            margin-top:4px;
+            font-size:18px;
+            font-weight:800;
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+
+        .yellow{
+            color:var(--yellow);
+        }
+
+        .green{
+            color:var(--green);
+        }
+
+        .blue{
+            color:var(--blue);
+        }
+
         .empty-state{
             color:var(--muted);
             text-align:center;
@@ -81,17 +145,34 @@
             margin-bottom:12px;
             padding:9px 12px;
         }
+
         .ticker-track{
             display:flex;
             width:max-content;
             gap:34px;
             animation:ticker 22s linear infinite;
         }
-        .ticker-item{font-size:12px;color:var(--muted);white-space:nowrap}
-        .ticker-item strong{color:var(--green);direction:ltr;unicode-bidi:isolate}
+
+        .ticker-item{
+            font-size:12px;
+            color:var(--muted);
+            white-space:nowrap;
+        }
+
+        .ticker-item strong{
+            color:var(--green);
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+
         @keyframes ticker{
-            from{transform:translateX(10%)}
-            to{transform:translateX(-55%)}
+            from{
+                transform:translateX(10%);
+            }
+
+            to{
+                transform:translateX(-55%);
+            }
         }
 
         .task{
@@ -105,11 +186,34 @@
             padding:13px;
             margin-bottom:10px;
         }
-        .task-info{min-width:0;flex:1}
-        .task-title{font-size:14px;font-weight:750;line-height:1.5}
-        .task-meta{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.6}
-        .task-reward{color:var(--green);font-weight:750}
-        .task-action{flex:0 0 auto}
+
+        .task-info{
+            min-width:0;
+            flex:1;
+        }
+
+        .task-title{
+            font-size:14px;
+            font-weight:750;
+            line-height:1.5;
+        }
+
+        .task-meta{
+            margin-top:4px;
+            color:var(--muted);
+            font-size:11px;
+            line-height:1.6;
+        }
+
+        .task-reward{
+            color:var(--green);
+            font-weight:750;
+        }
+
+        .task-action{
+            flex:0 0 auto;
+        }
+
         .btn{
             border:0;
             border-radius:11px;
@@ -118,15 +222,50 @@
             font-weight:800;
             cursor:pointer;
         }
-        .btn:disabled{opacity:.45;cursor:not-allowed}
-        .btn-blue{background:linear-gradient(135deg,#18a8e8,#087fc1);color:#fff;box-shadow:0 5px 14px rgba(14,165,233,.2)}
-        .btn-yellow{background:var(--yellow);color:#10151e}
-        .btn-green{background:var(--green);color:#06130a}
-        .btn-red{background:var(--red);color:#fff}
-        .btn-done{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.7);color:var(--green)}
-        .btn-block{width:100%;margin-top:10px}
 
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .btn:disabled{
+            opacity:.45;
+            cursor:not-allowed;
+        }
+
+        .btn-blue{
+            background:linear-gradient(135deg,#18a8e8,#087fc1);
+            color:#fff;
+            box-shadow:0 5px 14px rgba(14,165,233,.2);
+        }
+
+        .btn-yellow{
+            background:var(--yellow);
+            color:#10151e;
+        }
+
+        .btn-green{
+            background:var(--green);
+            color:#06130a;
+        }
+
+        .btn-red{
+            background:var(--red);
+            color:#fff;
+        }
+
+        .btn-done{
+            background:rgba(34,197,94,.12);
+            border:1px solid rgba(34,197,94,.7);
+            color:var(--green);
+        }
+
+        .btn-block{
+            width:100%;
+            margin-top:10px;
+        }
+
+        .grid-2{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+        }
+
         .option{
             background:var(--surface);
             border:1px solid var(--border);
@@ -135,9 +274,22 @@
             cursor:pointer;
             transition:.15s;
         }
-        .option:active{transform:scale(.98)}
-        .option-title{font-size:13px;font-weight:800}
-        .option-desc{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.6}
+
+        .option:active{
+            transform:scale(.98);
+        }
+
+        .option-title{
+            font-size:13px;
+            font-weight:800;
+        }
+
+        .option-desc{
+            margin-top:4px;
+            color:var(--muted);
+            font-size:10px;
+            line-height:1.6;
+        }
 
         .streak-row{
             display:flex;
@@ -150,12 +302,33 @@
             padding:11px 13px;
             margin-top:12px;
         }
-        .streak-number{font-size:20px;font-weight:900;color:var(--yellow);direction:ltr}
-        .streak-caption{font-size:11px;color:var(--muted)}
 
-        .form-group{margin-bottom:12px}
-        label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
-        input,select,textarea{
+        .streak-number{
+            font-size:20px;
+            font-weight:900;
+            color:var(--yellow);
+            direction:ltr;
+        }
+
+        .streak-caption{
+            font-size:11px;
+            color:var(--muted);
+        }
+
+        .form-group{
+            margin-bottom:12px;
+        }
+
+        label{
+            display:block;
+            color:var(--muted);
+            font-size:12px;
+            margin-bottom:5px;
+        }
+
+        input,
+        select,
+        textarea{
             width:100%;
             background:#0b111d;
             color:var(--text);
@@ -165,8 +338,18 @@
             outline:none;
             direction:inherit;
         }
-        input:focus,select:focus,textarea:focus{border-color:rgba(14,165,233,.7)}
-        input[dir="ltr"]{direction:ltr;text-align:left}
+
+        input:focus,
+        select:focus,
+        textarea:focus{
+            border-color:rgba(14,165,233,.7);
+        }
+
+        input[dir="ltr"]{
+            direction:ltr;
+            text-align:left;
+        }
+
         .balance-line{
             display:flex;
             justify-content:space-between;
@@ -178,9 +361,20 @@
             padding:11px 13px;
             font-size:12px;
         }
-        .balance-number{font-weight:900;color:var(--green);direction:ltr;unicode-bidi:isolate}
 
-        .leader-list{display:grid;gap:8px;margin-top:12px}
+        .balance-number{
+            font-weight:900;
+            color:var(--green);
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+
+        .leader-list{
+            display:grid;
+            gap:8px;
+            margin-top:12px;
+        }
+
         .leader{
             display:flex;
             align-items:center;
@@ -190,13 +384,34 @@
             border-radius:12px;
             padding:10px 12px;
         }
-        .rank{width:28px;text-align:center;font-weight:900;color:var(--yellow);direction:ltr}
-        .leader-name{flex:1;font-size:12px;font-weight:700}
-        .leader-value{font-size:12px;color:var(--green);font-weight:800;direction:ltr;unicode-bidi:isolate}
+
+        .rank{
+            width:28px;
+            text-align:center;
+            font-weight:900;
+            color:var(--yellow);
+            direction:ltr;
+        }
+
+        .leader-name{
+            flex:1;
+            font-size:12px;
+            font-weight:700;
+        }
+
+        .leader-value{
+            font-size:12px;
+            color:var(--green);
+            font-weight:800;
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
 
         .nav{
             position:fixed;
-            left:0;right:0;bottom:0;
+            left:0;
+            right:0;
+            bottom:0;
             z-index:1000;
             display:flex;
             justify-content:space-around;
@@ -205,6 +420,7 @@
             border-top:1px solid var(--border);
             backdrop-filter:blur(14px);
         }
+
         .nav-item{
             min-width:68px;
             background:none;
@@ -215,13 +431,29 @@
             border-radius:10px;
             font-size:10px;
         }
-        .nav-item.active{color:var(--yellow);background:rgba(245,158,11,.07)}
-        .nav-icon{
-            width:22px;height:22px;
-            margin:0 auto 3px;
-            display:grid;place-items:center;
+
+        .nav-item.active{
+            color:var(--yellow);
+            background:rgba(245,158,11,.07);
         }
-        .nav-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+        .nav-icon{
+            width:22px;
+            height:22px;
+            margin:0 auto 3px;
+            display:grid;
+            place-items:center;
+        }
+
+        .nav-icon svg{
+            width:19px;
+            height:19px;
+            fill:none;
+            stroke:currentColor;
+            stroke-width:1.8;
+            stroke-linecap:round;
+            stroke-linejoin:round;
+        }
 
         .switch-row{
             display:flex;
@@ -233,33 +465,110 @@
             border-radius:12px;
             padding:11px;
         }
-        .switch{position:relative;width:46px;height:25px;flex:0 0 auto}
-        .switch input{display:none}
-        .slider{position:absolute;inset:0;background:#334155;border-radius:30px;cursor:pointer;transition:.2s}
-        .slider:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-        .switch input:checked + .slider{background:var(--green)}
-        .switch input:checked + .slider:before{transform:translateX(21px)}
+
+        .switch{
+            position:relative;
+            width:46px;
+            height:25px;
+            flex:0 0 auto;
+        }
+
+        .switch input{
+            display:none;
+        }
+
+        .slider{
+            position:absolute;
+            inset:0;
+            background:#334155;
+            border-radius:30px;
+            cursor:pointer;
+            transition:.2s;
+        }
+
+        .slider:before{
+            content:"";
+            position:absolute;
+            width:19px;
+            height:19px;
+            left:3px;
+            top:3px;
+            background:#fff;
+            border-radius:50%;
+            transition:.2s;
+        }
+
+        .switch input:checked + .slider{
+            background:var(--green);
+        }
+
+        .switch input:checked + .slider:before{
+            transform:translateX(21px);
+        }
 
         .modal{
-            position:fixed;inset:0;
+            position:fixed;
+            inset:0;
             display:none;
             align-items:center;
             justify-content:center;
             padding:18px;
             background:rgba(0,0,0,.78);
             z-index:2000;
+            overflow-y:auto;
         }
-        .modal.open{display:flex}
+
+        .modal.open{
+            display:flex;
+        }
+
         .modal-box{
-            width:100%;max-width:420px;
+            width:100%;
+            max-width:420px;
+            max-height:92vh;
+            overflow-y:auto;
             background:var(--surface);
             border:1px solid var(--border);
             border-radius:18px;
             padding:18px;
             box-shadow:0 20px 60px rgba(0,0,0,.4);
         }
-        .modal-actions{display:flex;gap:10px;margin-top:14px}
-        .modal-actions .btn{flex:1}
+
+        .modal-actions{
+            display:flex;
+            gap:10px;
+            margin-top:14px;
+        }
+
+        .modal-actions .btn{
+            flex:1;
+        }
+
+        .campaign-preview{
+            margin-top:14px;
+            padding:14px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--border);
+        }
+
+        .preview-row{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:10px;
+            font-size:12px;
+        }
+
+        .preview-row:last-child{
+            margin-bottom:0;
+        }
+
+        .preview-value{
+            font-weight:900;
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
 
         .toast{
             position:fixed;
@@ -279,846 +588,3091 @@
             transition:.2s;
             text-align:center;
         }
-        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-        .loading{opacity:.55;pointer-events:none}
-        .ltr{direction:ltr;unicode-bidi:isolate}
+        .toast.show{
+            opacity:1;
+            transform:translateX(-50%) translateY(0);
+        }
+
+        .loading{
+            opacity:.55;
+            pointer-events:none;
+        }
+
+        .ltr{
+            direction:ltr;
+            unicode-bidi:isolate;
+        }
+
         @media(max-width:390px){
-            .stats{gap:5px}
-            .stat{padding:10px 4px}
-            .stat-value{font-size:16px}
-            .task{padding:11px}
-            .btn{padding:8px 12px}
+            .stats{
+                gap:5px;
+            }
+
+            .stat{
+                padding:10px 4px;
+            }
+
+            .stat-value{
+                font-size:16px;
+            }
+
+            .task{
+                padding:11px;
+            }
+
+            .btn{
+                padding:8px 12px;
+            }
         }
     </style>
 </head>
+
 <body>
+
 <div class="container">
 
+    <!-- الرئيسية -->
     <section id="home" class="section active">
+
         <div class="card">
             <h2 class="card-title">لوحة أرباح Rayan Coin</h2>
-            <p class="card-subtitle">تابع رصيدك وإنجازاتك اليومية مباشرة.</p>
+
+            <p class="card-subtitle">
+                تابع رصيدك وإنجازاتك اليومية مباشرة.
+            </p>
 
             <div class="stats">
+
                 <div class="stat">
                     <div class="stat-label">المكتمل</div>
                     <div class="stat-value yellow" id="completed-count">0</div>
                 </div>
+
                 <div class="stat">
                     <div class="stat-label">Earnings</div>
                     <div class="stat-value yellow" id="bot-coins">0</div>
                 </div>
+
                 <div class="stat">
                     <div class="stat-label">USDT</div>
                     <div class="stat-value green" id="usdt-balance">0.00</div>
                 </div>
+
             </div>
         </div>
 
         <div class="ticker" id="withdraw-ticker">
             <div class="ticker-track" id="ticker-track">
-                <div class="ticker-item">لا توجد عمليات سحب حديثة للعرض.</div>
+                <div class="ticker-item">
+                    لا توجد عمليات سحب حديثة للعرض.
+                </div>
             </div>
         </div>
 
         <div class="task">
+
             <div class="task-info">
-                <div class="task-title">تسجيل الحضور اليومي</div>
-                <div class="task-meta" id="streak-info">جارٍ تحميل بيانات الحضور...</div>
+
+                <div class="task-title">
+                    تسجيل الحضور اليومي
+                </div>
+
+                <div class="task-meta" id="streak-info">
+                    جارٍ تحميل بيانات الحضور...
+                </div>
+
             </div>
+
             <div class="task-action">
-                <button class="btn btn-done" id="daily-btn" onclick="completeDailyTask()" disabled>—</button>
+
+                <button
+                    class="btn btn-done"
+                    id="daily-btn"
+                    onclick="completeDailyTask()"
+                    disabled
+                >
+                    —
+                </button>
+
             </div>
+
         </div>
 
         <div class="grid-2">
+
             <div class="option" onclick="openTaskModal()">
-                <div class="option-title yellow">إضافة مهمة</div>
-                <div class="option-desc">أنشئ حملة جديدة بميزانية محددة.</div>
+
+                <div class="option-title yellow">
+                    إضافة حملة
+                </div>
+
+                <div class="option-desc">
+                    أنشئ حملة جديدة بميزانية محددة.
+                </div>
+
             </div>
+
             <div class="option" onclick="showGuide()">
-                <div class="option-title">الدليل الرسمي</div>
-                <div class="option-desc">تعرف على طريقة استخدام المنصة.</div>
+
+                <div class="option-title">
+                    الدليل الرسمي
+                </div>
+
+                <div class="option-desc">
+                    تعرف على طريقة استخدام المنصة.
+                </div>
+
             </div>
+
         </div>
 
         <div id="dynamic-tasks-container"></div>
 
         <div class="task">
+
             <div class="task-info">
-                <div class="task-title">متابعة حسابنا على X</div>
-               <div class="task-meta task-reward">مكافأة: <strong>0.03 USDT</strong></div>
+
+                <div class="task-title">
+                    متابعة حسابنا على X
+                </div>
+
+                <div class="task-meta task-reward">
+                    مكافأة:
+                    <strong>0.03 USDT</strong>
+                </div>
+
             </div>
+
             <div class="task-action">
-                <button class="btn btn-blue" id="x-btn" onclick="openFixedTask('x')" disabled>—</button>
+
+                <button
+                    class="btn btn-blue"
+                    id="x-btn"
+                    onclick="openFixedTask('x')"
+                    disabled
+                >
+                    —
+                </button>
+
             </div>
+
         </div>
 
         <div class="task">
+
             <div class="task-info">
-                <div class="task-title">انضم للقناة الرسمية</div>
-               <div class="task-meta task-reward">مكافأة: <strong>0.03 USDT</strong></div>
+
+                <div class="task-title">
+                    انضم للقناة الرسمية
+                </div>
+
+                <div class="task-meta task-reward">
+                    مكافأة:
+                    <strong>0.03 USDT</strong>
+                </div>
+
             </div>
+
             <div class="task-action">
-                <button class="btn btn-blue" id="tg-btn" onclick="openFixedTask('telegram')" disabled>—</button>
+
+                <button
+                    class="btn btn-blue"
+                    id="tg-btn"
+                    onclick="openFixedTask('telegram')"
+                    disabled
+                >
+                    —
+                </button>
+
             </div>
+
         </div>
+
     </section>
 
+
+    <!-- المهام -->
     <section id="tasks" class="section">
+
         <div class="card">
-            <h2 class="card-title">مركز المهام والمكافآت</h2>
-            <p class="card-subtitle">المهام والإعلانات المتاحة يتم تحميلها من السيرفر.</p>
+
+            <h2 class="card-title">
+                مركز المهام والمكافآت
+            </h2>
+
+            <p class="card-subtitle">
+                المهام والإعلانات المتاحة يتم تحميلها من السيرفر.
+            </p>
 
             <div class="streak-row">
+
                 <div>
-                    <div class="card-title" style="font-size:13px">الإعلانات اليومية</div>
-                    <div class="streak-caption">المتبقي اليوم</div>
+
+                    <div
+                        class="card-title"
+                        style="font-size:13px"
+                    >
+                        الإعلانات اليومية
+                    </div>
+
+                    <div class="streak-caption">
+                        المتبقي اليوم
+                    </div>
+
                 </div>
-                <div class="streak-number" id="ads-counter">0</div>
+
+                <div
+                    class="streak-number"
+                    id="ads-counter"
+                >
+                    0
+                </div>
+
             </div>
 
-            <button class="btn btn-yellow btn-block" id="watch-ad-btn" onclick="watchAd()" disabled>
+            <button
+                class="btn btn-yellow btn-block"
+                id="watch-ad-btn"
+                onclick="watchAd()"
+                disabled
+            >
                 مشاهدة إعلان مكافأة
             </button>
+
         </div>
 
         <div id="tasks-list"></div>
+
     </section>
 
+
+    <!-- المتصدرين -->
     <section id="leaderboard" class="section">
+
         <div class="card">
-            <h2 class="card-title">لوحة المتصدرين</h2>
-            <p class="card-subtitle">الترتيب الحقيقي من قاعدة البيانات.</p>
-            <div id="leaderboard-list" class="leader-list">
-                <div class="empty-state">جارٍ تحميل الترتيب...</div>
+
+            <h2 class="card-title">
+                لوحة المتصدرين
+            </h2>
+
+            <p class="card-subtitle">
+                الترتيب الحقيقي من قاعدة البيانات.
+            </p>
+
+            <div
+                id="leaderboard-list"
+                class="leader-list"
+            >
+                <div class="empty-state">
+                    جارٍ تحميل الترتيب...
+                </div>
             </div>
+
         </div>
+
     </section>
 
-    <section id="account" class="section">
-        <div class="card">
-            <h2 class="card-title">حسابي والإعدادات</h2>
 
-            <div class="form-group" style="margin-top:14px">
-                <label for="lang-select">لغة التطبيق</label>
-                <select id="lang-select" onchange="changeLanguage(this.value)">
-                    <option value="ar">العربية</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
+    <!-- الحساب -->
+    <section id="account" class="section">
+
+        <div class="card">
+
+            <h2 class="card-title">
+                حسابي والإعدادات
+            </h2>
+
+            <div
+                class="form-group"
+                style="margin-top:14px"
+            >
+
+                <label for="lang-select">
+                    لغة التطبيق
+                </label>
+
+                <select
+                    id="lang-select"
+                    onchange="changeLanguage(this.value)"
+                >
+
+                    <option value="ar">
+                        العربية
+                    </option>
+
+                    <option value="en">
+                        English
+                    </option>
+
+                    <option value="fr">
+                        Français
+                    </option>
+
                 </select>
+
             </div>
 
             <div class="form-group">
-                <label for="country-select">البلد / المنطقة</label>
-                <select id="country-select" onchange="changeCountry(this.value)">
-                    <option value="DZ">الجزائر</option>
-                    <option value="SA">السعودية</option>
-                    <option value="EG">مصر</option>
-                    <option value="MA">المغرب</option>
-                    <option value="AE">الإمارات</option>
-                    <option value="TN">تونس</option>
-                    <option value="FR">فرنسا</option>
-                    <option value="DE">ألمانيا</option>
-                    <option value="TR">تركيا</option>
-                    <option value="US">الولايات المتحدة</option>
+
+                <label for="country-select">
+                    البلد / المنطقة
+                </label>
+
+                <select
+                    id="country-select"
+                    onchange="changeCountry(this.value)"
+                >
+
+                    <option value="DZ">
+                        الجزائر
+                    </option>
+
+                    <option value="SA">
+                        السعودية
+                    </option>
+
+                    <option value="EG">
+                        مصر
+                    </option>
+
+                    <option value="MA">
+                        المغرب
+                    </option>
+
+                    <option value="AE">
+                        الإمارات
+                    </option>
+
+                    <option value="TN">
+                        تونس
+                    </option>
+
+                    <option value="FR">
+                        فرنسا
+                    </option>
+
+                    <option value="DE">
+                        ألمانيا
+                    </option>
+
+                    <option value="TR">
+                        تركيا
+                    </option>
+
+                    <option value="US">
+                        الولايات المتحدة
+                    </option>
+
                 </select>
+
             </div>
 
             <div class="switch-row">
+
                 <div>
-                    <div style="font-size:13px;font-weight:800">الوضع الداكن</div>
-                    <div class="card-subtitle">حفظ المظهر على هذا الجهاز.</div>
+
+                    <div
+                        style="
+                            font-size:13px;
+                            font-weight:800
+                        "
+                    >
+                        الوضع الداكن
+                    </div>
+
+                    <div class="card-subtitle">
+                        حفظ المظهر على هذا الجهاز.
+                    </div>
+
                 </div>
+
                 <label class="switch">
-                    <input type="checkbox" id="theme-toggle" checked onchange="toggleTheme(this.checked)">
+
+                    <input
+                        type="checkbox"
+                        id="theme-toggle"
+                        checked
+                        onchange="toggleTheme(this.checked)"
+                    >
+
                     <span class="slider"></span>
+
                 </label>
+
             </div>
+
         </div>
+
 
         <div class="card">
-            <h2 class="card-title">إحالات الأصدقاء</h2>
-            <p class="card-subtitle">رابط الإحالة يتم توليده من Telegram ID الحقيقي.</p>
-            <input id="ref-link" type="text" readonly dir="ltr" value="جارٍ التحميل...">
-            <button class="btn btn-yellow btn-block" onclick="copyRefLink()">نسخ رابط الإحالة</button>
+
+            <h2 class="card-title">
+                إحالات الأصدقاء
+            </h2>
+
+            <p class="card-subtitle">
+                رابط الإحالة يتم توليده من Telegram ID الحقيقي.
+            </p>
+
+            <input
+                id="ref-link"
+                type="text"
+                readonly
+                dir="ltr"
+                value="جارٍ التحميل..."
+            >
+
+            <button
+                class="btn btn-yellow btn-block"
+                onclick="copyRefLink()"
+            >
+                نسخ رابط الإحالة
+            </button>
+
         </div>
+
 
         <div class="card">
-            <h2 class="card-title">سحب الأرباح USDT</h2>
-            <p class="card-subtitle">الرصيد المتاح للسحب:</p>
-            <div class="balance-line" style="margin-top:9px">
-                <span>USDT</span>
-                <span class="balance-number" id="wallet-usdt">0.00</span>
+
+            <h2 class="card-title">
+                سحب الأرباح USDT
+            </h2>
+
+            <p class="card-subtitle">
+                الرصيد المتاح للسحب:
+            </p>
+
+            <div
+                class="balance-line"
+                style="margin-top:9px"
+            >
+
+                <span>
+                    USDT
+                </span>
+
+                <span
+                    class="balance-number"
+                    id="wallet-usdt"
+                >
+                    0.00
+                </span>
+
             </div>
 
-            <div class="form-group" style="margin-top:12px">
-                <label for="wallet-address">عنوان محفظتك</label>
-                <input id="wallet-address" type="text" dir="ltr" placeholder="USDT TRC20 address">
+            <div
+                class="form-group"
+                style="margin-top:12px"
+            >
+
+                <label for="wallet-address">
+                    عنوان محفظتك
+                </label>
+
+                <input
+                    id="wallet-address"
+                    type="text"
+                    dir="ltr"
+                    placeholder="USDT TRC20 address"
+                >
+
             </div>
-            <button class="btn btn-green btn-block" onclick="requestWithdraw()">إرسال طلب السحب</button>
+
+            <button
+                class="btn btn-green btn-block"
+                onclick="requestWithdraw()"
+            >
+                إرسال طلب السحب
+            </button>
+
         </div>
+
     </section>
+
 </div>
 
+
+<!-- شريط التنقل -->
 <nav class="nav">
-    <button class="nav-item active" onclick="switchTab('home',this)">
-        <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+
+    <button
+        class="nav-item active"
+        onclick="switchTab('home',this)"
+    >
+
+        <span
+            class="nav-icon"
+            aria-hidden="true"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+            </svg>
+
         </span>
+
         الرئيسية
+
     </button>
-    <button class="nav-item" onclick="switchTab('tasks',this)">
-        <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m12 7 1.7 3.5L17 12l-3.3 1.5L12 17l-1.7-3.5L7 12l3.3-1.5z"/></svg>
+
+
+    <button
+        class="nav-item"
+        onclick="switchTab('tasks',this)"
+    >
+
+        <span
+            class="nav-icon"
+            aria-hidden="true"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="m12 7 1.7 3.5L17 12l-3.3 1.5L12 17l-1.7-3.5L7 12l3.3-1.5z"/>
+            </svg>
+
         </span>
+
         المهام
+
     </button>
-    <button class="nav-item" onclick="switchTab('leaderboard',this)">
-        <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM5 6H3v2a4 4 0 0 0 4 4M19 6h2v2a4 4 0 0 1-4 4"/></svg>
+
+
+    <button
+        class="nav-item"
+        onclick="switchTab('leaderboard',this)"
+    >
+
+        <span
+            class="nav-icon"
+            aria-hidden="true"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM5 6H3v2a4 4 0 0 0 4 4M19 6h2v2a4 4 0 0 1-4 4"/>
+            </svg>
+
         </span>
+
         التصنيف
+
     </button>
-    <button class="nav-item" onclick="switchTab('account',this)">
-        <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+
+
+    <button
+        class="nav-item"
+        onclick="switchTab('account',this)"
+    >
+
+        <span
+            class="nav-icon"
+            aria-hidden="true"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21a8 8 0 0 1 16 0"/>
+            </svg>
+
         </span>
+
         حسابي
+
     </button>
+
 </nav>
 
-<div id="taskModal" class="modal" onclick="if(event.target===this)closeTaskModal()">
-<h2 class="card-title">إضافة حملة جديدة</h2>
 
-<p class="card-subtitle">
-    اختر المنصة ونوع المهمة والكمية، وسيتم حساب السعر والمكافأة تلقائيًا.
-</p>
+<!-- نافذة إنشاء الحملة -->
+<div
+    id="taskModal"
+    class="modal"
+    onclick="if(event.target===this)closeTaskModal()"
+>
 
-<div class="form-group" style="margin-top:14px">
-    <label for="campaignPlatform">المنصة</label>
+    <div class="modal-box">
 
-    <select id="campaignPlatform"
-            onchange="updateCampaignTypes()"
-            style="width:100%;padding:12px;border-radius:10px;">
+        <h2 class="card-title">
+            🚀 إنشاء حملة جديدة
+        </h2>
 
-        <option value="">اختر المنصة</option>
-        <option value="youtube">YouTube</option>
-        <option value="instagram">Instagram</option>
-        <option value="tiktok">TikTok</option>
+        <p class="card-subtitle">
+            اختر المنصة ونوع المهمة والكمية، وسيظهر السعر والمكافأة تلقائيًا.
+        </p>
 
-    </select>
-</div>
 
-<div class="form-group">
-    <label for="campaignType">نوع المهمة</label>
+        <div
+            class="form-group"
+            style="margin-top:14px"
+        >
 
-    <select id="campaignType"
-            onchange="calculateCampaignPreview()"
-            style="width:100%;padding:12px;border-radius:10px;">
+            <label for="campaignPlatform">
+                المنصة
+            </label>
 
-        <option value="">اختر نوع المهمة</option>
+            <select
+                id="campaignPlatform"
+                onchange="updateCampaignTypes()"
+            >
 
-    </select>
-</div>
+                <option value="">
+                    اختر المنصة
+                </option>
 
-<div class="form-group">
-    <label for="campaignQuantity">الكمية</label>
+                <option value="youtube">
+                    YouTube
+                </option>
 
-    <input
-        id="campaignQuantity"
-        type="number"
-        min="1"
-        step="1"
-        placeholder="مثال: 100"
-        oninput="calculateCampaignPreview()"
-    >
-</div>
+                <option value="instagram">
+                    Instagram
+                </option>
 
-<div class="form-group">
-    <label for="campaignTitle">عنوان الحملة</label>
+                <option value="tiktok">
+                    TikTok
+                </option>
 
-    <input
-        id="campaignTitle"
-        type="text"
-        placeholder="مثال: اشترك في قناتي"
-    >
-</div>
+            </select>
 
-<div class="form-group">
-    <label for="campaignLink">رابط الحملة</label>
+        </div>
 
-    <input
-        id="campaignLink"
-        type="url"
-        dir="ltr"
-        placeholder="https://..."
-    >
-</div>
 
-<div id="campaignPreview"
-     style="
-        margin-top:14px;
-        padding:14px;
-        border:1px solid var(--border);
-        border-radius:14px;
-     ">
+        <div class="form-group">
 
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span>سعر المعلن</span>
-        <strong id="campaignAdvertiserPrice">0.00$</strong>
+            <label for="campaignType">
+                نوع المهمة
+            </label>
+
+            <select
+                id="campaignType"
+                onchange="calculateCampaignPreview()"
+            >
+
+                <option value="">
+                    اختر نوع المهمة
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="campaignQuantity">
+                الكمية المطلوبة
+            </label>
+
+            <input
+                id="campaignQuantity"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="مثال: 10"
+                oninput="calculateCampaignPreview()"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="campaignTitle">
+                عنوان الحملة
+            </label>
+
+            <input
+                id="campaignTitle"
+                type="text"
+                placeholder="مثال: اشترك في قناتي"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="campaignLink">
+                رابط الحملة
+            </label>
+
+            <input
+                id="campaignLink"
+                type="url"
+                dir="ltr"
+                placeholder="https://..."
+            >
+
+        </div>
+
+
+        <div
+            id="campaignPreview"
+            class="campaign-preview"
+        >
+
+            <div class="preview-row">
+
+                <span>
+                    الكمية
+                </span>
+
+                <strong
+                    id="campaignQuantityPreview"
+                    class="preview-value"
+                >
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span>
+                    مكافأة المستخدم لكل تنفيذ
+                </span>
+
+                <strong
+                    id="campaignRewardPreview"
+                    class="preview-value green"
+                >
+                    0.02 USDT
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span>
+                    إجمالي مكافآت المستخدمين
+                </span>
+
+                <strong
+                    id="campaignRewardTotalPreview"
+                    class="preview-value green"
+                >
+                    0.00 USDT
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span>
+                    سعر المعلن
+                </span>
+
+                <strong
+                    id="campaignAdvertiserPrice"
+                    class="preview-value yellow"
+                >
+                    0.00 USDT
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span>
+                    المنصة
+                </span>
+
+                <strong
+                    id="campaignPlatformPreview"
+                    class="preview-value"
+                >
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span>
+                    نوع المهمة
+                </span>
+
+                <strong
+                    id="campaignTypePreview"
+                    class="preview-value"
+                >
+                    —
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-red"
+                onclick="closeTaskModal()"
+            >
+                إلغاء
+            </button>
+
+            <button
+                class="btn btn-green"
+                onclick="saveCampaign()"
+            >
+                🚀 إنشاء الحملة
+            </button>
+
+        </div>
+
     </div>
 
-    <div style="display:flex;justify-content:space-between;">
-        <span>مكافأة المستخدم</span>
-        <strong id="campaignUserReward">0.00 USDT</strong>
-    </div>
-
 </div>
 
-<div class="modal-actions">
 
-    <button class="btn btn-red"
-            onclick="closeTaskModal()">
-        إلغاء
-    </button>
+<div
+    id="toast"
+    class="toast"
+></div>
 
-    <button class="btn btn-green"
-            onclick="saveCampaign()">
-        نشر الحملة
-    </button>
-
-</div>
-</div>
-
-<div id="toast" class="toast"></div>
 
 <script>
 "use strict";
 
-/*
-  API contract المتوقع في المرحلة الثانية:
-  GET  /api/me
-  GET  /api/tasks
-  POST /api/tasks
-  POST /api/tasks/{id}/complete
-  POST /api/tasks/daily-checkin
-  POST /api/ads/watch
-  GET  /api/leaderboard
-  POST /api/withdrawals
-  GET  /api/referral
-  PATCH /api/settings
 
-  Telegram initData يتم إرساله في X-Telegram-Init-Data.
-  لا نثق بـ user ID القادم من JavaScript؛ السيرفر يجب أن يتحقق من initData.
-*/
+/* =========================
+   إعدادات API
+========================= */
 
 const API_BASE = "https://rayan-coin.onrender.com";
-// أسعار الحملاتconst TASK_LINKS = {
+
+
+/* =========================
+   روابط المهام الثابتة
+========================= */
+
+const TASK_LINKS = {
+
     x: "https://x.com/mohlahra18042",
+
     telegram: "https://t.me/Arba7y_Official"
+
 };
-const ADSTERAA_LINK = "https://www.profitableratecpmnetwork.com/u19dhqyq?key=6c2a30702a80cbfb6bc129abb22d894a";
+
+
+const ADSTERAA_LINK =
+    "https://www.profitableratecpmnetwork.com/u19dhqyq?key=6c2a30702a80cbfb6bc129abb22d894a";
+
+
+/* =========================
+   Telegram
+========================= */
+
 const tg = window.Telegram?.WebApp;
+
 if (tg) {
+
     tg.ready();
+
     tg.expand();
+
 }
+
+
+/* =========================
+   حالة التطبيق
+========================= */
 
 const state = {
+
     user: null,
+
     tasks: [],
+
     leaderboard: [],
-    settings: { lang: "ar", country: "DZ", darkMode: true },
+
+    settings: {
+
+        lang: "ar",
+
+        country: "DZ",
+
+        darkMode: true
+
+    },
+
     loading: false
+
 };
 
+
+/* =========================
+   أسعار الحملات
+========================= */
+
+const CAMPAIGN_PRICES = {
+
+    youtube: {
+
+        subscribers: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 2.00
+
+        },
+
+        views: {
+
+            unitQuantity: 100,
+
+            advertiserPrice: 6.00
+
+        }
+
+    },
+
+    instagram: {
+
+        followers: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.50
+
+        },
+
+        views: {
+
+            unitQuantity: 100,
+
+            advertiserPrice: 3.00
+
+        }
+
+    },
+
+    tiktok: {
+
+        followers: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.50
+
+        },
+
+        views: {
+
+            unitQuantity: 100,
+
+            advertiserPrice: 3.00
+
+        }
+
+    }
+
+};
+
+
+const PLATFORM_NAMES = {
+
+    youtube: "YouTube",
+
+    instagram: "Instagram",
+
+    tiktok: "TikTok"
+
+};
+
+
+const TYPE_NAMES = {
+
+    subscribers: "مشتركين",
+
+    followers: "متابعين",
+
+    views: "مشاهدات"
+
+};
+
+
+/*
+   مكافأة المستخدم لكل تنفيذ:
+   0.02 USDT
+*/
+const USER_REWARD_USDT = 0.02;
+
+
+/*
+   1 Earnings = 0.01 USDT
+*/
+const USDT_PER_EARNING = 0.01;
+
+
+/* =========================
+   Telegram Headers
+========================= */
+
 function telegramHeaders() {
+
     return {
+
         "Content-Type": "application/json",
-        "X-Telegram-Init-Data": tg?.initData || ""
+
+        "X-Telegram-Init-Data":
+            tg?.initData || ""
+
     };
+
 }
+
+
+/* =========================
+   API
+========================= */
 
 async function api(path, options = {}) {
-    const response = await fetch(API_BASE + path, {
-        credentials: "omit",
-        ...options,
-        headers: {...telegramHeaders(), ...(options.headers || {})}
-    });
 
-    const contentType = response.headers.get("content-type") || "";
-    const data = contentType.includes("application/json")
-        ? await response.json()
-        : await response.text();
+    const response = await fetch(
+
+        API_BASE + path,
+
+        {
+
+            credentials: "omit",
+
+            ...options,
+
+            headers: {
+
+                ...telegramHeaders(),
+
+                ...(options.headers || {})
+
+            }
+
+        }
+
+    );
+
+
+    const contentType =
+        response.headers.get("content-type") || "";
+
+
+    const data =
+        contentType.includes("application/json")
+
+            ? await response.json()
+
+            : await response.text();
+
 
     if (!response.ok) {
-        const message = typeof data === "object" && data?.detail ? data.detail : "حدث خطأ في الاتصال بالسيرفر.";
+
+        const message =
+            typeof data === "object" &&
+            data?.detail
+
+                ? data.detail
+
+                : "حدث خطأ في الاتصال بالسيرفر.";
+
+
         throw new Error(message);
+
     }
+
+
     return data;
+
 }
+
+
+/* =========================
+   أدوات عامة
+========================= */
 
 function formatNumber(value, decimals = 0) {
+
     const n = Number(value);
-    if (!Number.isFinite(n)) return decimals ? "0." + "0".repeat(decimals) : "0";
-    return n.toLocaleString("en-US", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-    });
+
+
+    if (!Number.isFinite(n)) {
+
+        return decimals
+
+            ? "0." + "0".repeat(decimals)
+
+            : "0";
+
+    }
+
+
+    return n.toLocaleString(
+
+        "en-US",
+
+        {
+
+            minimumFractionDigits: decimals,
+
+            maximumFractionDigits: decimals
+
+        }
+
+    );
+
 }
+
 
 function showToast(message) {
-    const el = document.getElementById("toast");
+
+    const el =
+        document.getElementById("toast");
+
+
+    if (!el) return;
+
+
     el.textContent = message;
+
     el.classList.add("show");
+
+
     clearTimeout(showToast.timer);
-    showToast.timer = setTimeout(() => el.classList.remove("show"), 2600);
+
+
+    showToast.timer = setTimeout(
+
+        () => {
+
+            el.classList.remove("show");
+
+        },
+
+        2600
+
+    );
+
 }
+
 
 function setLoading(on) {
+
     state.loading = on;
-    document.body.classList.toggle("loading", on);
+
+    document.body.classList.toggle(
+
+        "loading",
+
+        on
+
+    );
+
 }
+
+
+/* =========================
+   التنقل
+========================= */
 
 function switchTab(tabId, element) {
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-    const section = document.getElementById(tabId);
-    if (section) section.classList.add("active");
-    if (element) element.classList.add("active");
 
-    if (tabId === "tasks") loadTasks();
-    if (tabId === "leaderboard") loadLeaderboard();
+    document
+        .querySelectorAll(".section")
+        .forEach(
+
+            section =>
+                section.classList.remove("active")
+
+        );
+
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(
+
+            item =>
+                item.classList.remove("active")
+
+        );
+
+
+    const section =
+        document.getElementById(tabId);
+
+
+    if (section) {
+
+        section.classList.add("active");
+
+    }
+
+
+    if (element) {
+
+        element.classList.add("active");
+
+    }
+
+
+    if (tabId === "tasks") {
+
+        loadTasks();
+
+    }
+
+
+    if (tabId === "leaderboard") {
+
+        loadLeaderboard();
+
+    }
+
 }
+
+
+/* =========================
+   نافذة الحملة
+========================= */
 
 function openTaskModal() {
-    document.getElementById("taskModal").classList.add("open");
+
+    const modal =
+        document.getElementById("taskModal");
+
+
+    if (!modal) return;
+
+
+    modal.classList.add("open");
+
+    updateCampaignTypes();
+
+    calculateCampaignPreview();
+
 }
+
+
 function closeTaskModal() {
-    document.getElementById("taskModal").classList.remove("open");
+
+    const modal =
+        document.getElementById("taskModal");
+
+
+    if (!modal) return;
+
+
+    modal.classList.remove("open");
+
 }
+
+
+/* =========================
+   أنواع المهام
+========================= */
+
+function updateCampaignTypes() {
+
+    const platform =
+        document.getElementById(
+            "campaignPlatform"
+        )?.value || "";
+
+
+    const typeSelect =
+        document.getElementById(
+            "campaignType"
+        );
+
+
+    if (!typeSelect) return;
+
+
+    typeSelect.innerHTML =
+        '<option value="">اختر نوع المهمة</option>';
+
+
+    if (!platform) {
+
+        calculateCampaignPreview();
+
+        return;
+
+    }
+
+
+    const types =
+        CAMPAIGN_PRICES[platform];
+
+
+    if (!types) {
+
+        calculateCampaignPreview();
+
+        return;
+
+    }
+
+
+    Object.keys(types).forEach(
+
+        type => {
+
+            const option =
+                document.createElement("option");
+
+
+            option.value = type;
+
+
+            option.textContent =
+                TYPE_NAMES[type] || type;
+
+
+            typeSelect.appendChild(option);
+
+        }
+
+    );
+
+
+    calculateCampaignPreview();
+
+}
+
+
+/* =========================
+   حساب معاينة الحملة
+========================= */
+
+function calculateCampaignPreview() {
+
+    const platform =
+        document.getElementById(
+            "campaignPlatform"
+        )?.value || "";
+
+
+    const taskType =
+        document.getElementById(
+            "campaignType"
+        )?.value || "";
+
+
+    const quantity =
+        Number(
+
+            document.getElementById(
+                "campaignQuantity"
+            )?.value || 0
+
+        );
+
+
+    const quantityPreview =
+        document.getElementById(
+            "campaignQuantityPreview"
+        );
+
+
+    const rewardPreview =
+        document.getElementById(
+            "campaignRewardPreview"
+        );
+
+
+    const rewardTotalPreview =
+        document.getElementById(
+            "campaignRewardTotalPreview"
+        );
+
+
+    const advertiserPricePreview =
+        document.getElementById(
+            "campaignAdvertiserPrice"
+        );
+
+
+    const platformPreview =
+        document.getElementById(
+            "campaignPlatformPreview"
+        );
+
+
+    const typePreview =
+        document.getElementById(
+            "campaignTypePreview"
+        );
+
+
+    if (quantityPreview) {
+
+        quantityPreview.textContent =
+            Number.isFinite(quantity) &&
+            quantity > 0
+
+                ? formatNumber(quantity)
+
+                : "0";
+
+    }
+
+
+    if (platformPreview) {
+
+        platformPreview.textContent =
+            PLATFORM_NAMES[platform] || "—";
+
+    }
+
+
+    if (typePreview) {
+
+        typePreview.textContent =
+            TYPE_NAMES[taskType] || "—";
+
+    }
+
+
+    if (rewardPreview) {
+
+        rewardPreview.textContent =
+            USER_REWARD_USDT.toFixed(2) +
+            " USDT";
+
+    }
+
+
+    if (!platform || !taskType || quantity <= 0) {
+
+        if (rewardTotalPreview) {
+
+            rewardTotalPreview.textContent =
+                "0.00 USDT";
+
+        }
+
+
+        if (advertiserPricePreview) {
+
+            advertiserPricePreview.textContent =
+                "0.00 USDT";
+
+        }
+
+
+        return;
+
+    }
+
+
+    const selected =
+        CAMPAIGN_PRICES[platform]?.[taskType];
+
+
+    if (!selected) return;
+
+
+    const units =
+        quantity / selected.unitQuantity;
+
+
+    const advertiserPrice =
+        units * selected.advertiserPrice;
+
+
+    const rewardTotal =
+        quantity * USER_REWARD_USDT;
+
+
+    if (rewardTotalPreview) {
+
+        rewardTotalPreview.textContent =
+            rewardTotal.toFixed(2) +
+            " USDT";
+
+    }
+
+
+    if (advertiserPricePreview) {
+
+        advertiserPricePreview.textContent =
+            advertiserPrice.toFixed(2) +
+            " USDT";
+
+    }
+
+}
+
+
+/* =========================
+   المستخدم
+========================= */
 
 function renderUser() {
-    const u = state.user || {};
-    document.getElementById("completed-count").textContent = formatNumber(u.completed_tasks);
-    document.getElementById("bot-coins").textContent = formatNumber(u.earnings);
-    document.getElementById("usdt-balance").textContent = formatNumber(u.usdt_balance, 2);
-    document.getElementById("wallet-usdt").textContent = formatNumber(u.usdt_balance, 2);
 
-    const streak = Number(u.current_streak || 0);
-    const totalDays = Number(u.total_checkins || 0);
-    document.getElementById("streak-info").textContent =
+    const u = state.user || {};
+
+
+    document.getElementById(
+        "completed-count"
+    ).textContent =
+        formatNumber(u.completed_tasks);
+
+
+    document.getElementById(
+        "bot-coins"
+    ).textContent =
+        formatNumber(u.earnings);
+
+
+    document.getElementById(
+        "usdt-balance"
+    ).textContent =
+        formatNumber(
+            u.usdt_balance,
+            2
+        );
+
+
+    document.getElementById(
+        "wallet-usdt"
+    ).textContent =
+        formatNumber(
+            u.usdt_balance,
+            2
+        );
+
+
+    const streak =
+        Number(u.current_streak || 0);
+
+
+    const totalDays =
+        Number(u.total_checkins || 0);
+
+
+    document.getElementById(
+        "streak-info"
+    ).textContent =
+
         `إجمالي الحضور: ${formatNumber(totalDays)} يوم | التسلسل الحالي: ${formatNumber(streak)} يوم`;
 
-    const dailyBtn = document.getElementById("daily-btn");
+
+    const dailyBtn =
+        document.getElementById(
+            "daily-btn"
+        );
+
+
     if (u.daily_checkin_done) {
+
         dailyBtn.textContent = "تم";
+
         dailyBtn.disabled = true;
-        dailyBtn.className = "btn btn-done";
+
+        dailyBtn.className =
+            "btn btn-done";
+
     } else {
-        dailyBtn.textContent = "تسجيل";
+
+        dailyBtn.textContent =
+            "تسجيل";
+
         dailyBtn.disabled = false;
-        dailyBtn.className = "btn btn-green";
+
+        dailyBtn.className =
+            "btn btn-green";
+
     }
 
-    const adsLeft = Number(u.ads_left_today || 0);
-    document.getElementById("ads-counter").textContent = formatNumber(adsLeft);
-    document.getElementById("watch-ad-btn").disabled = adsLeft <= 0;
-    document.getElementById("watch-ad-btn").textContent =
-        adsLeft > 0 ? "مشاهدة إعلان مكافأة" : "لا توجد إعلانات متبقية اليوم";
 
-    const xBtn = document.getElementById("x-btn");
-    xBtn.disabled = !!u.fixed_tasks?.x_done;
-    xBtn.textContent = u.fixed_tasks?.x_done ? "تم" : "تنفيذ";
-    xBtn.className = u.fixed_tasks?.x_done ? "btn btn-done" : "btn btn-blue";
+    const adsLeft =
+        Number(u.ads_left_today || 0);
 
-    const tgBtn = document.getElementById("tg-btn");
-    tgBtn.disabled = !!u.fixed_tasks?.telegram_done;
-    tgBtn.textContent = u.fixed_tasks?.telegram_done ? "تم" : "انضمام";
-    tgBtn.className = u.fixed_tasks?.telegram_done ? "btn btn-done" : "btn btn-blue";
 
-    const referral = u.referral_link || "";
-    document.getElementById("ref-link").value = referral || "غير متاح حالياً";
+    document.getElementById(
+        "ads-counter"
+    ).textContent =
+        formatNumber(adsLeft);
+
+
+    const watchAdButton =
+        document.getElementById(
+            "watch-ad-btn"
+        );
+
+
+    watchAdButton.disabled =
+        adsLeft <= 0;
+
+
+    watchAdButton.textContent =
+
+        adsLeft > 0
+
+            ? "مشاهدة إعلان مكافأة"
+
+            : "لا توجد إعلانات متبقية اليوم";
+
+
+    const xBtn =
+        document.getElementById("x-btn");
+
+
+    xBtn.disabled =
+        !!u.fixed_tasks?.x_done;
+
+
+    xBtn.textContent =
+        u.fixed_tasks?.x_done
+
+            ? "تم"
+
+            : "تنفيذ";
+
+
+    xBtn.className =
+        u.fixed_tasks?.x_done
+
+            ? "btn btn-done"
+
+            : "btn btn-blue";
+
+
+    const tgBtn =
+        document.getElementById("tg-btn");
+
+
+    tgBtn.disabled =
+        !!u.fixed_tasks?.telegram_done;
+
+
+    tgBtn.textContent =
+        u.fixed_tasks?.telegram_done
+
+            ? "تم"
+
+            : "انضمام";
+
+
+    tgBtn.className =
+        u.fixed_tasks?.telegram_done
+
+            ? "btn btn-done"
+
+            : "btn btn-blue";
+
+
+    const referral =
+        u.referral_link || "";
+
+
+    document.getElementById(
+        "ref-link"
+    ).value =
+
+        referral || "غير متاح حالياً";
+
 }
+
+
+/* =========================
+   عرض المهام
+========================= */
 
 function renderTasks() {
-    const homeContainer = document.getElementById("dynamic-tasks-container");
-    const tasksContainer = document.getElementById("tasks-list");
+
+    const homeContainer =
+        document.getElementById(
+            "dynamic-tasks-container"
+        );
+
+
+    const tasksContainer =
+        document.getElementById(
+            "tasks-list"
+        );
+
+
     homeContainer.innerHTML = "";
+
     tasksContainer.innerHTML = "";
 
+
     if (!state.tasks.length) {
-        const empty = `<div class="empty-state">لا توجد مهام متاحة حالياً.</div>`;
-        homeContainer.innerHTML = empty;
-        tasksContainer.innerHTML = empty;
+
+        const empty =
+            `<div class="empty-state">لا توجد مهام متاحة حالياً.</div>`;
+
+
+        homeContainer.innerHTML =
+            empty;
+
+
+        tasksContainer.innerHTML =
+            empty;
+
+
         return;
+
     }
+
 
     state.tasks.forEach(task => {
-        const completed = !!task.completed;
-        const card = document.createElement("div");
-        card.className = "task";
-        card.innerHTML = `
-            <div class="task-info">
-                <div class="task-title"></div>
-                <div class="task-meta">
-                    <span class="task-reward">+${formatNumber(task.reward)} Earnings</span>
-                    ${task.budget_remaining != null ? ` · الميزانية المتبقية: ${formatNumber(task.budget_remaining)}` : ""}
-                </div>
-            </div>
-            <div class="task-action">
-                <button class="${completed ? "btn btn-done" : "btn btn-blue"}" ${completed ? "disabled" : ""}>
-                    ${completed ? "تم" : "تنفيذ"}
-                </button>
-            </div>
-        `;
-        card.querySelector(".task-title").textContent = task.title || "مهمة";
-        const btn = card.querySelector("button");
-        if (!completed) btn.onclick = () => completeTask(task.id, task.link);
 
-        homeContainer.appendChild(card.cloneNode(true));
-        const taskCopy = card;
-        tasksContainer.appendChild(taskCopy);
-        const actualBtn = taskCopy.querySelector("button");
-        if (!completed) actualBtn.onclick = () => completeTask(task.id, task.link);
+        const completed =
+            !!task.completed;
+
+
+        const card =
+            document.createElement("div");
+
+
+        card.className =
+            "task";
+
+
+        card.innerHTML = `
+
+            <div class="task-info">
+
+                <div class="task-title"></div>
+
+                <div class="task-meta">
+
+                    <span class="task-reward">
+                        +${formatNumber(task.reward)} Earnings
+                    </span>
+
+                    ${
+                        task.budget_remaining != null
+
+                            ? ` · الميزانية المتبقية: ${formatNumber(task.budget_remaining)}`
+
+                            : ""
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="task-action">
+
+                <button
+                    class="${
+                        completed
+                            ? "btn btn-done"
+                            : "btn btn-blue"
+                    }"
+                    ${completed ? "disabled" : ""}
+                >
+
+                    ${
+                        completed
+                            ? "تم"
+                            : "تنفيذ"
+                    }
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        card.querySelector(
+            ".task-title"
+        ).textContent =
+
+            task.title || "مهمة";
+
+
+        const btn =
+            card.querySelector("button");
+
+
+        if (!completed) {
+
+            btn.onclick = () =>
+
+                completeTask(
+                    task.id,
+                    task.link
+                );
+
+        }
+
+
+        const homeCopy =
+            card.cloneNode(true);
+
+
+        if (!completed) {
+
+            const homeBtn =
+                homeCopy.querySelector(
+                    "button"
+                );
+
+
+            homeBtn.onclick = () =>
+
+                completeTask(
+                    task.id,
+                    task.link
+                );
+
+        }
+
+
+        homeContainer.appendChild(
+            homeCopy
+        );
+
+
+        tasksContainer.appendChild(
+            card
+        );
+
     });
+
 }
+
+
+/* =========================
+   تحميل المستخدم
+========================= */
 
 async function loadMe() {
-    const data = await api("/api/me");
-    state.user = data.user || data;
-    if (data.settings) state.settings = {...state.settings, ...data.settings};
+
+    const data =
+        await api("/api/me");
+
+
+    state.user =
+        data.user || data;
+
+
+    if (data.settings) {
+
+        state.settings = {
+
+            ...state.settings,
+
+            ...data.settings
+
+        };
+
+    }
+
+
     renderUser();
+
     applySettings();
+
 }
+
+
+/* =========================
+   تحميل المهام
+========================= */
 
 async function loadTasks() {
+
     try {
-        const data = await api("/api/tasks");
-        state.tasks = Array.isArray(data) ? data : (data.tasks || []);
+
+        const data =
+            await api("/api/tasks");
+
+
+        state.tasks =
+            Array.isArray(data)
+
+                ? data
+
+                : (data.tasks || []);
+
+
         renderTasks();
+
     } catch (e) {
-        document.getElementById("tasks-list").innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+
+        document.getElementById(
+            "tasks-list"
+        ).innerHTML =
+
+            `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+
     }
+
 }
+
+
+/* =========================
+   المتصدرين
+========================= */
 
 async function loadLeaderboard() {
-    const box = document.getElementById("leaderboard-list");
-    box.innerHTML = `<div class="empty-state">جارٍ تحميل الترتيب...</div>`;
+
+    const box =
+        document.getElementById(
+            "leaderboard-list"
+        );
+
+
+    box.innerHTML =
+        `<div class="empty-state">جارٍ تحميل الترتيب...</div>`;
+
+
     try {
-        const data = await api("/api/leaderboard");
-        state.leaderboard = Array.isArray(data) ? data : (data.leaderboard || []);
+
+        const data =
+            await api(
+                "/api/leaderboard"
+            );
+
+
+        state.leaderboard =
+
+            Array.isArray(data)
+
+                ? data
+
+                : (data.leaderboard || []);
+
+
         box.innerHTML = "";
+
+
         if (!state.leaderboard.length) {
-            box.innerHTML = `<div class="empty-state">لا توجد بيانات تصنيف بعد.</div>`;
+
+            box.innerHTML =
+                `<div class="empty-state">لا توجد بيانات تصنيف بعد.</div>`;
+
             return;
+
         }
-        state.leaderboard.forEach((item, index) => {
-            const row = document.createElement("div");
-            row.className = "leader";
-            row.innerHTML = `
-                <div class="rank">${index + 1}</div>
-                <div class="leader-name"></div>
-                <div class="leader-value">${formatNumber(item.earnings)} Earnings</div>
-            `;
-            row.querySelector(".leader-name").textContent = item.name || `مستخدم ${item.telegram_id || ""}`;
-            box.appendChild(row);
-        });
+
+
+        state.leaderboard.forEach(
+
+            (item, index) => {
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "leader";
+
+
+                row.innerHTML = `
+
+                    <div class="rank">
+                        ${index + 1}
+                    </div>
+
+                    <div class="leader-name"></div>
+
+                    <div class="leader-value">
+                        ${formatNumber(item.earnings)} Earnings
+                    </div>
+
+                `;
+
+
+                row.querySelector(
+                    ".leader-name"
+                ).textContent =
+
+                    item.name ||
+
+                    `مستخدم ${item.telegram_id || ""}`;
+
+
+                box.appendChild(row);
+
+            }
+
+        );
+
     } catch (e) {
-        box.innerHTML = `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+
+        box.innerHTML =
+
+            `<div class="empty-state">${escapeHtml(e.message)}</div>`;
+
     }
+
 }
 
-async function completeTask(taskId, link) {
+
+/* =========================
+   تنفيذ مهمة
+========================= */
+
+async function completeTask(
+    taskId,
+    link
+) {
+
     try {
-        if (link) window.open(link, "_blank", "noopener,noreferrer");
-        await api(`/api/tasks/${encodeURIComponent(taskId)}/complete`, {method:"POST"});
+
+        if (link) {
+
+            window.open(
+                link,
+                "_blank",
+                "noopener,noreferrer"
+            );
+
+        }
+
+
+        await api(
+
+            `/api/tasks/${encodeURIComponent(taskId)}/complete`,
+
+            {
+                method:"POST"
+            }
+
+        );
+
+
         await refresh();
-        showToast("تم تسجيل إنجاز المهمة وإضافة المكافأة.");
+
+
+        showToast(
+            "تم تسجيل إنجاز المهمة وإضافة المكافأة."
+        );
+
     } catch (e) {
+
         showToast(e.message);
+
     }
+
 }
+
+
+/* =========================
+   المهام الثابتة
+========================= */
 
 async function openFixedTask(type) {
-    const link = TASK_LINKS[type];
-    if (link) window.open(link, "_blank", "noopener,noreferrer");
+
+    const link =
+        TASK_LINKS[type];
+
+
+    if (link) {
+
+        window.open(
+            link,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+    }
+
 
     try {
-        const url = type === "x"
-            ? "/api/tasks/fixed/x/complete"
-            : "/api/tasks/fixed/telegram/complete";
-        await api(url, {method:"POST"});
+
+        const url =
+
+            type === "x"
+
+                ? "/api/tasks/fixed/x/complete"
+
+                : "/api/tasks/fixed/telegram/complete";
+
+
+        await api(
+
+            url,
+
+            {
+                method:"POST"
+            }
+
+        );
+
+
         await refresh();
-        showToast("تم فتح المهمة وتسجيلها لدى السيرفر.");
+
+
+        showToast(
+            "تم فتح المهمة وتسجيلها لدى السيرفر."
+        );
+
     } catch (e) {
-        showToast("تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.");
+
+        showToast(
+            "تم فتح الرابط. التسجيل يحتاج اتصال السيرفر."
+        );
+
     }
+
 }
+
+
+/* =========================
+   الحضور اليومي
+========================= */
 
 async function completeDailyTask() {
+
     try {
-        await api("/api/tasks/daily-checkin", {method:"POST"});
+
+        await api(
+
+            "/api/tasks/daily-checkin",
+
+            {
+                method:"POST"
+            }
+
+        );
+
+
         await refresh();
-        showToast("تم تسجيل حضورك اليومي.");
+
+
+        showToast(
+            "تم تسجيل حضورك اليومي."
+        );
+
     } catch (e) {
+
         showToast(e.message);
+
     }
+
 }
+
+
+/* =========================
+   الإعلان
+========================= */
 
 async function watchAd() {
-    window.open(ADSTERAA_LINK, "_blank", "noopener,noreferrer");
+
+    window.open(
+
+        ADSTERAA_LINK,
+
+        "_blank",
+
+        "noopener,noreferrer"
+
+    );
+
 
     try {
-        await api("/api/ads/watch", {method:"POST"});
+
+        await api(
+
+            "/api/ads/watch",
+
+            {
+                method:"POST"
+            }
+
+        );
+
+
         await refresh();
-        showToast("تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر.");
+
+
+        showToast(
+            "تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر."
+        );
+
     } catch (e) {
-        showToast("تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر.");
+
+        showToast(
+            "تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر."
+        );
+
     }
+
 }
+
+
+/* =========================
+   إنشاء الحملة
+========================= */
 
 async function saveNewTask() {
-    const platform = document.getElementById("campaignPlatform").value;
-    const taskType = document.getElementById("campaignType").value;
-    const quantity = Number(document.getElementById("campaignQuantity").value);
-    const link = document.getElementById("newTaskLink").value.trim();
 
-    if (!platform || !taskType || !Number.isFinite(quantity) || quantity <= 0 || !link) {
-        showToast("يرجى إدخال جميع بيانات الحملة");
-        return;
-    }
+    const platform =
+        document.getElementById(
+            "campaignPlatform"
+        ).value;
 
-    // جدول أسعار الحملات
-    const prices = {
-        youtube: {
-            subscribers: {
-                unitQuantity: 10,
-                advertiserPrice: 2.00
-            },
-            views: {
-                unitQuantity: 100,
-                advertiserPrice: 6.00
-            }
-        },
 
-        instagram: {
-            followers: {
-                unitQuantity: 10,
-                advertiserPrice: 1.50
-            },
-            views: {
-                unitQuantity: 100,
-                advertiserPrice: 3.00
-            }
-        },
+    const taskType =
+        document.getElementById(
+            "campaignType"
+        ).value;
 
-        tiktok: {
-            followers: {
-                unitQuantity: 10,
-                advertiserPrice: 1.50
-            },
-            views: {
-                unitQuantity: 100,
-                advertiserPrice: 3.00
-            }
-        }
-    };
 
-    const selected = prices[platform]?.[taskType];
+    const quantity =
+        Number(
 
-    if (!selected) {
-        showToast("نوع الحملة غير صحيح");
-        return;
-    }
+            document.getElementById(
+                "campaignQuantity"
+            ).value
 
-    // عدد الوحدات المطلوبة
-    const units = quantity / selected.unitQuantity;
+        );
 
-    // سعر المعلن بالدولار
-    const advertiserPrice = units * selected.advertiserPrice;
-
-    // المستخدم يأخذ 0.02 USDT لكل تنفيذ
-    const userRewardUSDT = quantity * 0.02;
-
-    // تحويل مكافأة المستخدم إلى Earnings
-    // 1 Earnings = 0.01 USDT
-    const reward = Math.round(userRewardUSDT / 0.01);
-
-    // تحويل سعر المعلن إلى Earnings
-    const budget = Math.round(advertiserPrice / 0.01);
-
-    // عنوان الحملة تلقائيًا
-    const platformNames = {
-        youtube: "YouTube",
-        instagram: "Instagram",
-        tiktok: "TikTok"
-    };
-
-    const typeNames = {
-        subscribers: "مشتركين",
-        followers: "متابعين",
-        views: "مشاهدات"
-    };
 
     const title =
-        `${platformNames[platform]} - ${typeNames[taskType]} - ${quantity}`;
+        document.getElementById(
+            "campaignTitle"
+        ).value.trim();
 
-    // عرض النتيجة للمعلن قبل الحفظ
+
+    const link =
+        document.getElementById(
+            "campaignLink"
+        ).value.trim();
+
+
+    /* التحقق الأساسي */
+
+    if (!platform) {
+
+        showToast(
+            "اختر المنصة أولاً."
+        );
+
+        return;
+
+    }
+
+
+    if (!taskType) {
+
+        showToast(
+            "اختر نوع المهمة."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Number.isFinite(quantity) ||
+        quantity <= 0
+    ) {
+
+        showToast(
+            "أدخل كمية صحيحة."
+        );
+
+        return;
+
+    }
+
+
+    if (!title) {
+
+        showToast(
+            "أدخل عنوان الحملة."
+        );
+
+        return;
+
+    }
+
+
+    if (!link) {
+
+        showToast(
+            "أدخل رابط الحملة."
+        );
+
+        return;
+
+    }
+
+
+    const selected =
+        CAMPAIGN_PRICES[
+            platform
+        ]?.[taskType];
+
+
+    if (!selected) {
+
+        showToast(
+            "نوع الحملة غير صحيح."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       يجب أن تكون الكمية من مضاعفات الوحدة.
+
+       مثال:
+       YouTube subscribers = 10
+       YouTube views = 100
+    */
+
+    if (
+        quantity %
+        selected.unitQuantity !==
+        0
+    ) {
+
+        showToast(
+
+            `الكمية يجب أن تكون من مضاعفات ${selected.unitQuantity}.`
+
+        );
+
+        return;
+
+    }
+
+
+    /*
+       سعر المعلن.
+
+       مثال:
+       10 مشتركين = 2 USDT
+       100 مشاهدة = 6 USDT
+    */
+
+    const units =
+        quantity /
+        selected.unitQuantity;
+
+
+    const advertiserPrice =
+        units *
+        selected.advertiserPrice;
+
+
+    /*
+       مكافأة المستخدم:
+       0.02 USDT لكل تنفيذ
+    */
+
+    const rewardUSDT =
+        USER_REWARD_USDT;
+
+
+    /*
+       إجمالي المبلغ الذي سيذهب
+       للمستخدمين عند تنفيذ كامل الكمية.
+
+       مثال:
+       10 تنفيذات × 0.02 = 0.20 USDT
+    */
+
+    const totalUserRewardsUSDT =
+        quantity *
+        rewardUSDT;
+
+
+    /*
+       تحويل مكافأة التنفيذ إلى Earnings.
+
+       0.02 / 0.01 = 2 Earnings
+    */
+
+    const reward =
+        Math.round(
+            rewardUSDT /
+            USDT_PER_EARNING
+        );
+
+
+    /*
+       الـBackend الحالي يتعامل مع
+       budget على أنه ميزانية المكافآت
+       التي سيتم حجزها من رصيد منشئ المهمة.
+
+       لذلك نرسل إجمالي مكافآت المستخدمين،
+       وليس سعر المعلن الكامل.
+
+       مثال:
+       10 تنفيذات × 2 Earnings = 20 Earnings
+    */
+
+    const budget =
+        Math.round(
+            quantity *
+            reward
+        );
+
+
+    const platformName =
+        PLATFORM_NAMES[platform];
+
+
+    const typeName =
+        TYPE_NAMES[taskType];
+
+
     const confirmMessage =
-        `المنصة: ${platformNames[platform]}\n` +
-        `نوع المهمة: ${typeNames[taskType]}\n` +
+
+        `📢 ملخص الحملة\n\n` +
+
+        `المنصة: ${platformName}\n` +
+
+        `نوع المهمة: ${typeName}\n` +
+
         `الكمية: ${quantity}\n\n` +
-        `سعر المعلن: ${advertiserPrice.toFixed(2)} USDT\n` +
-        `مكافأة المستخدم: ${userRewardUSDT.toFixed(2)} USDT لكل تنفيذ\n\n` +
+
+        `💰 سعر المعلن: ${advertiserPrice.toFixed(2)} USDT\n` +
+
+        `🎁 مكافأة المستخدم: ${rewardUSDT.toFixed(2)} USDT لكل تنفيذ\n` +
+
+        `💵 إجمالي مكافآت المستخدمين: ${totalUserRewardsUSDT.toFixed(2)} USDT\n\n` +
+
         `هل تريد إنشاء الحملة؟`;
 
+
     if (!confirm(confirmMessage)) {
+
         return;
+
     }
 
-    try {
-        await api("/api/tasks", {
-            method: "POST",
-            body: JSON.stringify({
-                title: title,
-                link: link,
-                reward: reward,
-                budget: budget
-            })
-        });
 
-        showToast("تم إنشاء الحملة بنجاح ✅");
+    try {
+
+        setLoading(true);
+
+
+        await api(
+
+            "/api/tasks",
+
+            {
+
+                method:"POST",
+
+                body:JSON.stringify({
+
+                    title:
+
+                        title,
+
+
+                    link:
+
+                        link,
+
+
+                    reward:
+
+                        reward,
+
+
+                    budget:
+
+                        budget
+
+                })
+
+            }
+
+        );
+
 
         closeTaskModal();
 
-        await loadMe();
-        await loadTasks();
+
+        resetCampaignForm();
+
+
+        await refresh();
+
+
+        showToast(
+            "تم إنشاء الحملة بنجاح ✅"
+        );
+
 
     } catch (error) {
-        console.error(error);
-        showToast("تعذر إنشاء الحملة");
+
+        console.error(
+            "Campaign creation error:",
+            error
+        );
+
+
+        showToast(
+
+            error.message ||
+
+            "تعذر إنشاء الحملة."
+
+        );
+
+    } finally {
+
+        setLoading(false);
+
     }
+
 }
 
-    try {
-        await api("/api/tasks", {
-            method:"POST",
-            body:JSON.stringify({title, link, reward, budget})
-        });
-        closeTaskModal();
-        ["newTaskTitle","newTaskLink","newTaskReward","newTaskBudget"].forEach(id => document.getElementById(id).value = "");
-        await refresh();
-        showToast("تم إرسال المهمة للسيرفر.");
-    } catch (e) {
-        showToast(e.message);
-    }
+
+/* =========================
+   اسم الزر في النافذة
+========================= */
+
+async function saveCampaign() {
+
+    return saveNewTask();
+
 }
+
+
+/* =========================
+   تنظيف نموذج الحملة
+========================= */
+
+function resetCampaignForm() {
+
+    const platform =
+        document.getElementById(
+            "campaignPlatform"
+        );
+
+
+    const type =
+        document.getElementById(
+            "campaignType"
+        );
+
+
+    const quantity =
+        document.getElementById(
+            "campaignQuantity"
+        );
+
+
+    const title =
+        document.getElementById(
+            "campaignTitle"
+        );
+
+
+    const link =
+        document.getElementById(
+            "campaignLink"
+        );
+
+
+    if (platform) {
+
+        platform.value = "";
+
+    }
+
+
+    if (type) {
+
+        type.innerHTML =
+            '<option value="">اختر نوع المهمة</option>';
+
+    }
+
+
+    if (quantity) {
+
+        quantity.value = "";
+
+    }
+
+
+    if (title) {
+
+        title.value = "";
+
+    }
+
+
+    if (link) {
+
+        link.value = "";
+
+    }
+
+
+    calculateCampaignPreview();
+
+}
+
+
+/* =========================
+   السحب
+========================= */
 
 async function requestWithdraw() {
-    const address = document.getElementById("wallet-address").value.trim();
-    const balance = Number(state.user?.usdt_balance || 0);
 
-    if (!address) return showToast("أدخل عنوان المحفظة.");
-    if (balance < 2) return showToast("الحد الأدنى للسحب هو 2 USDT.");
+    const address =
+        document.getElementById(
+            "wallet-address"
+        ).value.trim();
+
+
+    const balance =
+        Number(
+            state.user?.usdt_balance || 0
+        );
+
+
+    if (!address) {
+
+        return showToast(
+            "أدخل عنوان المحفظة."
+        );
+
+    }
+
+
+    if (balance < 2) {
+
+        return showToast(
+            "الحد الأدنى للسحب هو 2 USDT."
+        );
+
+    }
+
 
     try {
-        await api("/api/withdrawals", {
-            method:"POST",
-            body:JSON.stringify({address})
-        });
-        document.getElementById("wallet-address").value = "";
+
+        await api(
+
+            "/api/withdrawals",
+
+            {
+
+                method:"POST",
+
+                body:JSON.stringify({
+
+                    address
+
+                })
+
+            }
+
+        );
+
+
+        document.getElementById(
+            "wallet-address"
+        ).value = "";
+
+
         await refresh();
-        showToast("تم إنشاء طلب السحب وحالته Pending.");
+
+
+        showToast(
+            "تم إنشاء طلب السحب وحالته Pending."
+        );
+
     } catch (e) {
+
         showToast(e.message);
+
     }
+
 }
+
+
+/* =========================
+   نسخ رابط الإحالة
+========================= */
 
 async function copyRefLink() {
-    const value = document.getElementById("ref-link").value;
-    if (!value || value === "غير متاح حالياً") return;
-    try {
-        await navigator.clipboard.writeText(value);
-        showToast("تم نسخ رابط الإحالة.");
-    } catch {
-        const input = document.getElementById("ref-link");
-        input.select();
-        document.execCommand("copy");
-        showToast("تم نسخ رابط الإحالة.");
+
+    const value =
+        document.getElementById(
+            "ref-link"
+        ).value;
+
+
+    if (
+        !value ||
+        value === "غير متاح حالياً"
+    ) {
+
+        return;
+
     }
+
+
+    try {
+
+        await navigator.clipboard.writeText(
+            value
+        );
+
+
+        showToast(
+            "تم نسخ رابط الإحالة."
+        );
+
+    } catch {
+
+        const input =
+            document.getElementById(
+                "ref-link"
+            );
+
+
+        input.select();
+
+
+        document.execCommand(
+            "copy"
+        );
+
+
+        showToast(
+            "تم نسخ رابط الإحالة."
+        );
+
+    }
+
 }
+
+
+/* =========================
+   اللغة
+========================= */
 
 async function changeLanguage(lang) {
-    state.settings.lang = lang;
+
+    state.settings.lang =
+        lang;
+
+
     try {
-        await api("/api/settings", {method:"PATCH", body:JSON.stringify({lang})});
+
+        await api(
+
+            "/api/settings",
+
+            {
+
+                method:"PATCH",
+
+                body:JSON.stringify({
+
+                    lang
+
+                })
+
+            }
+
+        );
+
+
         applySettings();
+
     } catch(e) {
-        showToast(e.message);
+
+        showToast(
+            e.message
+        );
+
     }
+
 }
+
+
+/* =========================
+   البلد
+========================= */
+
 async function changeCountry(country) {
-    state.settings.country = country;
+
+    state.settings.country =
+        country;
+
+
     try {
-        await api("/api/settings", {method:"PATCH", body:JSON.stringify({country})});
+
+        await api(
+
+            "/api/settings",
+
+            {
+
+                method:"PATCH",
+
+                body:JSON.stringify({
+
+                    country
+
+                })
+
+            }
+
+        );
+
     } catch(e) {
-        showToast(e.message);
+
+        showToast(
+            e.message
+        );
+
     }
+
 }
+
+
+/* =========================
+   الوضع الداكن
+========================= */
+
 async function toggleTheme(enabled) {
-    state.settings.darkMode = enabled;
-    document.body.dataset.theme = enabled ? "dark" : "light";
+
+    state.settings.darkMode =
+        enabled;
+
+
+    document.body.dataset.theme =
+        enabled
+            ? "dark"
+            : "light";
+
+
     try {
-        await api("/api/settings", {method:"PATCH", body:JSON.stringify({darkMode:enabled})});
+
+        await api(
+
+            "/api/settings",
+
+            {
+
+                method:"PATCH",
+
+                body:JSON.stringify({
+
+                    darkMode:
+                        enabled
+
+                })
+
+            }
+
+        );
+
     } catch(e) {
-        showToast(e.message);
+
+        showToast(
+            e.message
+        );
+
     }
+
 }
+
+
+/* =========================
+   تطبيق الإعدادات
+========================= */
 
 function applySettings() {
-    document.documentElement.lang = state.settings.lang || "ar";
-    document.documentElement.dir = state.settings.lang === "ar" ? "rtl" : "ltr";
-    document.getElementById("lang-select").value = state.settings.lang || "ar";
-    document.getElementById("country-select").value = state.settings.country || "DZ";
-    document.getElementById("theme-toggle").checked = state.settings.darkMode !== false;
-    document.body.dataset.theme = state.settings.darkMode === false ? "light" : "dark";
+
+    document.documentElement.lang =
+        state.settings.lang ||
+        "ar";
+
+
+    document.documentElement.dir =
+
+        state.settings.lang ===
+        "ar"
+
+            ? "rtl"
+
+            : "ltr";
+
+
+    document.getElementById(
+        "lang-select"
+    ).value =
+
+        state.settings.lang ||
+        "ar";
+
+
+    document.getElementById(
+        "country-select"
+    ).value =
+
+        state.settings.country ||
+        "DZ";
+
+
+    document.getElementById(
+        "theme-toggle"
+    ).checked =
+
+        state.settings.darkMode !==
+        false;
+
+
+    document.body.dataset.theme =
+
+        state.settings.darkMode ===
+        false
+
+            ? "light"
+
+            : "dark";
+
 }
+
+
+/* =========================
+   الدليل
+========================= */
 
 function showGuide() {
-    showToast("أكمل المهام، راقب رصيدك، ثم أرسل طلب السحب عند بلوغ الحد الأدنى.");
+
+    showToast(
+
+        "أكمل المهام، راقب رصيدك، ثم أرسل طلب السحب عند بلوغ الحد الأدنى."
+
+    );
+
 }
+
+
+/* =========================
+   حماية HTML
+========================= */
 
 function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+
+    return String(
+        value ?? ""
+    )
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
 }
+
+
+/* =========================
+   تحديث كامل
+========================= */
 
 async function refresh() {
+
     setLoading(true);
+
+
     try {
-        await Promise.all([loadMe(), loadTasks()]);
+
+        await Promise.all([
+
+            loadMe(),
+
+            loadTasks()
+
+        ]);
+
     } catch(e) {
-        showToast(e.message);
+
+        showToast(
+            e.message
+        );
+
     } finally {
+
         setLoading(false);
+
     }
+
 }
 
+
+/* =========================
+   تشغيل التطبيق
+========================= */
+
 (async function init(){
+
     try {
+
         await refresh();
+
     } catch(e) {
-        showToast("تعذر الاتصال بالسيرفر. تأكد من تشغيل API.");
-        document.getElementById("streak-info").textContent = "لا توجد بيانات من السيرفر بعد.";
+
+        showToast(
+            "تعذر الاتصال بالسيرفر. تأكد من تشغيل API."
+        );
+
+
+        const streakInfo =
+            document.getElementById(
+                "streak-info"
+            );
+
+
+        if (streakInfo) {
+
+            streakInfo.textContent =
+                "لا توجد بيانات من السيرفر بعد.";
+
+        }
+
     }
+
 })();
+
 </script>
+
 </body>
 </html>
