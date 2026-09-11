@@ -52,6 +52,52 @@ FIXED_TELEGRAM_REWARD = int(os.getenv("FIXED_TELEGRAM_REWARD", "50"))
 AD_REWARD = int(os.getenv("AD_REWARD", "1"))
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "0"))
 
+
+
+# ============================================================
+# CAMPAIGN PRICING - Rayan Coin
+# ============================================================
+
+CAMPAIGN_PRICES = {
+    "youtube": {
+        "subscribers": {
+            "unit_quantity": 10,
+            "advertiser_price": 2.00,
+            "user_reward": 0.10,
+        },
+        "views": {
+            "unit_quantity": 100,
+            "advertiser_price": 6.00,
+            "user_reward": 0.06,
+        },
+    },
+
+    "instagram": {
+        "followers": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.50,
+            "user_reward": 0.08,
+        },
+        "views": {
+            "unit_quantity": 100,
+            "advertiser_price": 3.00,
+            "user_reward": 0.05,
+        },
+    },
+
+    "tiktok": {
+        "followers": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.50,
+            "user_reward": 0.08,
+        },
+        "views": {
+            "unit_quantity": 100,
+            "advertiser_price": 3.00,
+            "user_reward": 0.05,
+        },
+    },
+}
 dp = Dispatcher()
 
 
