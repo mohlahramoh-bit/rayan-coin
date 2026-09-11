@@ -490,32 +490,106 @@
 </nav>
 
 <div id="taskModal" class="modal" onclick="if(event.target===this)closeTaskModal()">
-    <div class="modal-box">
-        <h2 class="card-title">إضافة مهمة جديدة</h2>
-        <p class="card-subtitle">سيتم إرسال البيانات إلى API؛ لا يتم حفظ المهمة في localStorage.</p>
+<h2 class="card-title">إضافة حملة جديدة</h2>
 
-        <div class="form-group" style="margin-top:14px">
-            <label for="newTaskTitle">عنوان المهمة</label>
-            <input id="newTaskTitle" type="text" placeholder="مثال: الاشتراك في قناة">
-        </div>
-        <div class="form-group">
-            <label for="newTaskLink">رابط التنفيذ</label>
-            <input id="newTaskLink" type="url" dir="ltr" placeholder="https://...">
-        </div>
-        <div class="form-group">
-            <label for="newTaskReward">المكافأة بالـ Earnings</label>
-            <input id="newTaskReward" type="number" min="1" step="1" placeholder="5">
-        </div>
-        <div class="form-group">
-            <label for="newTaskBudget">ميزانية المهمة</label>
-            <input id="newTaskBudget" type="number" min="1" step="1" placeholder="100">
-        </div>
+<p class="card-subtitle">
+    اختر المنصة ونوع المهمة والكمية، وسيتم حساب السعر والمكافأة تلقائيًا.
+</p>
 
-        <div class="modal-actions">
-            <button class="btn btn-red" onclick="closeTaskModal()">إلغاء</button>
-            <button class="btn btn-green" onclick="saveNewTask()">نشر المهمة</button>
-        </div>
+<div class="form-group" style="margin-top:14px">
+    <label for="campaignPlatform">المنصة</label>
+
+    <select id="campaignPlatform"
+            onchange="updateCampaignTypes()"
+            style="width:100%;padding:12px;border-radius:10px;">
+
+        <option value="">اختر المنصة</option>
+        <option value="youtube">YouTube</option>
+        <option value="instagram">Instagram</option>
+        <option value="tiktok">TikTok</option>
+
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="campaignType">نوع المهمة</label>
+
+    <select id="campaignType"
+            onchange="calculateCampaignPreview()"
+            style="width:100%;padding:12px;border-radius:10px;">
+
+        <option value="">اختر نوع المهمة</option>
+
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="campaignQuantity">الكمية</label>
+
+    <input
+        id="campaignQuantity"
+        type="number"
+        min="1"
+        step="1"
+        placeholder="مثال: 100"
+        oninput="calculateCampaignPreview()"
+    >
+</div>
+
+<div class="form-group">
+    <label for="campaignTitle">عنوان الحملة</label>
+
+    <input
+        id="campaignTitle"
+        type="text"
+        placeholder="مثال: اشترك في قناتي"
+    >
+</div>
+
+<div class="form-group">
+    <label for="campaignLink">رابط الحملة</label>
+
+    <input
+        id="campaignLink"
+        type="url"
+        dir="ltr"
+        placeholder="https://..."
+    >
+</div>
+
+<div id="campaignPreview"
+     style="
+        margin-top:14px;
+        padding:14px;
+        border:1px solid var(--border);
+        border-radius:14px;
+     ">
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>سعر المعلن</span>
+        <strong id="campaignAdvertiserPrice">0.00$</strong>
     </div>
+
+    <div style="display:flex;justify-content:space-between;">
+        <span>مكافأة المستخدم</span>
+        <strong id="campaignUserReward">0.00 USDT</strong>
+    </div>
+
+</div>
+
+<div class="modal-actions">
+
+    <button class="btn btn-red"
+            onclick="closeTaskModal()">
+        إلغاء
+    </button>
+
+    <button class="btn btn-green"
+            onclick="saveCampaign()">
+        نشر الحملة
+    </button>
+
+</div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -541,9 +615,7 @@
 */
 
 const API_BASE = "https://rayan-coin.onrender.com";
-
-// الروابط التي زودني بها المستخدم
-const TASK_LINKS = {
+// أسعار الحملاتconst TASK_LINKS = {
     x: "https://x.com/mohlahra18042",
     telegram: "https://t.me/Arba7y_Official"
 };
@@ -809,15 +881,127 @@ async function watchAd() {
 }
 
 async function saveNewTask() {
-    const title = document.getElementById("newTaskTitle").value.trim();
+    const platform = document.getElementById("campaignPlatform").value;
+    const taskType = document.getElementById("campaignType").value;
+    const quantity = Number(document.getElementById("campaignQuantity").value);
     const link = document.getElementById("newTaskLink").value.trim();
-    const reward = Number(document.getElementById("newTaskReward").value);
-    const budget = Number(document.getElementById("newTaskBudget").value);
 
-    if (!title || !link || !Number.isFinite(reward) || reward <= 0 || !Number.isFinite(budget) || budget <= 0) {
-        showToast("أدخل بيانات المهمة والميزانية بشكل صحيح.");
+    if (!platform || !taskType || !Number.isFinite(quantity) || quantity <= 0 || !link) {
+        showToast("يرجى إدخال جميع بيانات الحملة");
         return;
     }
+
+    // جدول أسعار الحملات
+    const prices = {
+        youtube: {
+            subscribers: {
+                unitQuantity: 10,
+                advertiserPrice: 2.00
+            },
+            views: {
+                unitQuantity: 100,
+                advertiserPrice: 6.00
+            }
+        },
+
+        instagram: {
+            followers: {
+                unitQuantity: 10,
+                advertiserPrice: 1.50
+            },
+            views: {
+                unitQuantity: 100,
+                advertiserPrice: 3.00
+            }
+        },
+
+        tiktok: {
+            followers: {
+                unitQuantity: 10,
+                advertiserPrice: 1.50
+            },
+            views: {
+                unitQuantity: 100,
+                advertiserPrice: 3.00
+            }
+        }
+    };
+
+    const selected = prices[platform]?.[taskType];
+
+    if (!selected) {
+        showToast("نوع الحملة غير صحيح");
+        return;
+    }
+
+    // عدد الوحدات المطلوبة
+    const units = quantity / selected.unitQuantity;
+
+    // سعر المعلن بالدولار
+    const advertiserPrice = units * selected.advertiserPrice;
+
+    // المستخدم يأخذ 0.02 USDT لكل تنفيذ
+    const userRewardUSDT = quantity * 0.02;
+
+    // تحويل مكافأة المستخدم إلى Earnings
+    // 1 Earnings = 0.01 USDT
+    const reward = Math.round(userRewardUSDT / 0.01);
+
+    // تحويل سعر المعلن إلى Earnings
+    const budget = Math.round(advertiserPrice / 0.01);
+
+    // عنوان الحملة تلقائيًا
+    const platformNames = {
+        youtube: "YouTube",
+        instagram: "Instagram",
+        tiktok: "TikTok"
+    };
+
+    const typeNames = {
+        subscribers: "مشتركين",
+        followers: "متابعين",
+        views: "مشاهدات"
+    };
+
+    const title =
+        `${platformNames[platform]} - ${typeNames[taskType]} - ${quantity}`;
+
+    // عرض النتيجة للمعلن قبل الحفظ
+    const confirmMessage =
+        `المنصة: ${platformNames[platform]}\n` +
+        `نوع المهمة: ${typeNames[taskType]}\n` +
+        `الكمية: ${quantity}\n\n` +
+        `سعر المعلن: ${advertiserPrice.toFixed(2)} USDT\n` +
+        `مكافأة المستخدم: ${userRewardUSDT.toFixed(2)} USDT لكل تنفيذ\n\n` +
+        `هل تريد إنشاء الحملة؟`;
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    try {
+        await api("/api/tasks", {
+            method: "POST",
+            body: JSON.stringify({
+                title: title,
+                link: link,
+                reward: reward,
+                budget: budget
+            })
+        });
+
+        showToast("تم إنشاء الحملة بنجاح ✅");
+
+        closeTaskModal();
+
+        await loadMe();
+        await loadTasks();
+
+    } catch (error) {
+        console.error(error);
+        showToast("تعذر إنشاء الحملة");
+    }
+}
 
     try {
         await api("/api/tasks", {
