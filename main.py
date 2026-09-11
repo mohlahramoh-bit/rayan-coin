@@ -542,6 +542,49 @@ async def api_tasks(request):
         } for r in rows]
 
         return web.json_response({"tasks": tasks})
+async def api_offers(request):
+    uid = auth_user(request)
+
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT
+                id,
+                provider,
+                provider_offer_id,
+                title,
+                description,
+                image_url,
+                tracking_url,
+                category,
+                payout_usd,
+                user_reward,
+                countries,
+                devices
+            FROM offers
+            WHERE status='active'
+            ORDER BY payout_usd DESC, id DESC
+            LIMIT 100
+        """).fetchall()
+
+        offers = [{
+            "id": r["id"],
+            "provider": r["provider"],
+            "provider_offer_id": r["provider_offer_id"],
+            "title": r["title"],
+            "description": r["description"],
+            "image_url": r["image_url"],
+            "tracking_url": r["tracking_url"],
+            "category": r["category"],
+            "payout_usd": float(r["payout_usd"] or 0),
+            "user_reward": int(r["user_reward"] or 0),
+            "countries": r["countries"] or "",
+            "devices": r["devices"] or ""
+        } for r in rows]
+
+        return web.json_response({
+            "ok": True,
+            "offers": offers
+        })
 
 
 async def api_create_task(request):
