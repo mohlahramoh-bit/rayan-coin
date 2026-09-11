@@ -260,6 +260,8 @@ def init_db():
             ON offer_conversions(user_id);
 
         CREATE INDEX IF NOT EXISTS idx_offer_conversions_provider
+        ON offer_conversions(provider);
+
         CREATE TABLE IF NOT EXISTS adgem_conversions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT NOT NULL,
@@ -277,10 +279,10 @@ def init_db():
         );
 
         CREATE INDEX IF NOT EXISTS idx_adgem_conversions_user
-            ON adgem_conversions(user_id); 
-               CREATE INDEX IF NOT EXISTS idx_offer_conversions_provider
-            ON offer_conversions(provider);
-        CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+        ON adgem_conversions(user_id);
+
+        CREATE INDEX IF NOT EXISTS idx_adgem_conversions_status
+        ON adgem_conversions(status);
         CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id);
         CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id);
         """)
