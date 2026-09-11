@@ -203,7 +203,64 @@ def init_db():
             dark_mode INTEGER NOT NULL DEFAULT 1,
             FOREIGN KEY(user_id) REFERENCES users(user_id)
         );
+ CREATE TABLE IF NOT EXISTS offers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider TEXT NOT NULL,
+            provider_offer_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            image_url TEXT DEFAULT '',
+            tracking_url TEXT NOT NULL,
+            category TEXT DEFAULT '',
+            payout_usd REAL NOT NULL DEFAULT 0,
+            user_reward INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'active',
+            countries TEXT DEFAULT '',
+            devices TEXT DEFAULT '',
+            raw_data TEXT DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(provider, provider_offer_id)
+        );
 
+        CREATE TABLE IF NOT EXISTS offer_clicks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            offer_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            provider TEXT NOT NULL,
+            provider_offer_id TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(offer_id) REFERENCES offers(id),
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS offer_conversions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider TEXT NOT NULL,
+            provider_conversion_id TEXT NOT NULL,
+            offer_id INTEGER,
+            user_id INTEGER NOT NULL,
+            payout_usd REAL NOT NULL DEFAULT 0,
+            reward INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'approved',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            processed_at TEXT,
+            FOREIGN KEY(offer_id) REFERENCES offers(id),
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            UNIQUE(provider, provider_conversion_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_offers_status
+            ON offers(status);
+
+        CREATE INDEX IF NOT EXISTS idx_offer_clicks_user
+            ON offer_clicks(user_id);
+
+        CREATE INDEX IF NOT EXISTS idx_offer_conversions_user
+            ON offer_conversions(user_id);
+
+        CREATE INDEX IF NOT EXISTS idx_offer_conversions_provider
+            ON offer_conversions(provider);
         CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
         CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id);
         CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id);
