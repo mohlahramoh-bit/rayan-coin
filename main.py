@@ -51,7 +51,7 @@ FIXED_X_REWARD = int(os.getenv("FIXED_X_REWARD", "50"))
 FIXED_TELEGRAM_REWARD = int(os.getenv("FIXED_TELEGRAM_REWARD", "50"))
 AD_REWARD = int(os.getenv("AD_REWARD", "1"))
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "0"))
-
+ADGEM_POSTBACK_KEY = os.getenv("i7gc8676i76i4el4f8jb871g", "").strip()  
 
 
 # ============================================================
@@ -260,6 +260,25 @@ def init_db():
             ON offer_conversions(user_id);
 
         CREATE INDEX IF NOT EXISTS idx_offer_conversions_provider
+        CREATE TABLE IF NOT EXISTS adgem_conversions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            request_id TEXT NOT NULL,
+            conversion_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            payout_usd REAL NOT NULL DEFAULT 0,
+            reward INTEGER NOT NULL DEFAULT 0,
+            conversion_type TEXT NOT NULL DEFAULT 'reward',
+            offer_id TEXT DEFAULT '',
+            goal_id TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'approved',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            UNIQUE(conversion_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_adgem_conversions_user
+            ON adgem_conversions(user_id); 
+               CREATE INDEX IF NOT EXISTS idx_offer_conversions_provider
             ON offer_conversions(provider);
         CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
         CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id);
