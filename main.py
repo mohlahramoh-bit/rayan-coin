@@ -523,7 +523,166 @@ def auth_user(request):
         )
     ensure_user(user["id"], user.get("first_name", ""), user.get("username", ""))
     return int(user["id"])
+async def api_adgem_postback(request):
+    if not ADGEM_POSTBACK_KEY:
+        logging.error("ADGEM_POSTBACK_KEY is missing")
+        raise web.HTTPServiceUnavailable(
+            text="AdGem postback is not configured"
+        )
 
+    raw_body = await request.read()
+    received_signature = request.headers.get("Signature", "").strip()
+
+    if not received_signature:
+        raise web.HTTPUnauthorized(text="Missing Signature")
+
+    expected_signature = hmac.new(
+        ADGEM_POSTBACK_KEY.encode("utf-8"),
+        raw_body,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(
+        expected_signature,
+        received_signature
+    ):
+        logging.warning("Invalid AdGem postback signature")
+        raise web.HTTPUnauthorized(text="Invalid Signature")
+
+    try:
+        payload = json.loads(raw_body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        raise web.HTTPBadRequest(text="Invalid JSON")
+
+    request_id = str(payload.get("request_id", "")).strip()
+    data = payload.get("data") or {}
+
+    if not request_id or not isinstance(data, dict):
+        raise web.HTTPBadRequest(text="Invalid AdGem payload")
+
+    player_id = str(data.get("player_id", "")).strip()
+    conversion_id = str(data.get("conversion_id", "")).strip()
+    conversion_type = str(
+        data.get("conversion_type", "reward")
+    ).strip().lower()
+
+    if not player_id or not conversion_id:
+        raise web.HTTPBadRequest(
+            text="Missing player_id or conversion_id"
+        )
+
+    if not player_id.isdigit():
+        raise web.HTTPBadRequest(text="Invalid player_id")
+
+    user_id = int(player_id)
+
+    if conversion_type != "reward":
+        return web.json_response({
+            "ok": True,
+            "rewarded": False,
+            "reason": "non_reward_conversion"
+        })
+
+    try:
+        reward = int(data.get("amount", 0) or 0)
+    except (TypeError, ValueError):
+        reward = 0
+
+    if reward <= 0:
+        return web.json_response({
+            "ok": True,
+            "rewarded": False,
+            "reason": "zero_reward"
+        })
+
+    try:
+        payout_usd = float(data.get("payout", 0) or 0)
+    except (TypeError, ValueError):
+        payout_usd = 0.0
+
+    offer_id = str(data.get("offer_id", "") or "")
+    goal_id = str(data.get("goal_id", "") or "")
+
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+
+        user = conn.execute(
+            "SELECT user_id FROM users WHERE user_id=?",
+            (user_id,)
+        ).fetchone()
+
+        if not user:
+            conn.rollback()
+            raise web.HTTPNotFound(text="User not found")
+
+        existing = conn.execute(
+            """
+            SELECT id
+            FROM adgem_conversions
+            WHERE conversion_id=?
+            """,
+            (conversion_id,)
+        ).fetchone()
+
+        if existing:
+            conn.commit()
+            return web.json_response({
+                "ok": True,
+                "rewarded": False,
+                "duplicate": True
+            })
+
+        conn.execute(
+            """
+            INSERT INTO adgem_conversions
+            (
+                request_id,
+                conversion_id,
+                user_id,
+                payout_usd,
+                reward,
+                conversion_type,
+                offer_id,
+                goal_id,
+                status
+            )
+            VALUES (?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                request_id,
+                conversion_id,
+                user_id,
+                payout_usd,
+                reward,
+                conversion_type,
+                offer_id,
+                goal_id,
+                "approved"
+            )
+        )
+
+        add_balance(
+            conn,
+            user_id,
+            reward,
+            earned=True
+        )
+
+        conn.commit()
+
+    logging.info(
+        "AdGem reward credited: user=%s reward=%s payout=%s conversion=%s",
+        user_id,
+        reward,
+        payout_usd,
+        conversion_id
+    )
+
+    return web.json_response({
+        "ok": True,
+        "rewarded": True,
+        "reward": reward
+    })
 
 # ============================================================
 # API
