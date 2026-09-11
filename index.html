@@ -599,6 +599,41 @@
             pointer-events:none;
         }
 
+        .offerwall-card{
+            padding:0;
+            overflow:hidden;
+        }
+
+        .offerwall-header{
+            padding:16px;
+            border-bottom:1px solid var(--border);
+        }
+
+        .offerwall-frame-wrap{
+            width:100%;
+            min-height:72vh;
+            background:#fff;
+        }
+
+        #adgem-offerwall{
+            display:block;
+            width:100%;
+            min-height:72vh;
+            height:760px;
+            border:0;
+            background:#fff;
+        }
+
+        .offerwall-fallback{
+            padding:14px 16px 18px;
+            border-top:1px solid var(--border);
+        }
+
+        .offerwall-fallback .btn{
+            margin-top:8px;
+        }
+
+
         .ltr{
             direction:ltr;
             unicode-bidi:isolate;
@@ -843,6 +878,52 @@
         </div>
 
         <div id="tasks-list"></div>
+
+    </section>
+
+
+    <!-- العروض -->
+    <section id="offers" class="section">
+
+        <div class="card offerwall-card">
+
+            <div class="offerwall-header">
+
+                <h2 class="card-title">
+                    العروض والمكافآت 🎁
+                </h2>
+
+                <p class="card-subtitle">
+                    أكمل العروض المتاحة واربح Earnings. كل مكافأة تُؤكَّد عبر السيرفر.
+                </p>
+
+            </div>
+
+            <div class="offerwall-frame-wrap">
+                <iframe
+                    id="adgem-offerwall"
+                    title="AdGem Offers"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    allow="clipboard-write; fullscreen"
+                ></iframe>
+            </div>
+
+            <div class="offerwall-fallback">
+                <div class="card-subtitle">
+                    إذا لم تظهر العروض داخل الصفحة، افتحها مباشرة.
+                </div>
+
+                <button
+                    class="btn btn-blue btn-block"
+                    onclick="openAdGemDirect()"
+                >
+                    فتح العروض مباشرة ↗
+                </button>
+
+            </div>
+
+        </div>
 
     </section>
 
@@ -1135,6 +1216,27 @@
         </span>
 
         المهام
+
+    </button>
+
+
+    <button
+        class="nav-item"
+        onclick="switchTab('offers',this)"
+    >
+
+        <span
+            class="nav-icon"
+            aria-hidden="true"
+        >
+
+            <svg viewBox="0 0 24 24">
+                <path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8M3 7h18v5H3zM12 7v15M12 7c-1.5 0-4-.7-4-2.5S9.3 2 11 3.2c.8.6 1 2.3 1 3.8zM12 7c1.5 0 4-.7 4-2.5S14.7 2 13 3.2c-.8.6-1 2.3-1 3.8z"/>
+            </svg>
+
+        </span>
+
+        العروض
 
     </button>
 
@@ -1827,6 +1929,13 @@ function switchTab(tabId, element) {
     }
 
 
+    if (tabId === "offers") {
+
+        loadAdGemOfferwall();
+
+    }
+
+
     if (tabId === "leaderboard") {
 
         loadLeaderboard();
@@ -2442,6 +2551,86 @@ function renderTasks() {
         );
 
     });
+
+}
+
+
+/* =========================
+   AdGem Offerwall
+========================= */
+
+const ADGEM_APP_ID = "33511";
+const ADGEM_WALL_BASE = "https://adunits.adgem.com/wall";
+
+function getAdGemPlayerId() {
+
+    const id =
+        state.user?.user_id ||
+        tg?.initDataUnsafe?.user?.id;
+
+    if (!id) return "";
+
+    return String(id).replace(/[^a-zA-Z0-9_-]/g, "");
+
+}
+
+function getAdGemWallUrl() {
+
+    const playerId = getAdGemPlayerId();
+
+    if (!playerId) return "";
+
+    return (
+        ADGEM_WALL_BASE +
+        "?appid=" +
+        encodeURIComponent(ADGEM_APP_ID) +
+        "&playerid=" +
+        encodeURIComponent(playerId)
+    );
+
+}
+
+function loadAdGemOfferwall() {
+
+    const frame =
+        document.getElementById("adgem-offerwall");
+
+    if (!frame) return;
+
+    const url = getAdGemWallUrl();
+
+    if (!url) {
+
+        showToast("تعذر تحديد حساب Telegram. أعد فتح التطبيق من Telegram.");
+
+        return;
+
+    }
+
+    if (frame.dataset.loadedUrl !== url) {
+
+        frame.src = url;
+        frame.dataset.loadedUrl = url;
+
+    }
+
+}
+
+function openAdGemDirect() {
+
+    const url = getAdGemWallUrl();
+
+    if (!url) {
+
+        return showToast("تعذر تحديد حساب Telegram.");
+
+    }
+
+    if (tg?.openLink) {
+        tg.openLink(url);
+    } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+    }
 
 }
 
