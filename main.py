@@ -1123,9 +1123,9 @@ async def create_app():
 
     app.router.add_route("OPTIONS", "/{tail:.*}", options_handler)
     app.router.add_get("/health", health)
-
-    app.router.add_get("/api/me", api_me)
-    app.router.add_get("/api/tasks", api_tasks)
+app.router.add_get("/api/me", api_me)
+app.router.add_get("/api/tasks", api_tasks)
+app.router.add_get("/api/offers", api_offers)
     app.router.add_post("/api/tasks", api_create_task)
     app.router.add_post("/api/tasks/{task_id}/complete", api_complete_task)
     app.router.add_post("/api/tasks/fixed/{kind}/complete", api_fixed_complete)
