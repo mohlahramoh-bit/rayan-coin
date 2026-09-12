@@ -53,6 +53,8 @@ ADSTERRA_URL = "https://www.profitableratecpmnetwork.com/u19dhqyq?key=6c2a30702a
 USDT_PER_EARNING = float(os.getenv("USDT_PER_EARNING", "0.01"))
 
 MIN_WITHDRAW_USDT = float(os.getenv("MIN_WITHDRAW_USDT", "2"))
+MIN_DEPOSIT_USDT = float(os.getenv("MIN_DEPOSIT_USDT", "1"))
+DEPOSIT_WALLET_ADDRESS = os.getenv("DEPOSIT_WALLET_ADDRESS", "").strip()
 DAILY_CHECKIN_REWARD = int(os.getenv("DAILY_CHECKIN_REWARD", "1"))
 REFERRAL_REWARD = int(os.getenv("REFERRAL_REWARD", "10"))
 FIXED_X_REWARD = int(os.getenv("FIXED_X_REWARD", "50"))
@@ -406,6 +408,20 @@ def init_db():
         ON adgem_conversions(status);
         CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id);
         CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id);
+
+        CREATE TABLE IF NOT EXISTS deposits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount_usdt REAL NOT NULL,
+            txid TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Pending',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            processed_at TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            UNIQUE(txid)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_deposits_user ON deposits(user_id);
         """)
 
         # Upgrade old database created by the original bot.py.
@@ -449,7 +465,7 @@ def ensure_user(user_id, full_name="", username="", referral_code=None):
                 (full_name, username, user_id),
             )
             conn.commit()
-            return
+            return False
 
         code = f"u{user_id}"
         referrer_id = None
@@ -480,6 +496,7 @@ def ensure_user(user_id, full_name="", username="", referral_code=None):
                 (user_id,),
             )
         conn.commit()
+        return True
 
 
 def add_balance(conn, user_id, amount, earned=True):
@@ -564,6 +581,8 @@ def user_json(conn, user_id):
         "daily_checkin_done": bool(daily),
         "ads_left_today": ads_left,
         "referral_link": f"https://t.me/{BOT_USERNAME_PLACEHOLDER}?start=ref_{u['referral_code']}",
+        "deposit_address": DEPOSIT_WALLET_ADDRESS,
+        "min_deposit_usdt": MIN_DEPOSIT_USDT,
         "fixed_tasks": {
             "x_done": bool(x_done),
             "telegram_done": bool(tg_done),
@@ -580,6 +599,29 @@ def user_json(conn, user_id):
 
 # Filled after bot creation using getMe().
 BOT_USERNAME_PLACEHOLDER = "YOUR_BOT"
+
+# يُملأ في main() بعد إنشاء الـ Bot، يُستخدم لإرسال إشعارات من داخل الـ API (aiohttp).
+BOT_INSTANCE = None
+
+
+async def notify_admin(text: str, reply_markup=None):
+    """يرسل إشعار للأدمن (ADMIN_USER_ID) دون ما يوقف تنفيذ الطلب الأساسي لو فشل."""
+    if not ADMIN_USER_ID or not BOT_INSTANCE:
+        return
+    try:
+        await BOT_INSTANCE.send_message(ADMIN_USER_ID, text, reply_markup=reply_markup)
+    except Exception:
+        logging.exception("Failed to notify admin")
+
+
+async def notify_user(user_id: int, text: str):
+    """يرسل إشعار لمستخدم معيّن. يتجاهل الفشل بصمت (مثلاً لو حظر البوت)."""
+    if not user_id or not BOT_INSTANCE:
+        return
+    try:
+        await BOT_INSTANCE.send_message(user_id, text)
+    except Exception:
+        logging.info("Failed to notify user %s (probably blocked the bot)", user_id)
 
 
 # ============================================================
@@ -656,7 +698,16 @@ def auth_user(request):
             text=json.dumps({"detail": "Telegram initData is invalid or missing"}),
             content_type="application/json"
         )
-    ensure_user(user["id"], user.get("first_name", ""), user.get("username", ""))
+    is_new = ensure_user(user["id"], user.get("first_name", ""), user.get("username", ""))
+    if is_new:
+        uname = f"@{user.get('username')}" if user.get("username") else "بدون يوزر"
+        asyncio.create_task(notify_admin(
+            "🆕 <b>مستخدم جديد سجّل في Rayan Coin!</b>\n\n"
+            f"الاسم: {user.get('first_name','')}\n"
+            f"اليوزر: {uname}\n"
+            f"المعرف: <code>{user['id']}</code>\n"
+            "المصدر: فتح التطبيق مباشرة"
+        ))
     return int(user["id"])
 async def api_adgem_postback(request):
     if not ADGEM_POSTBACK_KEY:
@@ -804,6 +855,12 @@ async def api_adgem_postback(request):
         )
 
         conn.commit()
+
+    asyncio.create_task(notify_user(
+        user_id,
+        f"🎁 <b>مكافأة جديدة!</b>\n\n"
+        f"أنجزت عرض AdGem وربحت <b>{reward} Earnings</b>."
+    ))
 
     logging.info(
         "AdGem reward credited: user=%s reward=%s payout=%s conversion=%s",
@@ -984,6 +1041,26 @@ async def api_submit_campaign_payment(request):
             raise web.HTTPConflict(text=json.dumps({"detail": "هذا Transaction Hash مستخدم مسبقاً"}), content_type="application/json")
         conn.execute("UPDATE campaign_payments SET tx_hash=?,submitted_at=CURRENT_TIMESTAMP WHERE id=?", (tx_hash, payment_id))
         conn.commit()
+
+        task = conn.execute("SELECT title FROM tasks WHERE id=?", (payment["task_id"],)).fetchone()
+        owner = conn.execute("SELECT full_name, username FROM users WHERE user_id=?", (uid,)).fetchone()
+
+    uname = f"@{owner['username']}" if owner and owner["username"] else "بدون يوزر"
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[[
+            InlineKeyboardButton(text="✅ موافقة", callback_data=f"pay_ok:{payment_id}"),
+            InlineKeyboardButton(text="❌ رفض", callback_data=f"pay_no:{payment_id}")
+        ]]
+    )
+    asyncio.create_task(notify_admin(
+        "💳 <b>طلب دفع حملة جديد</b>\n\n"
+        f"المعلن: {html.quote(owner['full_name'] if owner else '')} ({uname})\n"
+        f"الحملة: {html.quote(task['title'] if task else '')}\n"
+        f"المبلغ: <b>{float(payment['amount_usdt']):.2f} USDT</b> ({payment['network']})\n"
+        f"Tx Hash: <code>{html.quote(tx_hash)}</code>\n"
+        f"رقم الطلب: #{payment_id}",
+        reply_markup=keyboard
+    ))
 
     return web.json_response({"ok": True, "payment_id": payment_id, "status": "pending", "message": "تم إرسال الدفع وبانتظار المراجعة"})
 
@@ -1274,6 +1351,172 @@ async def api_my_withdrawals(request):
     return web.json_response({"withdrawals": [dict(r) for r in rows]})
 
 
+# ============================================================
+# الإيداع (شحن الرصيد يدوياً بمراجعة الأدمن) — منفصل عن دفع الحملات
+# ============================================================
+
+async def api_create_deposit(request):
+    uid = auth_user(request)
+    data = await request.json()
+
+    try:
+        amount = float(data.get("amount_usdt", 0))
+    except (TypeError, ValueError):
+        amount = 0.0
+
+    txid = str(data.get("txid", "")).strip()
+
+    if not DEPOSIT_WALLET_ADDRESS:
+        raise web.HTTPServiceUnavailable(
+            text=json.dumps({"detail": "الشحن غير مفعّل حالياً"}),
+            content_type="application/json"
+        )
+
+    if amount < MIN_DEPOSIT_USDT:
+        raise web.HTTPBadRequest(
+            text=json.dumps({"detail": f"الحد الأدنى للشحن {MIN_DEPOSIT_USDT:g} USDT"}),
+            content_type="application/json"
+        )
+
+    if not txid:
+        raise web.HTTPBadRequest(
+            text=json.dumps({"detail": "أدخل رقم المعاملة (TXID)"}),
+            content_type="application/json"
+        )
+
+    with db() as conn:
+        try:
+            cur = conn.execute(
+                """INSERT INTO deposits(user_id, amount_usdt, txid, status)
+                   VALUES(?,?,?,'Pending')""",
+                (uid, amount, txid)
+            )
+        except Exception as e:
+            if not is_unique_violation(e):
+                raise
+            raise web.HTTPConflict(
+                text=json.dumps({"detail": "رقم المعاملة هذا مُستخدم من قبل"}),
+                content_type="application/json"
+            )
+        conn.commit()
+        deposit_id = cur.lastrowid
+
+        user = conn.execute(
+            "SELECT full_name, username FROM users WHERE user_id=?", (uid,)
+        ).fetchone()
+
+    uname = f"@{user['username']}" if user and user["username"] else "بدون يوزر"
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[[
+            InlineKeyboardButton(text="✅ موافقة", callback_data=f"dep_ok:{deposit_id}"),
+            InlineKeyboardButton(text="❌ رفض", callback_data=f"dep_no:{deposit_id}")
+        ]]
+    )
+
+    asyncio.create_task(notify_admin(
+        "💰 <b>طلب شحن رصيد جديد</b>\n\n"
+        f"المستخدم: {html.quote(user['full_name'] if user else '')} ({uname})\n"
+        f"المعرف: <code>{uid}</code>\n"
+        f"المبلغ: <b>{amount:.2f} USDT</b>\n"
+        f"TXID: <code>{html.quote(txid)}</code>\n"
+        f"رقم الطلب: #{deposit_id}",
+        reply_markup=keyboard
+    ))
+
+    return web.json_response({"ok": True, "deposit_id": deposit_id, "status": "Pending"})
+
+
+async def api_my_deposits(request):
+    uid = auth_user(request)
+    with db() as conn:
+        rows = conn.execute(
+            """SELECT id, amount_usdt, txid, status, created_at, processed_at
+               FROM deposits WHERE user_id=? ORDER BY id DESC LIMIT 20""",
+            (uid,),
+        ).fetchall()
+    return web.json_response({"deposits": [dict(r) for r in rows]})
+
+
+def process_deposit_decision(deposit_id, approve: bool):
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        dep = conn.execute(
+            "SELECT * FROM deposits WHERE id=?", (deposit_id,)
+        ).fetchone()
+
+        if not dep:
+            conn.rollback()
+            return None, "الطلب غير موجود"
+
+        if dep["status"] != "Pending":
+            conn.rollback()
+            return dep, "تمت معالجة هذا الطلب مسبقاً"
+
+        new_status = "Approved" if approve else "Rejected"
+
+        if approve:
+            earnings = int(round(float(dep["amount_usdt"]) / USDT_PER_EARNING))
+            add_balance(conn, dep["user_id"], earnings, earned=False)
+
+        conn.execute(
+            "UPDATE deposits SET status=?, processed_at=CURRENT_TIMESTAMP WHERE id=?",
+            (new_status, deposit_id)
+        )
+        conn.commit()
+
+    return dep, None
+
+
+async def api_admin_deposits(request):
+    require_admin(request)
+    with db() as conn:
+        rows = conn.execute(
+            """SELECT d.id, d.user_id, d.amount_usdt, d.txid, d.status, d.created_at, d.processed_at,
+                      u.full_name, u.username
+               FROM deposits d JOIN users u ON u.user_id=d.user_id
+               ORDER BY d.id DESC LIMIT 200"""
+        ).fetchall()
+    return web.json_response({"deposits": [dict(r) for r in rows]})
+
+
+async def api_admin_deposit_status(request):
+    require_admin(request)
+    deposit_id = int(request.match_info["deposit_id"])
+    data = await request.json()
+    status = str(data.get("status", "")).strip().capitalize()
+
+    if status not in ("Approved", "Rejected"):
+        raise web.HTTPBadRequest(
+            text=json.dumps({"detail": "الحالة يجب أن تكون Approved أو Rejected"}),
+            content_type="application/json"
+        )
+
+    dep, error = process_deposit_decision(deposit_id, approve=(status == "Approved"))
+
+    if error:
+        code = web.HTTPNotFound if not dep else web.HTTPConflict
+        raise code(
+            text=json.dumps({"detail": error}),
+            content_type="application/json"
+        )
+
+    if status == "Approved":
+        asyncio.create_task(notify_user(
+            dep["user_id"],
+            f"✅ <b>تم تأكيد شحن رصيدك!</b>\n\n"
+            f"المبلغ: {float(dep['amount_usdt']):.2f} USDT تمت إضافته لرصيدك."
+        ))
+    else:
+        asyncio.create_task(notify_user(
+            dep["user_id"],
+            f"❌ <b>تعذّر تأكيد طلب الشحن.</b>\n\n"
+            f"المبلغ: {float(dep['amount_usdt']):.2f} USDT\n"
+            "تأكد من رقم المعاملة (TXID) وحاول مرة ثانية، أو تواصل معنا."
+        ))
+
+    return web.json_response({"ok": True, "status": status})
+
+
 def require_admin(request):
     uid = auth_user(request)
     if not ADMIN_USER_ID or uid != ADMIN_USER_ID:
@@ -1297,6 +1540,51 @@ async def api_admin_campaign_payments(request):
     return web.json_response({"payments": [dict(r) for r in rows]})
 
 
+def process_campaign_payment_decision(payment_id, approve: bool, tx_hash_override=None):
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=?", (payment_id,)).fetchone()
+        if not payment:
+            conn.rollback()
+            return None, "طلب دفع الحملة غير موجود"
+        if payment["status"] != "pending":
+            conn.rollback()
+            return payment, "تمت معالجة طلب الدفع مسبقاً"
+
+        if approve:
+            final_hash = tx_hash_override or (payment["tx_hash"] or "")
+            if not re.fullmatch(r"0x[a-fA-F0-9]{64}", final_hash):
+                conn.rollback()
+                return payment, "لا يمكن الموافقة بدون Transaction Hash صحيح"
+            duplicate = conn.execute(
+                "SELECT id FROM campaign_payments WHERE tx_hash=? AND id<>?",
+                (final_hash, payment_id)
+            ).fetchone()
+            if duplicate:
+                conn.rollback()
+                return payment, "هذا Transaction Hash مستخدم مسبقاً"
+            conn.execute(
+                "UPDATE campaign_payments SET tx_hash=?,status='approved',processed_at=CURRENT_TIMESTAMP WHERE id=?",
+                (final_hash, payment_id)
+            )
+            conn.execute(
+                "UPDATE tasks SET status='active' WHERE id=? AND status='pending_payment'",
+                (payment["task_id"],)
+            )
+        else:
+            conn.execute(
+                "UPDATE campaign_payments SET status='rejected',processed_at=CURRENT_TIMESTAMP WHERE id=?",
+                (payment_id,)
+            )
+            conn.execute(
+                "UPDATE tasks SET status='rejected' WHERE id=? AND status='pending_payment'",
+                (payment["task_id"],)
+            )
+        conn.commit()
+
+    return payment, None
+
+
 async def api_admin_campaign_payment_status(request):
     require_admin(request)
     payment_id = int(request.match_info["payment_id"])
@@ -1307,27 +1595,26 @@ async def api_admin_campaign_payment_status(request):
     if status not in ("approved", "rejected"):
         raise web.HTTPBadRequest(text=json.dumps({"detail": "الحالة يجب أن تكون approved أو rejected"}), content_type="application/json")
 
-    with db() as conn:
-        conn.execute("BEGIN IMMEDIATE")
-        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=?", (payment_id,)).fetchone()
-        if not payment:
-            raise web.HTTPNotFound(text=json.dumps({"detail": "طلب دفع الحملة غير موجود"}), content_type="application/json")
-        if payment["status"] != "pending":
-            raise web.HTTPConflict(text=json.dumps({"detail": "تمت معالجة طلب الدفع مسبقاً"}), content_type="application/json")
+    payment, error = process_campaign_payment_decision(payment_id, approve=(status == "approved"), tx_hash_override=tx_hash or None)
 
-        if status == "approved":
-            final_hash = tx_hash or (payment["tx_hash"] or "")
-            if not re.fullmatch(r"0x[a-fA-F0-9]{64}", final_hash):
-                raise web.HTTPBadRequest(text=json.dumps({"detail": "لا يمكن الموافقة بدون Transaction Hash صحيح"}), content_type="application/json")
-            duplicate = conn.execute("SELECT id FROM campaign_payments WHERE tx_hash=? AND id<>?", (final_hash, payment_id)).fetchone()
-            if duplicate:
-                raise web.HTTPConflict(text=json.dumps({"detail": "هذا Transaction Hash مستخدم مسبقاً"}), content_type="application/json")
-            conn.execute("UPDATE campaign_payments SET tx_hash=?,status='approved',processed_at=CURRENT_TIMESTAMP WHERE id=?", (final_hash, payment_id))
-            conn.execute("UPDATE tasks SET status='active' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
-        else:
-            conn.execute("UPDATE campaign_payments SET status='rejected',processed_at=CURRENT_TIMESTAMP WHERE id=?", (payment_id,))
-            conn.execute("UPDATE tasks SET status='rejected' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
-        conn.commit()
+    if error:
+        code = web.HTTPNotFound if not payment else (web.HTTPBadRequest if "Transaction" in error or "مستخدم" in error else web.HTTPConflict)
+        raise code(text=json.dumps({"detail": error}), content_type="application/json")
+
+    if status == "approved":
+        asyncio.create_task(notify_user(
+            payment["owner_id"],
+            f"✅ <b>تمت الموافقة على دفعة حملتك!</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "حملتك الآن نشطة وتظهر للمستخدمين."
+        ))
+    else:
+        asyncio.create_task(notify_user(
+            payment["owner_id"],
+            f"❌ <b>تعذّر تأكيد دفعة حملتك.</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "تأكد من الـ Transaction Hash وتواصل معنا لو تحتاج مساعدة."
+        ))
 
     return web.json_response({"ok": True, "payment_id": payment_id, "status": status, "campaign_status": "active" if status == "approved" else "rejected"})
 
@@ -1378,6 +1665,22 @@ async def api_admin_withdrawal_status(request):
             (status, withdrawal_id),
         )
         conn.commit()
+
+    if status == "Approved":
+        asyncio.create_task(notify_user(
+            w["user_id"],
+            f"✅ <b>تم قبول طلب سحبك!</b>\n\n"
+            f"المبلغ: {float(w['amount_usdt']):.2f} USDT\n"
+            f"العنوان: <code>{html.quote(w['address'])}</code>\n"
+            "راح يوصلك التحويل خلال وقت قصير."
+        ))
+    else:
+        asyncio.create_task(notify_user(
+            w["user_id"],
+            f"❌ <b>تم رفض طلب سحبك.</b>\n\n"
+            f"المبلغ: {float(w['amount_usdt']):.2f} USDT تمت إعادته لرصيدك.\n"
+            "تواصل معنا لو تحتاج توضيح."
+        ))
 
     return web.json_response({"ok": True, "status": status})
 
@@ -1437,12 +1740,23 @@ async def command_start_handler(message: Message) -> None:
     if len(args) == 2 and args[1].startswith("ref_"):
         referral = args[1][4:].strip()
 
-    ensure_user(
+    is_new = ensure_user(
         user.id,
         user.full_name,
         user.username or "",
         referral_code=referral
     )
+
+    if is_new:
+        uname = f"@{user.username}" if user.username else "بدون يوزر"
+        asyncio.create_task(notify_admin(
+            "🆕 <b>مستخدم جديد سجّل في Rayan Coin!</b>\n\n"
+            f"الاسم: {html.quote(user.full_name)}\n"
+            f"اليوزر: {uname}\n"
+            f"المعرف: <code>{user.id}</code>\n"
+            f"عبر إحالة: {'نعم' if referral else 'لا'}\n"
+            "المصدر: أمر /start"
+        ))
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -1532,6 +1846,87 @@ async def back_home_callback(callback: CallbackQuery):
     await callback.answer()
 
 
+@dp.callback_query(F.data.startswith("dep_ok:") | F.data.startswith("dep_no:"))
+async def deposit_decision_callback(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_USER_ID:
+        await callback.answer("هذا الزر للأدمن فقط.", show_alert=True)
+        return
+
+    action, raw_id = callback.data.split(":", 1)
+    deposit_id = int(raw_id)
+    approve = action == "dep_ok"
+
+    dep, error = process_deposit_decision(deposit_id, approve=approve)
+
+    if error:
+        await callback.answer(error, show_alert=True)
+        return
+
+    if approve:
+        await notify_user(
+            dep["user_id"],
+            f"✅ <b>تم تأكيد شحن رصيدك!</b>\n\n"
+            f"المبلغ: {float(dep['amount_usdt']):.2f} USDT تمت إضافته لرصيدك."
+        )
+        result_line = "✅ تمت الموافقة"
+    else:
+        await notify_user(
+            dep["user_id"],
+            f"❌ <b>تعذّر تأكيد طلب الشحن.</b>\n\n"
+            f"المبلغ: {float(dep['amount_usdt']):.2f} USDT\n"
+            "تأكد من رقم المعاملة (TXID) وحاول مرة ثانية، أو تواصل معنا."
+        )
+        result_line = "❌ تم الرفض"
+
+    try:
+        await callback.message.edit_text(callback.message.text + f"\n\n{result_line}")
+    except Exception:
+        pass
+
+    await callback.answer("تم تسجيل القرار.")
+
+
+@dp.callback_query(F.data.startswith("pay_ok:") | F.data.startswith("pay_no:"))
+async def campaign_payment_decision_callback(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_USER_ID:
+        await callback.answer("هذا الزر للأدمن فقط.", show_alert=True)
+        return
+
+    action, raw_id = callback.data.split(":", 1)
+    payment_id = int(raw_id)
+    approve = action == "pay_ok"
+
+    payment, error = process_campaign_payment_decision(payment_id, approve=approve)
+
+    if error:
+        await callback.answer(error, show_alert=True)
+        return
+
+    if approve:
+        await notify_user(
+            payment["owner_id"],
+            f"✅ <b>تمت الموافقة على دفعة حملتك!</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "حملتك الآن نشطة وتظهر للمستخدمين."
+        )
+        result_line = "✅ تمت الموافقة"
+    else:
+        await notify_user(
+            payment["owner_id"],
+            f"❌ <b>تعذّر تأكيد دفعة حملتك.</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "تأكد من الـ Transaction Hash وتواصل معنا لو تحتاج مساعدة."
+        )
+        result_line = "❌ تم الرفض"
+
+    try:
+        await callback.message.edit_text(callback.message.text + f"\n\n{result_line}")
+    except Exception:
+        pass
+
+    await callback.answer("تم تسجيل القرار.")
+
+
 # ============================================================
 # SERVER + BOT
 # ============================================================
@@ -1559,6 +1954,10 @@ async def create_app():
     app.router.add_get("/api/admin/campaign-payments", api_admin_campaign_payments)
     app.router.add_patch("/api/admin/campaign-payments/{payment_id}", api_admin_campaign_payment_status)
     app.router.add_patch("/api/admin/withdrawals/{withdrawal_id}", api_admin_withdrawal_status)
+    app.router.add_post("/api/deposits", api_create_deposit)
+    app.router.add_get("/api/deposits", api_my_deposits)
+    app.router.add_get("/api/admin/deposits", api_admin_deposits)
+    app.router.add_patch("/api/admin/deposits/{deposit_id}", api_admin_deposit_status)
     app.router.add_get("/api/settings", api_settings)
     app.router.add_patch("/api/settings", api_settings)
 
@@ -1566,7 +1965,7 @@ async def create_app():
 
 
 async def main():
-    global BOT_USERNAME_PLACEHOLDER
+    global BOT_USERNAME_PLACEHOLDER, BOT_INSTANCE
 
     init_db()
 
@@ -1574,6 +1973,7 @@ async def main():
         token=TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
+    BOT_INSTANCE = bot
 
     me = await bot.get_me()
     BOT_USERNAME_PLACEHOLDER = me.username or "YOUR_BOT"
