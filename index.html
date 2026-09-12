@@ -1611,6 +1611,33 @@
 </div>
  
  
+<!-- نافذة دفع الحملة اليدوي -->
+<div id="campaignPaymentModal" class="modal" onclick="if(event.target===this)closeCampaignPaymentModal()">
+    <div class="modal-box">
+        <h2 class="card-title">💳 دفع الحملة</h2>
+        <p class="card-subtitle">أرسل المبلغ المطلوب إلى عنوان USDT على شبكة BSC (BEP20)، ثم أدخل Transaction Hash لإرسال الدفع للمراجعة.</p>
+        <div class="campaign-preview" style="margin-top:14px">
+            <div class="preview-row"><span>المبلغ المطلوب</span><strong id="paymentAmount" class="preview-value yellow">0.00 USDT</strong></div>
+            <div class="preview-row"><span>الشبكة</span><strong id="paymentNetwork" class="preview-value">BSC (BEP20)</strong></div>
+            <div class="preview-row" style="display:block"><span style="display:block;margin-bottom:6px">عنوان الدفع</span>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input id="paymentAddress" type="text" readonly dir="ltr" style="margin:0;flex:1;font-size:11px">
+                    <button class="btn btn-blue" type="button" onclick="copyCampaignPaymentAddress()">نسخ</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:14px">
+            <label for="campaignTxHash">Transaction Hash</label>
+            <input id="campaignTxHash" type="text" dir="ltr" placeholder="0x...">
+        </div>
+        <div id="campaignPaymentStatus" class="empty-state" style="padding:10px 0">⏳ أرسل المبلغ ثم أدخل Transaction Hash</div>
+        <div class="modal-actions">
+            <button class="btn btn-red" type="button" onclick="closeCampaignPaymentModal()">إغلاق</button>
+            <button id="submitCampaignPaymentBtn" class="btn btn-green" type="button" onclick="submitCampaignPayment()">إرسال الدفع</button>
+        </div>
+    </div>
+</div>
+
 <div
     id="toast"
     class="toast"
@@ -1685,6 +1712,8 @@ const state = {
     loading: false
  
 };
+
+let currentCampaignPaymentId = null;
  
  
 /* =========================
@@ -3270,36 +3299,26 @@ async function saveNewTask() {
         setLoading(true);
  
  
-        await api(
- 
+        const data = await api(
+
             "/api/tasks",
- 
+
             {
  
                 method:"POST",
  
                 body:JSON.stringify({
  
-                    title:
- 
-                        title,
- 
- 
-                    link:
- 
-                        link,
- 
- 
-                    reward:
- 
-                        reward,
- 
- 
-                    budget:
- 
-                        budget
- 
-                })
+                    title: title,
+
+                    link: link,
+
+                    platform: platform,
+
+                    task_type: taskType,
+
+                    quantity: quantity
+                    })
  
             }
  
@@ -3307,17 +3326,18 @@ async function saveNewTask() {
  
  
         closeTaskModal();
- 
- 
+
         resetCampaignForm();
- 
- 
+
         await refresh();
- 
- 
-        showToast(
-            "تم إنشاء الحملة بنجاح ✅"
-        );
+
+        currentCampaignPaymentId = data.payment?.id || null;
+
+        if (currentCampaignPaymentId) {
+            openCampaignPaymentModal(data.payment);
+        } else {
+            showToast("تم إنشاء الحملة وبانتظار الدفع.");
+        }
  
  
     } catch (error) {
@@ -3345,6 +3365,65 @@ async function saveNewTask() {
 }
  
  
+/* =========================
+   دفع الحملة اليدوي
+========================= */
+
+function openCampaignPaymentModal(payment) {
+    const modal = document.getElementById("campaignPaymentModal");
+    if (!modal || !payment) return;
+    currentCampaignPaymentId = payment.id;
+    document.getElementById("paymentAmount").textContent = Number(payment.amount_usdt || 0).toFixed(2) + " USDT";
+    document.getElementById("paymentNetwork").textContent = payment.network || "BSC (BEP20)";
+    document.getElementById("paymentAddress").value = payment.address || "";
+    document.getElementById("campaignTxHash").value = "";
+    document.getElementById("campaignPaymentStatus").textContent = "⏳ أرسل المبلغ ثم أدخل Transaction Hash";
+    document.getElementById("submitCampaignPaymentBtn").disabled = false;
+    modal.classList.add("open");
+}
+
+function closeCampaignPaymentModal() {
+    const modal = document.getElementById("campaignPaymentModal");
+    if (modal) modal.classList.remove("open");
+}
+
+async function copyCampaignPaymentAddress() {
+    const value = document.getElementById("paymentAddress").value;
+    try {
+        await navigator.clipboard.writeText(value);
+        showToast("تم نسخ عنوان الدفع.");
+    } catch {
+        const input = document.getElementById("paymentAddress");
+        input.select();
+        document.execCommand("copy");
+        showToast("تم نسخ عنوان الدفع.");
+    }
+}
+
+async function submitCampaignPayment() {
+    if (!currentCampaignPaymentId) return;
+    const txHash = document.getElementById("campaignTxHash").value.trim();
+    if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
+        showToast("أدخل Transaction Hash صحيح لشبكة BSC.");
+        return;
+    }
+    const button = document.getElementById("submitCampaignPaymentBtn");
+    button.disabled = true;
+    try {
+        await api(`/api/campaign-payments/${currentCampaignPaymentId}/submit`, {
+            method: "POST",
+            body: JSON.stringify({tx_hash: txHash})
+        });
+        document.getElementById("campaignPaymentStatus").textContent = "⏳ تم إرسال الدفع وبانتظار المراجعة";
+        showToast("تم إرسال الدفع للمراجعة بنجاح.");
+        setTimeout(closeCampaignPaymentModal, 900);
+    } catch (e) {
+        showToast(e.message || "تعذر إرسال الدفع.");
+        button.disabled = false;
+    }
+}
+
+
 /* =========================
    اسم الزر في النافذة
 ========================= */
