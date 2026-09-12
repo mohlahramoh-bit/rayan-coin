@@ -1024,6 +1024,26 @@ async def api_submit_campaign_payment(request):
         conn.execute("UPDATE campaign_payments SET tx_hash=?,submitted_at=CURRENT_TIMESTAMP WHERE id=?", (tx_hash, payment_id))
         conn.commit()
 
+        task = conn.execute("SELECT title FROM tasks WHERE id=?", (payment["task_id"],)).fetchone()
+        owner = conn.execute("SELECT full_name, username FROM users WHERE user_id=?", (uid,)).fetchone()
+
+    uname = f"@{owner['username']}" if owner and owner["username"] else "بدون يوزر"
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[[
+            InlineKeyboardButton(text="✅ موافقة", callback_data=f"pay_ok:{payment_id}"),
+            InlineKeyboardButton(text="❌ رفض", callback_data=f"pay_no:{payment_id}")
+        ]]
+    )
+    asyncio.create_task(notify_admin(
+        "💳 <b>طلب دفع حملة جديد</b>\n\n"
+        f"المعلن: {html.quote(owner['full_name'] if owner else '')} ({uname})\n"
+        f"الحملة: {html.quote(task['title'] if task else '')}\n"
+        f"المبلغ: <b>{float(payment['amount_usdt']):.2f} USDT</b> ({payment['network']})\n"
+        f"Tx Hash: <code>{html.quote(tx_hash)}</code>\n"
+        f"رقم الطلب: #{payment_id}",
+        reply_markup=keyboard
+    ))
+
     return web.json_response({"ok": True, "payment_id": payment_id, "status": "pending", "message": "تم إرسال الدفع وبانتظار المراجعة"})
 
 
@@ -1336,6 +1356,39 @@ async def api_admin_campaign_payments(request):
     return web.json_response({"payments": [dict(r) for r in rows]})
 
 
+def process_campaign_payment_decision(payment_id, approve: bool, tx_hash_override=None):
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=?", (payment_id,)).fetchone()
+        if not payment:
+            conn.rollback()
+            return None, "طلب دفع الحملة غير موجود"
+        if payment["status"] != "pending":
+            conn.rollback()
+            return payment, "تمت معالجة طلب الدفع مسبقاً"
+
+        if approve:
+            final_hash = tx_hash_override or (payment["tx_hash"] or "")
+            if not re.fullmatch(r"0x[a-fA-F0-9]{64}", final_hash):
+                conn.rollback()
+                return payment, "لا يمكن الموافقة بدون Transaction Hash صحيح"
+            duplicate = conn.execute(
+                "SELECT id FROM campaign_payments WHERE tx_hash=? AND id<>?",
+                (final_hash, payment_id)
+            ).fetchone()
+            if duplicate:
+                conn.rollback()
+                return payment, "هذا Transaction Hash مستخدم مسبقاً"
+            conn.execute("UPDATE campaign_payments SET tx_hash=?,status='approved',processed_at=CURRENT_TIMESTAMP WHERE id=?", (final_hash, payment_id))
+            conn.execute("UPDATE tasks SET status='active' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
+        else:
+            conn.execute("UPDATE campaign_payments SET status='rejected',processed_at=CURRENT_TIMESTAMP WHERE id=?", (payment_id,))
+            conn.execute("UPDATE tasks SET status='rejected' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
+        conn.commit()
+
+    return payment, None
+
+
 async def api_admin_campaign_payment_status(request):
     require_admin(request)
     payment_id = int(request.match_info["payment_id"])
@@ -1346,27 +1399,11 @@ async def api_admin_campaign_payment_status(request):
     if status not in ("approved", "rejected"):
         raise web.HTTPBadRequest(text=json.dumps({"detail": "الحالة يجب أن تكون approved أو rejected"}), content_type="application/json")
 
-    with db() as conn:
-        conn.execute("BEGIN IMMEDIATE")
-        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=?", (payment_id,)).fetchone()
-        if not payment:
-            raise web.HTTPNotFound(text=json.dumps({"detail": "طلب دفع الحملة غير موجود"}), content_type="application/json")
-        if payment["status"] != "pending":
-            raise web.HTTPConflict(text=json.dumps({"detail": "تمت معالجة طلب الدفع مسبقاً"}), content_type="application/json")
+    payment, error = process_campaign_payment_decision(payment_id, approve=(status == "approved"), tx_hash_override=tx_hash or None)
 
-        if status == "approved":
-            final_hash = tx_hash or (payment["tx_hash"] or "")
-            if not re.fullmatch(r"0x[a-fA-F0-9]{64}", final_hash):
-                raise web.HTTPBadRequest(text=json.dumps({"detail": "لا يمكن الموافقة بدون Transaction Hash صحيح"}), content_type="application/json")
-            duplicate = conn.execute("SELECT id FROM campaign_payments WHERE tx_hash=? AND id<>?", (final_hash, payment_id)).fetchone()
-            if duplicate:
-                raise web.HTTPConflict(text=json.dumps({"detail": "هذا Transaction Hash مستخدم مسبقاً"}), content_type="application/json")
-            conn.execute("UPDATE campaign_payments SET tx_hash=?,status='approved',processed_at=CURRENT_TIMESTAMP WHERE id=?", (final_hash, payment_id))
-            conn.execute("UPDATE tasks SET status='active' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
-        else:
-            conn.execute("UPDATE campaign_payments SET status='rejected',processed_at=CURRENT_TIMESTAMP WHERE id=?", (payment_id,))
-            conn.execute("UPDATE tasks SET status='rejected' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
-        conn.commit()
+    if error:
+        code = web.HTTPNotFound if not payment else (web.HTTPBadRequest if "Transaction" in error or "مستخدم" in error else web.HTTPConflict)
+        raise code(text=json.dumps({"detail": error}), content_type="application/json")
 
     if status == "approved":
         asyncio.create_task(notify_user(
@@ -1611,6 +1648,47 @@ async def back_home_callback(callback: CallbackQuery):
         parse_mode=ParseMode.HTML
     )
     await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("pay_ok:") | F.data.startswith("pay_no:"))
+async def campaign_payment_decision_callback(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_USER_ID:
+        await callback.answer("هذا الزر للأدمن فقط.", show_alert=True)
+        return
+
+    action, raw_id = callback.data.split(":", 1)
+    payment_id = int(raw_id)
+    approve = action == "pay_ok"
+
+    payment, error = process_campaign_payment_decision(payment_id, approve=approve)
+
+    if error:
+        await callback.answer(error, show_alert=True)
+        return
+
+    if approve:
+        await notify_user(
+            payment["owner_id"],
+            f"✅ <b>تمت الموافقة على دفعة حملتك!</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "حملتك الآن نشطة وتظهر للمستخدمين."
+        )
+        result_line = "✅ تمت الموافقة"
+    else:
+        await notify_user(
+            payment["owner_id"],
+            f"❌ <b>تعذّر تأكيد دفعة حملتك.</b>\n\n"
+            f"المبلغ: {float(payment['amount_usdt']):.2f} USDT\n"
+            "تأكد من الـ Transaction Hash وتواصل معنا لو تحتاج مساعدة."
+        )
+        result_line = "❌ تم الرفض"
+
+    try:
+        await callback.message.edit_text(callback.message.text + f"\n\n{result_line}")
+    except Exception:
+        pass
+
+    await callback.answer("تم تسجيل القرار.")
 
 
 # ============================================================
