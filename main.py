@@ -5,6 +5,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import sqlite3
 import sys
 import time
@@ -51,7 +52,11 @@ FIXED_X_REWARD = int(os.getenv("FIXED_X_REWARD", "50"))
 FIXED_TELEGRAM_REWARD = int(os.getenv("FIXED_TELEGRAM_REWARD", "50"))
 AD_REWARD = int(os.getenv("AD_REWARD", "1"))
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "0"))
-ADGEM_POSTBACK_KEY = os.getenv("i7gc8676i76i4el4f8jb871g", "").strip()  
+ADGEM_POSTBACK_KEY = os.getenv("i7gc8676i76i4el4f8jb871g", "").strip()
+
+CAMPAIGN_PAYMENT_ADDRESS = "0x75d79ef88cce039069a4746b4498151a00293de2"
+CAMPAIGN_PAYMENT_NETWORK = "BSC (BEP20)"
+CAMPAIGN_PAYMENT_CURRENCY = "USDT"  
 
 
 # ============================================================
@@ -145,6 +150,25 @@ def init_db():
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(owner_id) REFERENCES users(user_id)
         );
+
+        CREATE TABLE IF NOT EXISTS campaign_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id INTEGER NOT NULL UNIQUE,
+            owner_id INTEGER NOT NULL,
+            amount_usdt REAL NOT NULL CHECK(amount_usdt > 0),
+            currency TEXT NOT NULL DEFAULT 'USDT',
+            network TEXT NOT NULL DEFAULT 'BSC (BEP20)',
+            payment_address TEXT NOT NULL,
+            tx_hash TEXT UNIQUE,
+            status TEXT NOT NULL DEFAULT 'pending',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            submitted_at TEXT,
+            processed_at TEXT,
+            FOREIGN KEY(task_id) REFERENCES tasks(id),
+            FOREIGN KEY(owner_id) REFERENCES users(user_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_campaign_payments_owner ON campaign_payments(owner_id);
+        CREATE INDEX IF NOT EXISTS idx_campaign_payments_status ON campaign_payments(status);
 
         CREATE TABLE IF NOT EXISTS task_completions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -305,6 +329,18 @@ def init_db():
         for name, typ in upgrades:
             if name not in cols:
                 conn.execute(f"ALTER TABLE users ADD COLUMN {name} {typ}")
+
+        task_cols = {r["name"] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()}
+        task_upgrades = [
+            ("platform", "TEXT DEFAULT ''"),
+            ("task_type", "TEXT DEFAULT ''"),
+            ("quantity", "INTEGER NOT NULL DEFAULT 0"),
+            ("advertiser_price_usdt", "REAL NOT NULL DEFAULT 0"),
+            ("user_reward_usdt", "REAL NOT NULL DEFAULT 0"),
+        ]
+        for name, typ in task_upgrades:
+            if name not in task_cols:
+                conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} {typ}")
 
 
 def ensure_user(user_id, full_name="", username="", referral_code=None):
@@ -773,45 +809,98 @@ async def api_create_task(request):
 
     title = str(data.get("title", "")).strip()
     link = str(data.get("link", "")).strip()
-    reward = int(data.get("reward", 0))
-    budget = int(data.get("budget", 0))
+    platform = str(data.get("platform", "")).strip().lower()
+    task_type = str(data.get("task_type", data.get("type", ""))).strip().lower()
+    try:
+        quantity = int(data.get("quantity", 0))
+    except (TypeError, ValueError):
+        quantity = 0
 
-    if not title or not link or reward <= 0 or budget <= 0:
-        raise web.HTTPBadRequest(
-            text=json.dumps({"detail": "بيانات المهمة غير صحيحة"}),
-            content_type="application/json"
-        )
+    selected = CAMPAIGN_PRICES.get(platform, {}).get(task_type)
+    if not title or not link or not selected or quantity <= 0:
+        raise web.HTTPBadRequest(text=json.dumps({"detail": "بيانات الحملة غير صحيحة"}), content_type="application/json")
 
-    if budget < reward:
-        raise web.HTTPBadRequest(
-            text=json.dumps({"detail": "الميزانية يجب أن تكون أكبر أو تساوي المكافأة"}),
-            content_type="application/json"
-        )
+    unit_quantity = int(selected["unit_quantity"])
+    if quantity % unit_quantity != 0:
+        raise web.HTTPBadRequest(text=json.dumps({"detail": f"الكمية يجب أن تكون من مضاعفات {unit_quantity}"}), content_type="application/json")
+
+    units = quantity / unit_quantity
+    advertiser_price = round(units * float(selected["advertiser_price"]), 8)
+    user_reward_usdt = float(selected["user_reward"])
+    reward = int(round(user_reward_usdt / USDT_PER_EARNING))
+    budget = int(quantity * reward)
+
+    if advertiser_price <= 0 or reward <= 0 or budget <= 0:
+        raise web.HTTPBadRequest(text=json.dumps({"detail": "تعذر حساب سعر الحملة"}), content_type="application/json")
 
     with db() as conn:
-        # Reserve the entire task budget immediately.
-        user = conn.execute(
-            "SELECT balance FROM users WHERE user_id=?", (uid,)
-        ).fetchone()
-
-        if not user or user["balance"] < budget:
-            raise web.HTTPBadRequest(
-                text=json.dumps({"detail": "رصيدك غير كافٍ لميزانية المهمة"}),
-                content_type="application/json"
-            )
-
-        conn.execute(
-            "UPDATE users SET balance=balance-? WHERE user_id=? AND balance>=?",
-            (budget, uid, budget)
-        )
+        conn.execute("BEGIN IMMEDIATE")
         cur = conn.execute(
-            """INSERT INTO tasks(owner_id,title,link,reward,budget)
-               VALUES(?,?,?,?,?)""",
-            (uid, title, link, reward, budget)
+            """INSERT INTO tasks(owner_id,title,link,reward,budget,status,platform,task_type,quantity,advertiser_price_usdt,user_reward_usdt)
+               VALUES(?,?,?,?,?,'pending_payment',?,?,?,?,?)""",
+            (uid, title, link, reward, budget, platform, task_type, quantity, advertiser_price, user_reward_usdt)
         )
+        task_id = cur.lastrowid
+        pcur = conn.execute(
+            """INSERT INTO campaign_payments(task_id,owner_id,amount_usdt,currency,network,payment_address,status)
+               VALUES(?,?,?,?,?,?,'pending')""",
+            (task_id, uid, advertiser_price, CAMPAIGN_PAYMENT_CURRENCY, CAMPAIGN_PAYMENT_NETWORK, CAMPAIGN_PAYMENT_ADDRESS)
+        )
+        payment_id = pcur.lastrowid
         conn.commit()
 
-        return web.json_response({"ok": True, "task_id": cur.lastrowid})
+    return web.json_response({
+        "ok": True,
+        "task_id": task_id,
+        "status": "pending_payment",
+        "payment": {
+            "id": payment_id,
+            "amount_usdt": advertiser_price,
+            "currency": CAMPAIGN_PAYMENT_CURRENCY,
+            "network": CAMPAIGN_PAYMENT_NETWORK,
+            "address": CAMPAIGN_PAYMENT_ADDRESS,
+            "status": "pending"
+        },
+        "user_reward_usdt": user_reward_usdt,
+        "total_user_rewards_usdt": round(quantity * user_reward_usdt, 8)
+    })
+
+
+async def api_submit_campaign_payment(request):
+    uid = auth_user(request)
+    payment_id = int(request.match_info["payment_id"])
+    data = await request.json()
+    tx_hash = str(data.get("tx_hash", "")).strip()
+
+    if not re.fullmatch(r"0x[a-fA-F0-9]{64}", tx_hash):
+        raise web.HTTPBadRequest(text=json.dumps({"detail": "أدخل Transaction Hash صحيح لشبكة BSC"}), content_type="application/json")
+
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=? AND owner_id=?", (payment_id, uid)).fetchone()
+        if not payment:
+            raise web.HTTPNotFound(text=json.dumps({"detail": "طلب الدفع غير موجود"}), content_type="application/json")
+        if payment["status"] != "pending":
+            raise web.HTTPConflict(text=json.dumps({"detail": "تم إرسال هذا الدفع للمراجعة مسبقاً"}), content_type="application/json")
+        duplicate = conn.execute("SELECT id FROM campaign_payments WHERE tx_hash=?", (tx_hash,)).fetchone()
+        if duplicate:
+            raise web.HTTPConflict(text=json.dumps({"detail": "هذا Transaction Hash مستخدم مسبقاً"}), content_type="application/json")
+        conn.execute("UPDATE campaign_payments SET tx_hash=?,submitted_at=CURRENT_TIMESTAMP WHERE id=?", (tx_hash, payment_id))
+        conn.commit()
+
+    return web.json_response({"ok": True, "payment_id": payment_id, "status": "pending", "message": "تم إرسال الدفع وبانتظار المراجعة"})
+
+
+async def api_my_campaign_payments(request):
+    uid = auth_user(request)
+    with db() as conn:
+        rows = conn.execute(
+            """SELECT p.id,p.task_id,p.amount_usdt,p.currency,p.network,p.payment_address,p.tx_hash,p.status,p.created_at,p.submitted_at,p.processed_at,
+                      t.title,t.status AS campaign_status
+               FROM campaign_payments p JOIN tasks t ON t.id=p.task_id
+               WHERE p.owner_id=? ORDER BY p.id DESC LIMIT 50""", (uid,)
+        ).fetchall()
+    return web.json_response({"payments": [dict(r) for r in rows]})
 
 
 async def api_complete_task(request):
@@ -1094,6 +1183,54 @@ def require_admin(request):
     return uid
 
 
+async def api_admin_campaign_payments(request):
+    require_admin(request)
+    with db() as conn:
+        rows = conn.execute(
+            """SELECT p.id,p.task_id,p.owner_id,p.amount_usdt,p.currency,p.network,p.payment_address,p.tx_hash,p.status,
+                      p.created_at,p.submitted_at,p.processed_at,t.title,t.platform,t.task_type,t.quantity,
+                      t.advertiser_price_usdt,t.user_reward_usdt,t.status AS campaign_status,u.full_name,u.username
+               FROM campaign_payments p JOIN tasks t ON t.id=p.task_id JOIN users u ON u.user_id=p.owner_id
+               ORDER BY p.id DESC LIMIT 200"""
+        ).fetchall()
+    return web.json_response({"payments": [dict(r) for r in rows]})
+
+
+async def api_admin_campaign_payment_status(request):
+    require_admin(request)
+    payment_id = int(request.match_info["payment_id"])
+    data = await request.json()
+    status = str(data.get("status", "")).strip().lower()
+    tx_hash = str(data.get("tx_hash", "")).strip()
+
+    if status not in ("approved", "rejected"):
+        raise web.HTTPBadRequest(text=json.dumps({"detail": "الحالة يجب أن تكون approved أو rejected"}), content_type="application/json")
+
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        payment = conn.execute("SELECT * FROM campaign_payments WHERE id=?", (payment_id,)).fetchone()
+        if not payment:
+            raise web.HTTPNotFound(text=json.dumps({"detail": "طلب دفع الحملة غير موجود"}), content_type="application/json")
+        if payment["status"] != "pending":
+            raise web.HTTPConflict(text=json.dumps({"detail": "تمت معالجة طلب الدفع مسبقاً"}), content_type="application/json")
+
+        if status == "approved":
+            final_hash = tx_hash or (payment["tx_hash"] or "")
+            if not re.fullmatch(r"0x[a-fA-F0-9]{64}", final_hash):
+                raise web.HTTPBadRequest(text=json.dumps({"detail": "لا يمكن الموافقة بدون Transaction Hash صحيح"}), content_type="application/json")
+            duplicate = conn.execute("SELECT id FROM campaign_payments WHERE tx_hash=? AND id<>?", (final_hash, payment_id)).fetchone()
+            if duplicate:
+                raise web.HTTPConflict(text=json.dumps({"detail": "هذا Transaction Hash مستخدم مسبقاً"}), content_type="application/json")
+            conn.execute("UPDATE campaign_payments SET tx_hash=?,status='approved',processed_at=CURRENT_TIMESTAMP WHERE id=?", (final_hash, payment_id))
+            conn.execute("UPDATE tasks SET status='active' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
+        else:
+            conn.execute("UPDATE campaign_payments SET status='rejected',processed_at=CURRENT_TIMESTAMP WHERE id=?", (payment_id,))
+            conn.execute("UPDATE tasks SET status='rejected' WHERE id=? AND status='pending_payment'", (payment["task_id"],))
+        conn.commit()
+
+    return web.json_response({"ok": True, "payment_id": payment_id, "status": status, "campaign_status": "active" if status == "approved" else "rejected"})
+
+
 async def api_admin_withdrawals(request):
     require_admin(request)
     with db() as conn:
@@ -1308,6 +1445,8 @@ async def create_app():
     app.router.add_get("/api/offers", api_offers)
     app.router.add_post("/api/adgem/postback", api_adgem_postback)
     app.router.add_post("/api/tasks", api_create_task)
+    app.router.add_post("/api/campaign-payments/{payment_id}/submit", api_submit_campaign_payment)
+    app.router.add_get("/api/campaign-payments", api_my_campaign_payments)
     app.router.add_post("/api/tasks/{task_id}/complete", api_complete_task)
     app.router.add_post("/api/tasks/fixed/{kind}/complete", api_fixed_complete)
     app.router.add_post("/api/tasks/daily-checkin", api_daily_checkin)
@@ -1316,6 +1455,8 @@ async def create_app():
     app.router.add_post("/api/withdrawals", api_withdraw)
     app.router.add_get("/api/withdrawals", api_my_withdrawals)
     app.router.add_get("/api/admin/withdrawals", api_admin_withdrawals)
+    app.router.add_get("/api/admin/campaign-payments", api_admin_campaign_payments)
+    app.router.add_patch("/api/admin/campaign-payments/{payment_id}", api_admin_campaign_payment_status)
     app.router.add_patch("/api/admin/withdrawals/{withdrawal_id}", api_admin_withdrawal_status)
     app.router.add_get("/api/settings", api_settings)
     app.router.add_patch("/api/settings", api_settings)
