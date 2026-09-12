@@ -1,28 +1,34 @@
+
+
+فهرس · HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0b0f19">
+    <meta name="theme-color" content="#0a0b0f">
     <title>Rayan Coin</title>
-
+    <link rel="icon" type="image/png" href="logo.png">
+ 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+ 
     <style>
         :root{
-            --bg:#090e18;
-            --surface:#121a2b;
-            --surface-2:#182238;
-            --border:#25314a;
-            --text:#f7f9fc;
-            --muted:#91a0b8;
-            --yellow:#f59e0b;
+            --bg:#0a0b0f;
+            --surface:#15161d;
+            --surface-2:#1c1e27;
+            --border:#2a2c38;
+            --text:#f7f8fa;
+            --muted:#8f93a3;
+            --gold:#f0b90b;
+            --gold-2:#ffd766;
+            --yellow:#f0b90b;
             --green:#22c55e;
-            --blue:#0ea5e9;
+            --blue:#3b9df5;
             --red:#ef4444;
-            --shadow:0 10px 30px rgba(0,0,0,.24);
+            --shadow:0 10px 30px rgba(0,0,0,.35);
         }
-
+ 
         /* =========================
            الوضع الفاتح
         ========================= */
@@ -36,38 +42,38 @@
             --shadow:0 10px 30px rgba(15,23,42,.08);
             color-scheme:light;
         }
-
+ 
         body[data-theme="light"] .card{
             background:linear-gradient(180deg,#ffffff,#f8fafc);
         }
-
+ 
         body[data-theme="light"] .nav{
             background:rgba(255,255,255,.96);
         }
-
+ 
         body[data-theme="light"] input,
         body[data-theme="light"] select,
         body[data-theme="light"] textarea{
             background:#ffffff;
             color:var(--text);
         }
-
+ 
         body[data-theme="light"] .stat,
         body[data-theme="light"] .ticker,
         body[data-theme="light"] .campaign-preview{
             background:rgba(15,23,42,.025);
         }
-
+ 
         *{
             box-sizing:border-box;
             margin:0;
             padding:0;
         }
-
+ 
         html{
             background:var(--bg);
         }
-
+ 
         body{
             min-height:100vh;
             background:var(--bg);
@@ -77,59 +83,59 @@
             -webkit-font-smoothing:antialiased;
             text-rendering:optimizeLegibility;
         }
-
+ 
         button,input,select,textarea{
             font:inherit;
         }
-
+ 
         button{
             touch-action:manipulation;
         }
-
+ 
         .container{
             width:100%;
             max-width:620px;
             margin:auto;
             padding:12px;
         }
-
+ 
         .section{
             display:none;
         }
-
+ 
         .section.active{
             display:block;
         }
-
+ 
         .card{
-            background:linear-gradient(180deg,var(--surface),#101827);
+            background:linear-gradient(180deg,var(--surface),#101017);
             border:1px solid var(--border);
             border-radius:18px;
             padding:16px;
             margin-bottom:12px;
             box-shadow:var(--shadow);
         }
-
+ 
         .card-title{
             font-size:17px;
             font-weight:800;
             line-height:1.45;
         }
-
+ 
         .card-subtitle{
             margin-top:5px;
             color:var(--muted);
             font-size:12px;
             line-height:1.7;
         }
-
+ 
         .stats{
             display:grid;
             grid-template-columns:repeat(3,1fr);
             gap:8px;
             margin-top:14px;
         }
-
+ 
         .stat{
             min-width:0;
             background:rgba(255,255,255,.025);
@@ -138,13 +144,13 @@
             padding:11px 7px;
             text-align:center;
         }
-
+ 
         .stat-label{
             color:var(--muted);
             font-size:11px;
             white-space:nowrap;
         }
-
+ 
         .stat-value{
             margin-top:4px;
             font-size:18px;
@@ -152,26 +158,26 @@
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         .yellow{
             color:var(--yellow);
         }
-
+ 
         .green{
             color:var(--green);
         }
-
+ 
         .blue{
             color:var(--blue);
         }
-
+ 
         .empty-state{
             color:var(--muted);
             text-align:center;
             padding:20px 10px;
             font-size:12px;
         }
-
+ 
         .ticker{
             overflow:hidden;
             background:var(--surface);
@@ -180,36 +186,36 @@
             margin-bottom:12px;
             padding:9px 12px;
         }
-
+ 
         .ticker-track{
             display:flex;
             width:max-content;
             gap:34px;
             animation:ticker 22s linear infinite;
         }
-
+ 
         .ticker-item{
             font-size:12px;
             color:var(--muted);
             white-space:nowrap;
         }
-
+ 
         .ticker-item strong{
             color:var(--green);
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         @keyframes ticker{
             from{
                 transform:translateX(10%);
             }
-
+ 
             to{
                 transform:translateX(-55%);
             }
         }
-
+ 
         .task{
             display:flex;
             align-items:center;
@@ -221,246 +227,97 @@
             padding:13px;
             margin-bottom:10px;
         }
-
+ 
         .task-info{
             min-width:0;
             flex:1;
         }
-        /* =========================
-           AdGem Offerwall
-        ========================= */
-        .adgem-offer-card{
-            position:relative;
-            overflow:hidden;
-            display:flex;
-            align-items:center;
-            gap:12px;
-            background:linear-gradient(135deg,#101b31,#172541);
-            border:1px solid rgba(245,158,11,.35);
-            border-radius:16px;
-            padding:13px;
-            margin-top:10px;
-            margin-bottom:10px;
-            box-shadow:0 10px 28px rgba(0,0,0,.18);
-        }
-
-        .adgem-offer-card::before{
-            content:"";
-            position:absolute;
-            width:120px;
-            height:120px;
-            left:-45px;
-            top:-55px;
-            background:rgba(245,158,11,.10);
-            border-radius:50%;
-        }
-
-        .adgem-logo{
-            position:relative;
-            flex:0 0 48px;
-            width:48px;
-            height:48px;
-            display:grid;
-            place-items:center;
-            border-radius:14px;
-            background:linear-gradient(145deg,#fbbf24,#f59e0b);
-            box-shadow:0 7px 18px rgba(245,158,11,.25);
-        }
-
-        .adgem-logo svg{
-            width:30px;
-            height:30px;
-            fill:none;
-            stroke:#111827;
-            stroke-width:1.8;
-            stroke-linecap:round;
-            stroke-linejoin:round;
-        }
-
-        .adgem-offer-info{
-            position:relative;
-            min-width:0;
-            flex:1;
-        }
-
-        .adgem-offer-title{
-            font-size:14px;
-            font-weight:900;
-            line-height:1.45;
-        }
-
-        .adgem-offer-subtitle{
-            margin-top:3px;
-            color:var(--muted);
-            font-size:10px;
-            line-height:1.6;
-        }
-
-        .adgem-offer-reward{
-            margin-top:4px;
-            color:var(--green);
-            font-size:11px;
-            font-weight:900;
-        }
-
-        .adgem-offer-btn{
-            position:relative;
-            flex:0 0 auto;
-            border:0;
-            border-radius:11px;
-            padding:9px 12px;
-            background:var(--yellow);
-            color:#10151e;
-            font-size:11px;
-            font-weight:900;
-            cursor:pointer;
-            box-shadow:0 5px 14px rgba(245,158,11,.18);
-        }
-
-        .adgem-offer-btn:active{
-            transform:scale(.97);
-        }
-
-        .adgem-modal-box{
-            width:100%;
-            max-width:520px;
-            height:min(88vh,760px);
-            padding:10px;
-            display:flex;
-            flex-direction:column;
-        }
-
-        .adgem-modal-head{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:10px;
-            padding:4px 3px 10px;
-        }
-
-        .adgem-modal-title{
-            font-size:15px;
-            font-weight:900;
-        }
-
-        .adgem-close{
-            width:34px;
-            height:34px;
-            border:1px solid var(--border);
-            border-radius:10px;
-            background:var(--surface-2);
-            color:var(--text);
-            cursor:pointer;
-            font-size:18px;
-            line-height:1;
-        }
-
-        .adgem-frame-wrap{
-            position:relative;
-            flex:1;
-            min-height:0;
-            overflow:hidden;
-            border:1px solid var(--border);
-            border-radius:13px;
-            background:#fff;
-        }
-
-        #adgem-frame{
-            width:100%;
-            height:100%;
-            border:0;
-            display:block;
-            background:#fff;
-        }
-
-        .adgem-direct-link{
-            margin-top:8px;
-            text-align:center;
-            color:var(--muted);
-            font-size:10px;
-        }
-
-        .adgem-direct-link a{
-            color:var(--yellow);
-            text-decoration:none;
-            font-weight:800;
-        }
-
-
+ 
         .task-title{
             font-size:14px;
             font-weight:750;
             line-height:1.5;
         }
-
+ 
         .task-meta{
             margin-top:4px;
             color:var(--muted);
             font-size:11px;
             line-height:1.6;
         }
-
+ 
         .task-reward{
             color:var(--green);
             font-weight:750;
         }
-
+ 
         .task-action{
             flex:0 0 auto;
         }
-
+ 
         .btn{
             border:0;
-            border-radius:11px;
-            padding:9px 16px;
+            border-radius:12px;
+            padding:10px 16px;
             font-size:13px;
             font-weight:800;
             cursor:pointer;
+            transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
         }
-
+ 
+        .btn:active{
+            transform:scale(.97);
+        }
+ 
         .btn:disabled{
             opacity:.45;
             cursor:not-allowed;
         }
-
+ 
         .btn-blue{
-            background:linear-gradient(135deg,#18a8e8,#087fc1);
+            background:linear-gradient(135deg,var(--blue),#1f6fd1);
             color:#fff;
-            box-shadow:0 5px 14px rgba(14,165,233,.2);
+            box-shadow:0 6px 16px rgba(59,157,245,.25);
         }
-
+ 
         .btn-yellow{
-            background:var(--yellow);
-            color:#10151e;
+            background:linear-gradient(135deg,var(--gold-2),var(--gold));
+            color:#1a1300;
+            box-shadow:0 6px 18px rgba(240,185,11,.32);
         }
-
+ 
+        .btn-yellow:active{
+            filter:brightness(.95);
+        }
+ 
         .btn-green{
-            background:var(--green);
+            background:linear-gradient(135deg,#34d976,var(--green));
             color:#06130a;
+            box-shadow:0 6px 16px rgba(34,197,94,.25);
         }
-
+ 
         .btn-red{
             background:var(--red);
             color:#fff;
         }
-
+ 
         .btn-done{
             background:rgba(34,197,94,.12);
             border:1px solid rgba(34,197,94,.7);
             color:var(--green);
         }
-
+ 
         .btn-block{
             width:100%;
             margin-top:10px;
         }
-
+ 
         .grid-2{
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:10px;
         }
-
+ 
         .option{
             background:var(--surface);
             border:1px solid var(--border);
@@ -469,23 +326,23 @@
             cursor:pointer;
             transition:.15s;
         }
-
+ 
         .option:active{
             transform:scale(.98);
         }
-
+ 
         .option-title{
             font-size:13px;
             font-weight:800;
         }
-
+ 
         .option-desc{
             margin-top:4px;
             color:var(--muted);
             font-size:10px;
             line-height:1.6;
         }
-
+ 
         .streak-row{
             display:flex;
             align-items:center;
@@ -497,30 +354,30 @@
             padding:11px 13px;
             margin-top:12px;
         }
-
+ 
         .streak-number{
             font-size:20px;
             font-weight:900;
             color:var(--yellow);
             direction:ltr;
         }
-
+ 
         .streak-caption{
             font-size:11px;
             color:var(--muted);
         }
-
+ 
         .form-group{
             margin-bottom:12px;
         }
-
+ 
         label{
             display:block;
             color:var(--muted);
             font-size:12px;
             margin-bottom:5px;
         }
-
+ 
         input,
         select,
         textarea{
@@ -533,18 +390,18 @@
             outline:none;
             direction:inherit;
         }
-
+ 
         input:focus,
         select:focus,
         textarea:focus{
             border-color:rgba(14,165,233,.7);
         }
-
+ 
         input[dir="ltr"]{
             direction:ltr;
             text-align:left;
         }
-
+ 
         .balance-line{
             display:flex;
             justify-content:space-between;
@@ -556,20 +413,20 @@
             padding:11px 13px;
             font-size:12px;
         }
-
+ 
         .balance-number{
             font-weight:900;
             color:var(--green);
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         .leader-list{
             display:grid;
             gap:8px;
             margin-top:12px;
         }
-
+ 
         .leader{
             display:flex;
             align-items:center;
@@ -579,7 +436,7 @@
             border-radius:12px;
             padding:10px 12px;
         }
-
+ 
         .rank{
             width:28px;
             text-align:center;
@@ -587,13 +444,13 @@
             color:var(--yellow);
             direction:ltr;
         }
-
+ 
         .leader-name{
             flex:1;
             font-size:12px;
             font-weight:700;
         }
-
+ 
         .leader-value{
             font-size:12px;
             color:var(--green);
@@ -601,7 +458,7 @@
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         .nav{
             position:fixed;
             left:0;
@@ -615,7 +472,7 @@
             border-top:1px solid var(--border);
             backdrop-filter:blur(14px);
         }
-
+ 
         .nav-item{
             min-width:68px;
             background:none;
@@ -626,12 +483,12 @@
             border-radius:10px;
             font-size:10px;
         }
-
+ 
         .nav-item.active{
             color:var(--yellow);
             background:rgba(245,158,11,.07);
         }
-
+ 
         .nav-icon{
             width:22px;
             height:22px;
@@ -639,7 +496,7 @@
             display:grid;
             place-items:center;
         }
-
+ 
         .nav-icon svg{
             width:19px;
             height:19px;
@@ -649,7 +506,7 @@
             stroke-linecap:round;
             stroke-linejoin:round;
         }
-
+ 
         .switch-row{
             display:flex;
             align-items:center;
@@ -660,18 +517,18 @@
             border-radius:12px;
             padding:11px;
         }
-
+ 
         .switch{
             position:relative;
             width:46px;
             height:25px;
             flex:0 0 auto;
         }
-
+ 
         .switch input{
             display:none;
         }
-
+ 
         .slider{
             position:absolute;
             inset:0;
@@ -680,7 +537,7 @@
             cursor:pointer;
             transition:.2s;
         }
-
+ 
         .slider:before{
             content:"";
             position:absolute;
@@ -692,15 +549,15 @@
             border-radius:50%;
             transition:.2s;
         }
-
+ 
         .switch input:checked + .slider{
             background:var(--green);
         }
-
+ 
         .switch input:checked + .slider:before{
             transform:translateX(21px);
         }
-
+ 
         .modal{
             position:fixed;
             inset:0;
@@ -712,11 +569,11 @@
             z-index:2000;
             overflow-y:auto;
         }
-
+ 
         .modal.open{
             display:flex;
         }
-
+ 
         .modal-box{
             width:100%;
             max-width:420px;
@@ -728,17 +585,17 @@
             padding:18px;
             box-shadow:0 20px 60px rgba(0,0,0,.4);
         }
-
+ 
         .modal-actions{
             display:flex;
             gap:10px;
             margin-top:14px;
         }
-
+ 
         .modal-actions .btn{
             flex:1;
         }
-
+ 
         .campaign-preview{
             margin-top:14px;
             padding:14px;
@@ -746,7 +603,7 @@
             background:rgba(255,255,255,.04);
             border:1px solid var(--border);
         }
-
+ 
         .preview-row{
             display:flex;
             justify-content:space-between;
@@ -754,17 +611,17 @@
             margin-bottom:10px;
             font-size:12px;
         }
-
+ 
         .preview-row:last-child{
             margin-bottom:0;
         }
-
+ 
         .preview-value{
             font-weight:900;
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         .toast{
             position:fixed;
             left:50%;
@@ -783,80 +640,187 @@
             transition:.2s;
             text-align:center;
         }
-
+ 
         .toast.show{
             opacity:1;
             transform:translateX(-50%) translateY(0);
         }
-
+ 
         .loading{
             opacity:.55;
             pointer-events:none;
         }
-
+ 
+        /* =========================
+           شاشة التحميل الأولى (Boot)
+        ========================= */
+        #boot-loader{
+            position:fixed;
+            inset:0;
+            z-index:9999;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:14px;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(240,185,11,.10), transparent 60%),
+                var(--bg);
+            transition:opacity .4s ease;
+        }
+ 
+        #boot-loader.hide{
+            opacity:0;
+            pointer-events:none;
+        }
+ 
+        #boot-loader .boot-logo-wrap{
+            position:relative;
+            width:132px;
+            height:132px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+ 
+        #boot-loader .boot-ring{
+            position:absolute;
+            inset:0;
+            border-radius:50%;
+            border:3px solid rgba(240,185,11,.18);
+            border-top-color:var(--gold);
+            animation:boot-spin 1.1s linear infinite;
+        }
+ 
+        #boot-loader .boot-logo{
+            width:104px;
+            height:104px;
+            border-radius:50%;
+            object-fit:cover;
+            box-shadow:0 0 26px rgba(240,185,11,.45);
+            animation:boot-pulse 1.8s ease-in-out infinite;
+        }
+ 
+        #boot-loader .boot-title{
+            font-size:19px;
+            font-weight:900;
+            letter-spacing:.3px;
+            background:linear-gradient(135deg,var(--gold-2),var(--gold));
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+        }
+ 
+        #boot-loader .boot-subtitle{
+            font-size:12px;
+            color:var(--muted);
+        }
+ 
+        #boot-loader .boot-dots{
+            font-size:12px;
+            color:var(--gold-2);
+            font-weight:700;
+        }
+ 
+        #boot-loader .boot-dots::after{
+            content:"";
+            animation:boot-dots 1.2s steps(4,end) infinite;
+        }
+ 
+        @keyframes boot-spin{
+            to{ transform:rotate(360deg); }
+        }
+ 
+        @keyframes boot-pulse{
+            0%,100%{ transform:scale(1); }
+            50%{ transform:scale(1.06); }
+        }
+ 
+        @keyframes boot-dots{
+            0%{ content:""; }
+            25%{ content:"."; }
+            50%{ content:".."; }
+            75%{ content:"..."; }
+            100%{ content:""; }
+        }
+ 
         .ltr{
             direction:ltr;
             unicode-bidi:isolate;
         }
-
+ 
         @media(max-width:390px){
             .stats{
                 gap:5px;
             }
-
+ 
             .stat{
                 padding:10px 4px;
             }
-
+ 
             .stat-value{
                 font-size:16px;
             }
-
+ 
             .task{
                 padding:11px;
             }
-
+ 
             .btn{
                 padding:8px 12px;
             }
         }
     </style>
 </head>
-
+ 
 <body data-theme="dark">
-
+ 
+<div id="boot-loader">
+    <div class="boot-logo-wrap">
+        <div class="boot-ring"></div>
+        <img class="boot-logo" src="logo.png" alt="Rayan Coin">
+    </div>
+    <div class="boot-title">Rayan Coin</div>
+    <div class="boot-subtitle">أكمل المهام واربح USDT</div>
+    <div class="boot-dots">جاري التحميل</div>
+</div>
+ 
 <div class="container">
-
+ 
+ 
     <!-- الرئيسية -->
     <section id="home" class="section active">
-
+ 
         <div class="card">
-            <h2 class="card-title">لوحة أرباح Rayan Coin</h2>
-
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;">
+                <img src="logo.png" alt="Rayan Coin" style="width:34px;height:34px;border-radius:50%;box-shadow:0 0 12px rgba(240,185,11,.4);">
+                <h2 class="card-title" style="margin:0;">لوحة أرباح Rayan Coin</h2>
+            </div>
+ 
             <p class="card-subtitle">
                 تابع رصيدك وإنجازاتك اليومية مباشرة.
             </p>
-
+ 
             <div class="stats">
-
+ 
                 <div class="stat">
                     <div class="stat-label">المكتمل</div>
                     <div class="stat-value yellow" id="completed-count">0</div>
                 </div>
-
+ 
                 <div class="stat">
                     <div class="stat-label">Earnings</div>
                     <div class="stat-value yellow" id="bot-coins">0</div>
                 </div>
-
+ 
                 <div class="stat">
                     <div class="stat-label">USDT</div>
                     <div class="stat-value green" id="usdt-balance">0.00</div>
                 </div>
-
+ 
             </div>
         </div>
-
+ 
         <div class="ticker" id="withdraw-ticker">
             <div class="ticker-track" id="ticker-track">
                 <div class="ticker-item">
@@ -864,23 +828,23 @@
                 </div>
             </div>
         </div>
-
+ 
         <div class="task">
-
+ 
             <div class="task-info">
-
+ 
                 <div class="task-title">
                     تسجيل الحضور اليومي
                 </div>
-
+ 
                 <div class="task-meta" id="streak-info">
                     جارٍ تحميل بيانات الحضور...
                 </div>
-
+ 
             </div>
-
+ 
             <div class="task-action">
-
+ 
                 <button
                     class="btn btn-done"
                     id="daily-btn"
@@ -889,58 +853,58 @@
                 >
                     —
                 </button>
-
+ 
             </div>
-
+ 
         </div>
-
+ 
         <div class="grid-2">
-
+ 
             <div class="option" onclick="openTaskModal()">
-
+ 
                 <div class="option-title yellow">
                     إضافة حملة
                 </div>
-
+ 
                 <div class="option-desc">
                     أنشئ حملة جديدة بميزانية محددة.
                 </div>
-
+ 
             </div>
-
+ 
             <div class="option" onclick="showGuide()">
-
+ 
                 <div class="option-title">
                     الدليل الرسمي
                 </div>
-
+ 
                 <div class="option-desc">
                     تعرف على طريقة استخدام المنصة.
                 </div>
-
+ 
             </div>
-
+ 
         </div>
-
+ 
         <div id="dynamic-tasks-container"></div>
-
+ 
         <div class="task">
-
+ 
             <div class="task-info">
-
+ 
                 <div class="task-title">
                     متابعة حسابنا على X
                 </div>
-
+ 
                 <div class="task-meta task-reward">
                     مكافأة:
                     <strong>0.03 USDT</strong>
                 </div>
-
+ 
             </div>
-
+ 
             <div class="task-action">
-
+ 
                 <button
                     class="btn btn-blue"
                     id="x-btn"
@@ -949,28 +913,28 @@
                 >
                     —
                 </button>
-
+ 
             </div>
-
+ 
         </div>
-
+ 
         <div class="task">
-
+ 
             <div class="task-info">
-
+ 
                 <div class="task-title">
                     انضم للقناة الرسمية
                 </div>
-
+ 
                 <div class="task-meta task-reward">
                     مكافأة:
                     <strong>0.03 USDT</strong>
                 </div>
-
+ 
             </div>
-
+ 
             <div class="task-action">
-
+ 
                 <button
                     class="btn btn-blue"
                     id="tg-btn"
@@ -979,53 +943,53 @@
                 >
                     —
                 </button>
-
+ 
             </div>
-
+ 
         </div>
-
+ 
     </section>
-
-
+ 
+ 
     <!-- المهام -->
     <section id="tasks" class="section">
-
+ 
         <div class="card">
-
+ 
             <h2 class="card-title">
                 مركز المهام والمكافآت
             </h2>
-
+ 
             <p class="card-subtitle">
                 المهام والإعلانات المتاحة يتم تحميلها من السيرفر.
             </p>
-
+ 
             <div class="streak-row">
-
+ 
                 <div>
-
+ 
                     <div
                         class="card-title"
                         style="font-size:13px"
                     >
                         الإعلانات اليومية
                     </div>
-
+ 
                     <div class="streak-caption">
                         المتبقي اليوم
                     </div>
-
+ 
                 </div>
-
+ 
                 <div
                     class="streak-number"
                     id="ads-counter"
                 >
                     0
                 </div>
-
+ 
             </div>
-
+ 
             <button
                 class="btn btn-yellow btn-block"
                 id="watch-ad-btn"
@@ -1034,59 +998,46 @@
             >
                 مشاهدة إعلان مكافأة
             </button>
-
+ 
         </div>
-
-        <div id="tasks-list"></div>
-
-        <!-- AdGem Offerwall -->
-        <div class="adgem-offer-card">
-            <div class="adgem-logo" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                    <path d="m12 2 8 5-3 10-5 5-5-5L4 7z"/>
-                    <path d="m4 7 8 4 8-4M12 11v11"/>
-                </svg>
-            </div>
-
-            <div class="adgem-offer-info">
-                <div class="adgem-offer-title">
-                    عروض ومكافآت AdGem 🎁
-                </div>
-
-                <div class="adgem-offer-subtitle">
-                    أكمل العروض المتاحة واربح Earnings إضافية.
-                </div>
-
-                <div class="adgem-offer-reward">
-                    مكافآت حسب العرض
-                </div>
-            </div>
-
+ 
+        <div class="card">
+ 
+            <h2 class="card-title">
+                عروض ومكافآت TimeWall
+            </h2>
+ 
+            <p class="card-subtitle">
+                أكمل العروض المتاحة واربح Earnings إضافية. المكافأة تتأكد من TimeWall مباشرة.
+            </p>
+ 
             <button
-                class="adgem-offer-btn"
-                type="button"
-                onclick="openAdGem()"
+                class="btn btn-yellow btn-block"
+                onclick="openTimewall()"
             >
                 عرض العروض
             </button>
+ 
         </div>
-
+ 
+        <div id="tasks-list"></div>
+ 
     </section>
-
-
+ 
+ 
     <!-- المتصدرين -->
     <section id="leaderboard" class="section">
-
+ 
         <div class="card">
-
+ 
             <h2 class="card-title">
                 لوحة المتصدرين
             </h2>
-
+ 
             <p class="card-subtitle">
                 الترتيب الحقيقي من قاعدة البيانات.
             </p>
-
+ 
             <div
                 id="leaderboard-list"
                 class="leader-list"
@@ -1095,110 +1046,110 @@
                     جارٍ تحميل الترتيب...
                 </div>
             </div>
-
+ 
         </div>
-
+ 
     </section>
-
-
+ 
+ 
     <!-- الحساب -->
     <section id="account" class="section">
-
+ 
         <div class="card">
-
+ 
             <h2 class="card-title">
                 حسابي والإعدادات
             </h2>
-
+ 
             <div
                 class="form-group"
                 style="margin-top:14px"
             >
-
+ 
                 <label id="settings-lang-label" for="lang-select">
                     لغة التطبيق
                 </label>
-
+ 
                 <select
                     id="lang-select"
                     onchange="changeLanguage(this.value)"
                 >
-
+ 
                     <option value="ar">
                         العربية
                     </option>
-
+ 
                     <option value="en">
                         English
                     </option>
-
+ 
                     <option value="fr">
                         Français
                     </option>
-
+ 
                 </select>
-
+ 
             </div>
-
+ 
             <div class="form-group">
-
+ 
                 <label id="settings-country-label" for="country-select">
                     البلد / المنطقة
                 </label>
-
+ 
                 <select
                     id="country-select"
                     onchange="changeCountry(this.value)"
                 >
-
+ 
                     <option value="DZ">
                         الجزائر
                     </option>
-
+ 
                     <option value="SA">
                         السعودية
                     </option>
-
+ 
                     <option value="EG">
                         مصر
                     </option>
-
+ 
                     <option value="MA">
                         المغرب
                     </option>
-
+ 
                     <option value="AE">
                         الإمارات
                     </option>
-
+ 
                     <option value="TN">
                         تونس
                     </option>
-
+ 
                     <option value="FR">
                         فرنسا
                     </option>
-
+ 
                     <option value="DE">
                         ألمانيا
                     </option>
-
+ 
                     <option value="TR">
                         تركيا
                     </option>
-
+ 
                     <option value="US">
                         الولايات المتحدة
                     </option>
-
+ 
                 </select>
-
+ 
             </div>
-
+ 
             <div class="switch-row">
-
+ 
                 <div>
-
+ 
                     <div
                         style="
                             font-size:13px;
@@ -1208,41 +1159,41 @@
                     >
                         الوضع الداكن
                     </div>
-
+ 
                     <div id="theme-desc" class="card-subtitle">
                         حفظ المظهر على هذا الجهاز.
                     </div>
-
+ 
                 </div>
-
+ 
                 <label class="switch">
-
+ 
                     <input
                         type="checkbox"
                         id="theme-toggle"
                         checked
                         onchange="toggleTheme(this.checked)"
                     >
-
+ 
                     <span class="slider"></span>
-
+ 
                 </label>
-
+ 
             </div>
-
+ 
         </div>
-
-
+ 
+ 
         <div class="card">
-
+ 
             <h2 class="card-title">
                 إحالات الأصدقاء
             </h2>
-
+ 
             <p class="card-subtitle">
                 رابط الإحالة يتم توليده من Telegram ID الحقيقي.
             </p>
-
+ 
             <input
                 id="ref-link"
                 type="text"
@@ -1250,247 +1201,247 @@
                 dir="ltr"
                 value="جارٍ التحميل..."
             >
-
+ 
             <button
                 class="btn btn-yellow btn-block"
                 onclick="copyRefLink()"
             >
                 نسخ رابط الإحالة
             </button>
-
+ 
         </div>
-
-
+ 
+ 
         <div class="card">
-
+ 
             <h2 class="card-title">
                 سحب الأرباح USDT
             </h2>
-
+ 
             <p class="card-subtitle">
                 الرصيد المتاح للسحب:
             </p>
-
+ 
             <div
                 class="balance-line"
                 style="margin-top:9px"
             >
-
+ 
                 <span>
                     USDT
                 </span>
-
+ 
                 <span
                     class="balance-number"
                     id="wallet-usdt"
                 >
                     0.00
                 </span>
-
+ 
             </div>
-
+ 
             <div
                 class="form-group"
                 style="margin-top:12px"
             >
-
+ 
                 <label for="wallet-address">
                     عنوان محفظتك
                 </label>
-
+ 
                 <input
                     id="wallet-address"
                     type="text"
                     dir="ltr"
                     placeholder="USDT TRC20 address"
                 >
-
+ 
             </div>
-
+ 
             <button
                 class="btn btn-green btn-block"
                 onclick="requestWithdraw()"
             >
                 إرسال طلب السحب
             </button>
-
+ 
         </div>
-
+ 
     </section>
-
+ 
 </div>
-
-
+ 
+ 
 <!-- شريط التنقل -->
 <nav class="nav">
-
+ 
     <button
         class="nav-item active"
         onclick="switchTab('home',this)"
     >
-
+ 
         <span
             class="nav-icon"
             aria-hidden="true"
         >
-
+ 
             <svg viewBox="0 0 24 24">
                 <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
             </svg>
-
+ 
         </span>
-
+ 
         الرئيسية
-
+ 
     </button>
-
-
+ 
+ 
     <button
         class="nav-item"
         onclick="switchTab('tasks',this)"
     >
-
+ 
         <span
             class="nav-icon"
             aria-hidden="true"
         >
-
+ 
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="9"/>
                 <path d="m12 7 1.7 3.5L17 12l-3.3 1.5L12 17l-1.7-3.5L7 12l3.3-1.5z"/>
             </svg>
-
+ 
         </span>
-
+ 
         المهام
-
+ 
     </button>
-
-
+ 
+ 
     <button
         class="nav-item"
         onclick="switchTab('leaderboard',this)"
     >
-
+ 
         <span
             class="nav-icon"
             aria-hidden="true"
         >
-
+ 
             <svg viewBox="0 0 24 24">
                 <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM5 6H3v2a4 4 0 0 0 4 4M19 6h2v2a4 4 0 0 1-4 4"/>
             </svg>
-
+ 
         </span>
-
+ 
         التصنيف
-
+ 
     </button>
-
-
+ 
+ 
     <button
         class="nav-item"
         onclick="switchTab('account',this)"
     >
-
+ 
         <span
             class="nav-icon"
             aria-hidden="true"
         >
-
+ 
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4"/>
                 <path d="M4 21a8 8 0 0 1 16 0"/>
             </svg>
-
+ 
         </span>
-
+ 
         حسابي
-
+ 
     </button>
-
+ 
 </nav>
-
-
+ 
+ 
 <!-- نافذة إنشاء الحملة -->
 <div
     id="taskModal"
     class="modal"
     onclick="if(event.target===this)closeTaskModal()"
 >
-
+ 
     <div class="modal-box">
-
+ 
         <h2 class="card-title">
             🚀 إنشاء حملة جديدة
         </h2>
-
+ 
         <p class="card-subtitle">
             اختر المنصة ونوع المهمة والكمية، وسيظهر السعر والمكافأة تلقائيًا.
         </p>
-
-
+ 
+ 
         <div
             class="form-group"
             style="margin-top:14px"
         >
-
+ 
             <label for="campaignPlatform">
                 المنصة
             </label>
-
+ 
             <select
                 id="campaignPlatform"
                 onchange="updateCampaignTypes()"
             >
-
+ 
                 <option value="">
                     اختر المنصة
                 </option>
-
+ 
                 <option value="youtube">
                     YouTube
                 </option>
-
+ 
                 <option value="instagram">
                     Instagram
                 </option>
-
+ 
                 <option value="tiktok">
                     TikTok
                 </option>
-
+ 
             </select>
-
+ 
         </div>
-
-
+ 
+ 
         <div class="form-group">
-
+ 
             <label for="campaignType">
                 نوع المهمة
             </label>
-
+ 
             <select
                 id="campaignType"
                 onchange="calculateCampaignPreview()"
             >
-
+ 
                 <option value="">
                     اختر نوع المهمة
                 </option>
-
+ 
             </select>
-
+ 
         </div>
-
-
+ 
+ 
         <div class="form-group">
-
+ 
             <label for="campaignQuantity">
                 الكمية المطلوبة
             </label>
-
+ 
             <input
                 id="campaignQuantity"
                 type="number"
@@ -1499,966 +1450,866 @@
                 placeholder="مثال: 10"
                 oninput="calculateCampaignPreview()"
             >
-
+ 
         </div>
-
-
+ 
+ 
         <div class="form-group">
-
+ 
             <label for="campaignTitle">
                 عنوان الحملة
             </label>
-
+ 
             <input
                 id="campaignTitle"
                 type="text"
                 placeholder="مثال: اشترك في قناتي"
             >
-
+ 
         </div>
-
-
+ 
+ 
         <div class="form-group">
-
+ 
             <label for="campaignLink">
                 رابط الحملة
             </label>
-
+ 
             <input
                 id="campaignLink"
                 type="url"
                 dir="ltr"
                 placeholder="https://..."
             >
-
+ 
         </div>
-
-
+ 
+ 
         <div
             id="campaignPreview"
             class="campaign-preview"
         >
-
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     الكمية
                 </span>
-
+ 
                 <strong
                     id="campaignQuantityPreview"
                     class="preview-value"
                 >
                     0
                 </strong>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     مكافأة المستخدم لكل تنفيذ
                 </span>
-
+ 
                 <strong
                     id="campaignRewardPreview"
                     class="preview-value green"
                 >
                     0.02 USDT
                 </strong>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     إجمالي مكافآت المستخدمين
                 </span>
-
+ 
                 <strong
                     id="campaignRewardTotalPreview"
                     class="preview-value green"
                 >
                     0.00 USDT
                 </strong>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     سعر المعلن
                 </span>
-
+ 
                 <strong
                     id="campaignAdvertiserPrice"
                     class="preview-value yellow"
                 >
                     0.00 USDT
                 </strong>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     المنصة
                 </span>
-
+ 
                 <strong
                     id="campaignPlatformPreview"
                     class="preview-value"
                 >
                     —
                 </strong>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="preview-row">
-
+ 
                 <span>
                     نوع المهمة
                 </span>
-
+ 
                 <strong
                     id="campaignTypePreview"
                     class="preview-value"
                 >
                     —
                 </strong>
-
+ 
             </div>
-
+ 
         </div>
-
-
+ 
+ 
         <div class="modal-actions">
-
+ 
             <button
                 class="btn btn-red"
                 onclick="closeTaskModal()"
             >
                 إلغاء
             </button>
-
+ 
             <button
                 class="btn btn-green"
                 onclick="saveCampaign()"
             >
                 🚀 إنشاء الحملة
             </button>
-
+ 
         </div>
-
+ 
     </div>
-
+ 
 </div>
-
-
-<!-- AdGem Offerwall Modal -->
-<div
-    id="adgemModal"
-    class="modal"
-    onclick="if(event.target===this)closeAdGem()"
->
-    <div class="modal-box adgem-modal-box">
-        <div class="adgem-modal-head">
-            <div class="adgem-modal-title">
-                🎁 عروض AdGem
-            </div>
-
-            <button
-                class="adgem-close"
-                type="button"
-                onclick="closeAdGem()"
-                aria-label="إغلاق"
-            >
-                ×
-            </button>
-        </div>
-
-        <div class="adgem-frame-wrap">
-            <iframe
-                id="adgem-frame"
-                title="AdGem Offerwall"
-                loading="lazy"
-                referrerpolicy="strict-origin-when-cross-origin"
-            ></iframe>
-        </div>
-
-        <div class="adgem-direct-link">
-            إذا لم تظهر العروض،
-            <a
-                id="adgem-direct-link"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                افتحها مباشرة
-            </a>
-        </div>
-    </div>
-</div>
-
+ 
+ 
 <div
     id="toast"
     class="toast"
 ></div>
-
-
+ 
+ 
 <script>
 "use strict";
-
-
+ 
+ 
 /* =========================
    إعدادات API
 ========================= */
-
+ 
 const API_BASE = "https://rayan-coin.onrender.com";
-
-
+ 
+ 
 /* =========================
    روابط المهام الثابتة
 ========================= */
-
+ 
 const TASK_LINKS = {
-
+ 
     x: "https://x.com/mohlahra18042",
-
+ 
     telegram: "https://t.me/Arba7y_Official"
-
+ 
 };
-
-
+ 
+ 
 const ADSTERAA_LINK =
     "https://www.profitableratecpmnetwork.com/u19dhqyq?key=6c2a30702a80cbfb6bc129abb22d894a";
-
-
+ 
+ 
 /* =========================
    Telegram
 ========================= */
-
+ 
 const tg = window.Telegram?.WebApp;
-
+ 
 if (tg) {
-
+ 
     tg.ready();
-
+ 
     tg.expand();
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    حالة التطبيق
 ========================= */
-
+ 
 const state = {
-
+ 
     user: null,
-
+ 
     tasks: [],
-
+ 
     leaderboard: [],
-
+ 
     settings: {
-
+ 
         lang: "ar",
-
+ 
         country: "DZ",
-
+ 
         darkMode: true
-
+ 
     },
-
+ 
     loading: false
-
+ 
 };
-
-
+ 
+ 
 /* =========================
    أسعار الحملات
 ========================= */
-
+ 
 const CAMPAIGN_PRICES = {
-
+ 
     youtube: {
-
+ 
         subscribers: {
-
+ 
             unitQuantity: 10,
-
+ 
             advertiserPrice: 2.00
-
+ 
         },
-
+ 
         views: {
-
+ 
             unitQuantity: 100,
-
+ 
             advertiserPrice: 6.00
-
+ 
         }
-
+ 
     },
-
+ 
     instagram: {
-
+ 
         followers: {
-
+ 
             unitQuantity: 10,
-
+ 
             advertiserPrice: 1.50
-
+ 
         },
-
+ 
         views: {
-
+ 
             unitQuantity: 100,
-
+ 
             advertiserPrice: 3.00
-
+ 
         }
-
+ 
     },
-
+ 
     tiktok: {
-
+ 
         followers: {
-
+ 
             unitQuantity: 10,
-
+ 
             advertiserPrice: 1.50
-
+ 
         },
-
+ 
         views: {
-
+ 
             unitQuantity: 100,
-
+ 
             advertiserPrice: 3.00
-
+ 
         }
-
+ 
     }
-
+ 
 };
-
-
+ 
+ 
 const PLATFORM_NAMES = {
-
+ 
     youtube: "YouTube",
-
+ 
     instagram: "Instagram",
-
+ 
     tiktok: "TikTok"
-
+ 
 };
-
-
+ 
+ 
 const TYPE_NAMES = {
-
+ 
     subscribers: "مشتركين",
-
+ 
     followers: "متابعين",
-
+ 
     views: "مشاهدات"
-
+ 
 };
-
-
+ 
+ 
 /*
    مكافأة المستخدم لكل تنفيذ:
    0.02 USDT
 */
 const USER_REWARD_USDT = 0.02;
-
-
+ 
+ 
 /*
    1 Earnings = 0.01 USDT
 */
 const USDT_PER_EARNING = 0.01;
-
-
+ 
+ 
 /* =========================
    Telegram Headers
 ========================= */
-
+ 
 function telegramHeaders() {
-
+ 
     return {
-
+ 
         "Content-Type": "application/json",
-
+ 
         "X-Telegram-Init-Data":
             tg?.initData || ""
-
+ 
     };
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    API
 ========================= */
-
+ 
 async function api(path, options = {}) {
-
+ 
     const response = await fetch(
-
+ 
         API_BASE + path,
-
+ 
         {
-
+ 
             credentials: "omit",
-
+ 
             ...options,
-
+ 
             headers: {
-
+ 
                 ...telegramHeaders(),
-
+ 
                 ...(options.headers || {})
-
+ 
             }
-
+ 
         }
-
+ 
     );
-
-
+ 
+ 
     const contentType =
         response.headers.get("content-type") || "";
-
-
+ 
+ 
     const data =
         contentType.includes("application/json")
-
+ 
             ? await response.json()
-
+ 
             : await response.text();
-
-
+ 
+ 
     if (!response.ok) {
-
+ 
         const message =
             typeof data === "object" &&
             data?.detail
-
+ 
                 ? data.detail
-
+ 
                 : "حدث خطأ في الاتصال بالسيرفر.";
-
-
+ 
+ 
         throw new Error(message);
-
+ 
     }
-
-
+ 
+ 
     return data;
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    أدوات عامة
 ========================= */
-
+ 
 function formatNumber(value, decimals = 0) {
-
+ 
     const n = Number(value);
-
-
+ 
+ 
     if (!Number.isFinite(n)) {
-
+ 
         return decimals
-
+ 
             ? "0." + "0".repeat(decimals)
-
+ 
             : "0";
-
+ 
     }
-
-
+ 
+ 
     return n.toLocaleString(
-
+ 
         "en-US",
-
+ 
         {
-
+ 
             minimumFractionDigits: decimals,
-
+ 
             maximumFractionDigits: decimals
-
+ 
         }
-
+ 
     );
-
+ 
 }
-
-
+ 
+ 
 function showToast(message) {
-
+ 
     const el =
         document.getElementById("toast");
-
-
+ 
+ 
     if (!el) return;
-
-
+ 
+ 
     el.textContent = message;
-
+ 
     el.classList.add("show");
-
-
+ 
+ 
     clearTimeout(showToast.timer);
-
-
+ 
+ 
     showToast.timer = setTimeout(
-
+ 
         () => {
-
+ 
             el.classList.remove("show");
-
+ 
         },
-
+ 
         2600
-
+ 
     );
-
+ 
 }
-
-
+ 
+ 
 function setLoading(on) {
-
+ 
     state.loading = on;
-
+ 
     document.body.classList.toggle(
-
+ 
         "loading",
-
+ 
         on
-
+ 
     );
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    التنقل
 ========================= */
-
+ 
 function switchTab(tabId, element) {
-
+ 
     document
         .querySelectorAll(".section")
         .forEach(
-
+ 
             section =>
                 section.classList.remove("active")
-
+ 
         );
-
-
+ 
+ 
     document
         .querySelectorAll(".nav-item")
         .forEach(
-
+ 
             item =>
                 item.classList.remove("active")
-
+ 
         );
-
-
+ 
+ 
     const section =
         document.getElementById(tabId);
-
-
+ 
+ 
     if (section) {
-
+ 
         section.classList.add("active");
-
+ 
     }
-
-
+ 
+ 
     if (element) {
-
+ 
         element.classList.add("active");
-
+ 
     }
-
-
+ 
+ 
     if (tabId === "tasks") {
-
+ 
         loadTasks();
-
+ 
     }
-
-
+ 
+ 
     if (tabId === "leaderboard") {
-
+ 
         loadLeaderboard();
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    نافذة الحملة
 ========================= */
-
+ 
 function openTaskModal() {
-
+ 
     const modal =
         document.getElementById("taskModal");
-
-
+ 
+ 
     if (!modal) return;
-
-
+ 
+ 
     modal.classList.add("open");
-
+ 
     updateCampaignTypes();
-
+ 
     calculateCampaignPreview();
-
+ 
 }
-
-
+ 
+ 
 function closeTaskModal() {
-
+ 
     const modal =
         document.getElementById("taskModal");
-
-
+ 
+ 
     if (!modal) return;
-
-
+ 
+ 
     modal.classList.remove("open");
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    أنواع المهام
 ========================= */
-
+ 
 function updateCampaignTypes() {
-
+ 
     const platform =
         document.getElementById(
             "campaignPlatform"
         )?.value || "";
-
-
+ 
+ 
     const typeSelect =
         document.getElementById(
             "campaignType"
         );
-
-
+ 
+ 
     if (!typeSelect) return;
-
-
+ 
+ 
     typeSelect.innerHTML =
-        '<option value="">'+T().chooseTaskType+'</option>';
-
-
+        '<option value="">اختر نوع المهمة</option>';
+ 
+ 
     if (!platform) {
-
+ 
         calculateCampaignPreview();
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     const types =
         CAMPAIGN_PRICES[platform];
-
-
+ 
+ 
     if (!types) {
-
+ 
         calculateCampaignPreview();
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     Object.keys(types).forEach(
-
+ 
         type => {
-
+ 
             const option =
                 document.createElement("option");
-
-
+ 
+ 
             option.value = type;
-
-
+ 
+ 
             option.textContent =
-                T().typeNames[type] || type;
-
-
+                TYPE_NAMES[type] || type;
+ 
+ 
             typeSelect.appendChild(option);
-
+ 
         }
-
+ 
     );
-
-
+ 
+ 
     calculateCampaignPreview();
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    حساب معاينة الحملة
 ========================= */
-
+ 
 function calculateCampaignPreview() {
-
+ 
     const platform =
         document.getElementById(
             "campaignPlatform"
         )?.value || "";
-
-
+ 
+ 
     const taskType =
         document.getElementById(
             "campaignType"
         )?.value || "";
-
-
+ 
+ 
     const quantity =
         Number(
-
+ 
             document.getElementById(
                 "campaignQuantity"
             )?.value || 0
-
+ 
         );
-
-
+ 
+ 
     const quantityPreview =
         document.getElementById(
             "campaignQuantityPreview"
         );
-
-
+ 
+ 
     const rewardPreview =
         document.getElementById(
             "campaignRewardPreview"
         );
-
-
+ 
+ 
     const rewardTotalPreview =
         document.getElementById(
             "campaignRewardTotalPreview"
         );
-
-
+ 
+ 
     const advertiserPricePreview =
         document.getElementById(
             "campaignAdvertiserPrice"
         );
-
-
+ 
+ 
     const platformPreview =
         document.getElementById(
             "campaignPlatformPreview"
         );
-
-
+ 
+ 
     const typePreview =
         document.getElementById(
             "campaignTypePreview"
         );
-
-
+ 
+ 
     if (quantityPreview) {
-
+ 
         quantityPreview.textContent =
             Number.isFinite(quantity) &&
             quantity > 0
-
+ 
                 ? formatNumber(quantity)
-
+ 
                 : "0";
-
+ 
     }
-
-
+ 
+ 
     if (platformPreview) {
-
+ 
         platformPreview.textContent =
-            T().platformNames[platform] || "—";
-
+            PLATFORM_NAMES[platform] || "—";
+ 
     }
-
-
+ 
+ 
     if (typePreview) {
-
+ 
         typePreview.textContent =
-            T().typeNames[taskType] || "—";
-
+            TYPE_NAMES[taskType] || "—";
+ 
     }
-
-
+ 
+ 
     if (rewardPreview) {
-
+ 
         rewardPreview.textContent =
             USER_REWARD_USDT.toFixed(2) +
             " USDT";
-
+ 
     }
-
-
+ 
+ 
     if (!platform || !taskType || quantity <= 0) {
-
+ 
         if (rewardTotalPreview) {
-
+ 
             rewardTotalPreview.textContent =
                 "0.00 USDT";
-
+ 
         }
-
-
+ 
+ 
         if (advertiserPricePreview) {
-
+ 
             advertiserPricePreview.textContent =
                 "0.00 USDT";
-
+ 
         }
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     const selected =
         CAMPAIGN_PRICES[platform]?.[taskType];
-
-
+ 
+ 
     if (!selected) return;
-
-
+ 
+ 
     const units =
         quantity / selected.unitQuantity;
-
-
+ 
+ 
     const advertiserPrice =
         units * selected.advertiserPrice;
-
-
+ 
+ 
     const rewardTotal =
         quantity * USER_REWARD_USDT;
-
-
+ 
+ 
     if (rewardTotalPreview) {
-
+ 
         rewardTotalPreview.textContent =
             rewardTotal.toFixed(2) +
             " USDT";
-
+ 
     }
-
-
+ 
+ 
     if (advertiserPricePreview) {
-
+ 
         advertiserPricePreview.textContent =
             advertiserPrice.toFixed(2) +
             " USDT";
-
+ 
     }
-
+ 
 }
-
-
-/* =========================
-   AdGem Offerwall
-========================= */
-
-const ADGEM_APP_ID = "33511";
-
-function getAdGemPlayerId() {
-    const telegramId =
-        tg?.initDataUnsafe?.user?.id ??
-        state.user?.telegram_id ??
-        state.user?.user_id ??
-        state.user?.id ??
-        "";
-
-    return String(telegramId).trim();
-}
-
-function getAdGemUrl() {
-    const playerId = getAdGemPlayerId();
-
-    if (!playerId) return "";
-
-    return (
-        "https://adunits.adgem.com/wall" +
-        "?appid=" + encodeURIComponent(ADGEM_APP_ID) +
-        "&playerid=" + encodeURIComponent(playerId)
-    );
-}
-
-function openAdGem() {
-    const modal = document.getElementById("adgemModal");
-    const frame = document.getElementById("adgem-frame");
-    const directLink = document.getElementById("adgem-direct-link");
-
-    const url = getAdGemUrl();
-
-    if (!url) {
-        showToast(T().telegramIdError);
-        return;
-    }
-
-    if (frame) frame.src = url;
-    if (directLink) directLink.href = url;
-
-    if (modal) modal.classList.add("open");
-}
-
-function closeAdGem() {
-    const modal = document.getElementById("adgemModal");
-    const frame = document.getElementById("adgem-frame");
-
-    if (modal) modal.classList.remove("open");
-    if (frame) frame.src = "about:blank";
-}
-
+ 
+ 
 /* =========================
    المستخدم
 ========================= */
-
+ 
 function renderUser() {
-
+ 
     const u = state.user || {};
-
-
+ 
+ 
     document.getElementById(
         "completed-count"
     ).textContent =
         formatNumber(u.completed_tasks);
-
-
+ 
+ 
     document.getElementById(
         "bot-coins"
     ).textContent =
         formatNumber(u.earnings);
-
-
+ 
+ 
     document.getElementById(
         "usdt-balance"
     ).textContent =
@@ -2466,8 +2317,8 @@ function renderUser() {
             u.usdt_balance,
             2
         );
-
-
+ 
+ 
     document.getElementById(
         "wallet-usdt"
     ).textContent =
@@ -2475,224 +2326,224 @@ function renderUser() {
             u.usdt_balance,
             2
         );
-
-
+ 
+ 
     const streak =
         Number(u.current_streak || 0);
-
-
+ 
+ 
     const totalDays =
         Number(u.total_checkins || 0);
-
-
+ 
+ 
     document.getElementById(
         "streak-info"
     ).textContent =
-
-        T().totalAttendance(formatNumber(totalDays),formatNumber(streak));
-
-
+ 
+        `إجمالي الحضور: ${formatNumber(totalDays)} يوم | التسلسل الحالي: ${formatNumber(streak)} يوم`;
+ 
+ 
     const dailyBtn =
         document.getElementById(
             "daily-btn"
         );
-
-
+ 
+ 
     if (u.daily_checkin_done) {
-
-        dailyBtn.textContent = T().done;
-
+ 
+        dailyBtn.textContent = "تم";
+ 
         dailyBtn.disabled = true;
-
+ 
         dailyBtn.className =
             "btn btn-done";
-
+ 
     } else {
-
+ 
         dailyBtn.textContent =
-            T().register;
-
+            "تسجيل";
+ 
         dailyBtn.disabled = false;
-
+ 
         dailyBtn.className =
             "btn btn-green";
-
+ 
     }
-
-
+ 
+ 
     const adsLeft =
         Number(u.ads_left_today || 0);
-
-
+ 
+ 
     document.getElementById(
         "ads-counter"
     ).textContent =
         formatNumber(adsLeft);
-
-
+ 
+ 
     const watchAdButton =
         document.getElementById(
             "watch-ad-btn"
         );
-
-
+ 
+ 
     watchAdButton.disabled =
         adsLeft <= 0;
-
-
+ 
+ 
     watchAdButton.textContent =
-
+ 
         adsLeft > 0
-
-            ? T().watchRewardAd
-
-            : T().noAdsToday;
-
-
+ 
+            ? "مشاهدة إعلان مكافأة"
+ 
+            : "لا توجد إعلانات متبقية اليوم";
+ 
+ 
     const xBtn =
         document.getElementById("x-btn");
-
-
+ 
+ 
     xBtn.disabled =
         !!u.fixed_tasks?.x_done;
-
-
+ 
+ 
     xBtn.textContent =
         u.fixed_tasks?.x_done
-
-            ? T().done
-
-            : T().execute;
-
-
+ 
+            ? "تم"
+ 
+            : "تنفيذ";
+ 
+ 
     xBtn.className =
         u.fixed_tasks?.x_done
-
+ 
             ? "btn btn-done"
-
+ 
             : "btn btn-blue";
-
-
+ 
+ 
     const tgBtn =
         document.getElementById("tg-btn");
-
-
+ 
+ 
     tgBtn.disabled =
         !!u.fixed_tasks?.telegram_done;
-
-
+ 
+ 
     tgBtn.textContent =
         u.fixed_tasks?.telegram_done
-
-            ? T().done
-
-            : T().join;
-
-
+ 
+            ? "تم"
+ 
+            : "انضمام";
+ 
+ 
     tgBtn.className =
         u.fixed_tasks?.telegram_done
-
+ 
             ? "btn btn-done"
-
+ 
             : "btn btn-blue";
-
-
+ 
+ 
     const referral =
         u.referral_link || "";
-
-
+ 
+ 
     document.getElementById(
         "ref-link"
     ).value =
-
-        referral || T().unavailable;
-
+ 
+        referral || "غير متاح حالياً";
+ 
 }
-
-
+ 
+ 
 /* =========================
    عرض المهام
 ========================= */
-
+ 
 function renderTasks() {
-
+ 
     const homeContainer =
         document.getElementById(
             "dynamic-tasks-container"
         );
-
-
+ 
+ 
     const tasksContainer =
         document.getElementById(
             "tasks-list"
         );
-
-
+ 
+ 
     homeContainer.innerHTML = "";
-
+ 
     tasksContainer.innerHTML = "";
-
-
+ 
+ 
     if (!state.tasks.length) {
-
+ 
         const empty =
             `<div class="empty-state">لا توجد مهام متاحة حالياً.</div>`;
-
-
+ 
+ 
         homeContainer.innerHTML =
             empty;
-
-
+ 
+ 
         tasksContainer.innerHTML =
             empty;
-
-
+ 
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     state.tasks.forEach(task => {
-
+ 
         const completed =
             !!task.completed;
-
-
+ 
+ 
         const card =
             document.createElement("div");
-
-
+ 
+ 
         card.className =
             "task";
-
-
+ 
+ 
         card.innerHTML = `
-
+ 
             <div class="task-info">
-
+ 
                 <div class="task-title"></div>
-
+ 
                 <div class="task-meta">
-
+ 
                     <span class="task-reward">
                         +${formatNumber(task.reward)} Earnings
                     </span>
-
+ 
                     ${
                         task.budget_remaining != null
-
-                            ? T().remainingBudget(formatNumber(task.budget_remaining))
-
+ 
+                            ? ` · الميزانية المتبقية: ${formatNumber(task.budget_remaining)}`
+ 
                             : ""
                     }
-
+ 
                 </div>
-
+ 
             </div>
-
-
+ 
+ 
             <div class="task-action">
-
+ 
                 <button
                     class="${
                         completed
@@ -2701,1133 +2552,1072 @@ function renderTasks() {
                     }"
                     ${completed ? "disabled" : ""}
                 >
-
+ 
                     ${
                         completed
-                            ? T().done
-                            : T().execute
+                            ? "تم"
+                            : "تنفيذ"
                     }
-
+ 
                 </button>
-
+ 
             </div>
-
+ 
         `;
-
-
+ 
+ 
         card.querySelector(
             ".task-title"
         ).textContent =
-
-            task.title || T().task;
-
-
+ 
+            task.title || "مهمة";
+ 
+ 
         const btn =
             card.querySelector("button");
-
-
+ 
+ 
         if (!completed) {
-
+ 
             btn.onclick = () =>
-
+ 
                 completeTask(
                     task.id,
                     task.link
                 );
-
+ 
         }
-
-
+ 
+ 
         const homeCopy =
             card.cloneNode(true);
-
-
+ 
+ 
         if (!completed) {
-
+ 
             const homeBtn =
                 homeCopy.querySelector(
                     "button"
                 );
-
-
+ 
+ 
             homeBtn.onclick = () =>
-
+ 
                 completeTask(
                     task.id,
                     task.link
                 );
-
+ 
         }
-
-
+ 
+ 
         homeContainer.appendChild(
             homeCopy
         );
-
-
+ 
+ 
         tasksContainer.appendChild(
             card
         );
-
+ 
     });
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تحميل المستخدم
 ========================= */
-
+ 
 async function loadMe() {
-
+ 
     const data =
         await api("/api/me");
-
-
+ 
+ 
     state.user =
         data.user || data;
-
-
+ 
+ 
     if (data.settings) {
-
+ 
         state.settings = {
-
+ 
             ...state.settings,
-
+ 
             ...data.settings
-
+ 
         };
-        saveSettingsLocal();
-
+ 
     }
-
-
+ 
+ 
     renderUser();
-
+ 
     applySettings();
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تحميل المهام
 ========================= */
-
+ 
 async function loadTasks() {
-
+ 
     try {
-
+ 
         const data =
             await api("/api/tasks");
-
-
+ 
+ 
         state.tasks =
             Array.isArray(data)
-
+ 
                 ? data
-
+ 
                 : (data.tasks || []);
-
-
+ 
+ 
         renderTasks();
-        applySettings();
-
+ 
     } catch (e) {
-
+ 
         document.getElementById(
             "tasks-list"
         ).innerHTML =
-
+ 
             `<div class="empty-state">${escapeHtml(e.message)}</div>`;
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    المتصدرين
 ========================= */
-
+ 
 async function loadLeaderboard() {
-
+ 
     const box =
         document.getElementById(
             "leaderboard-list"
         );
-
-
+ 
+ 
     box.innerHTML =
-        `<div class="empty-state">${T().loadingLeaderboard}</div>`;
-
-
+        `<div class="empty-state">جارٍ تحميل الترتيب...</div>`;
+ 
+ 
     try {
-
+ 
         const data =
             await api(
                 "/api/leaderboard"
             );
-
-
+ 
+ 
         state.leaderboard =
-
+ 
             Array.isArray(data)
-
+ 
                 ? data
-
+ 
                 : (data.leaderboard || []);
-
-
+ 
+ 
         box.innerHTML = "";
-
-
+ 
+ 
         if (!state.leaderboard.length) {
-
+ 
             box.innerHTML =
-                `<div class="empty-state">${T().noLeaderboard}</div>`;
-
+                `<div class="empty-state">لا توجد بيانات تصنيف بعد.</div>`;
+ 
             return;
-
+ 
         }
-
-
+ 
+ 
         state.leaderboard.forEach(
-
+ 
             (item, index) => {
-
+ 
                 const row =
                     document.createElement(
                         "div"
                     );
-
-
+ 
+ 
                 row.className =
                     "leader";
-
-
+ 
+ 
                 row.innerHTML = `
-
+ 
                     <div class="rank">
                         ${index + 1}
                     </div>
-
+ 
                     <div class="leader-name"></div>
-
+ 
                     <div class="leader-value">
                         ${formatNumber(item.earnings)} Earnings
                     </div>
-
+ 
                 `;
-
-
+ 
+ 
                 row.querySelector(
                     ".leader-name"
                 ).textContent =
-
+ 
                     item.name ||
-
-                    T().user(item.telegram_id);
-
-
+ 
+                    `مستخدم ${item.telegram_id || ""}`;
+ 
+ 
                 box.appendChild(row);
-
+ 
             }
-
+ 
         );
-
+ 
     } catch (e) {
-
+ 
         box.innerHTML =
-
+ 
             `<div class="empty-state">${escapeHtml(e.message)}</div>`;
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تنفيذ مهمة
 ========================= */
-
+ 
 async function completeTask(
     taskId,
     link
 ) {
-
+ 
     try {
-
+ 
         if (link) {
-
+ 
             window.open(
                 link,
                 "_blank",
                 "noopener,noreferrer"
             );
-
+ 
         }
-
-
+ 
+ 
         await api(
-
+ 
             `/api/tasks/${encodeURIComponent(taskId)}/complete`,
-
+ 
             {
                 method:"POST"
             }
-
+ 
         );
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().taskCompleted
+            "تم تسجيل إنجاز المهمة وإضافة المكافأة."
         );
-
+ 
     } catch (e) {
-
+ 
         showToast(e.message);
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    المهام الثابتة
 ========================= */
-
+ 
 async function openFixedTask(type) {
-
+ 
     const link =
         TASK_LINKS[type];
-
-
+ 
+ 
     if (link) {
-
+ 
         window.open(
             link,
             "_blank",
             "noopener,noreferrer"
         );
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         const url =
-
+ 
             type === "x"
-
+ 
                 ? "/api/tasks/fixed/x/complete"
-
+ 
                 : "/api/tasks/fixed/telegram/complete";
-
-
+ 
+ 
         await api(
-
+ 
             url,
-
+ 
             {
                 method:"POST"
             }
-
+ 
         );
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().fixedRecorded
+            "تم فتح المهمة وتسجيلها لدى السيرفر."
         );
-
+ 
     } catch (e) {
-
+ 
         showToast(
-            T().fixedConnection
+            "تم فتح الرابط. التسجيل يحتاج اتصال السيرفر."
         );
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    الحضور اليومي
 ========================= */
-
+ 
 async function completeDailyTask() {
-
+ 
     try {
-
+ 
         await api(
-
+ 
             "/api/tasks/daily-checkin",
-
+ 
             {
                 method:"POST"
             }
-
+ 
         );
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().dailyDone
+            "تم تسجيل حضورك اليومي."
         );
-
+ 
     } catch (e) {
-
+ 
         showToast(e.message);
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
+/* =========================
+   TimeWall
+========================= */
+ 
+async function openTimewall() {
+ 
+    try {
+ 
+        const data = await api("/api/timewall/link");
+ 
+        if (data?.url) {
+ 
+            window.open(
+                data.url,
+                "_blank",
+                "noopener,noreferrer"
+            );
+ 
+        }
+ 
+    } catch (e) {
+ 
+        showToast(e.message);
+ 
+    }
+ 
+}
+ 
+ 
 /* =========================
    الإعلان
 ========================= */
-
+ 
 async function watchAd() {
-
+ 
     window.open(
-
+ 
         ADSTERAA_LINK,
-
+ 
         "_blank",
-
+ 
         "noopener,noreferrer"
-
+ 
     );
-
-
+ 
+ 
     try {
-
+ 
         await api(
-
+ 
             "/api/ads/watch",
-
+ 
             {
                 method:"POST"
             }
-
+ 
         );
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().adOpened
+            "تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر."
         );
-
+ 
     } catch (e) {
-
+ 
         showToast(
-            T().adConnection
+            "تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر."
         );
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    إنشاء الحملة
 ========================= */
-
+ 
 async function saveNewTask() {
-
+ 
     const platform =
         document.getElementById(
             "campaignPlatform"
         ).value;
-
-
+ 
+ 
     const taskType =
         document.getElementById(
             "campaignType"
         ).value;
-
-
+ 
+ 
     const quantity =
         Number(
-
+ 
             document.getElementById(
                 "campaignQuantity"
             ).value
-
+ 
         );
-
-
+ 
+ 
     const title =
         document.getElementById(
             "campaignTitle"
         ).value.trim();
-
-
+ 
+ 
     const link =
         document.getElementById(
             "campaignLink"
         ).value.trim();
-
-
+ 
+ 
     /* التحقق الأساسي */
-
+ 
     if (!platform) {
-
+ 
         showToast(
             "اختر المنصة أولاً."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     if (!taskType) {
-
+ 
         showToast(
-            T().chooseType
+            "اختر نوع المهمة."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     if (
         !Number.isFinite(quantity) ||
         quantity <= 0
     ) {
-
+ 
         showToast(
-            T().validQuantity
+            "أدخل كمية صحيحة."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     if (!title) {
-
+ 
         showToast(
-            T().enterTitle
+            "أدخل عنوان الحملة."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     if (!link) {
-
+ 
         showToast(
-            T().enterLink
+            "أدخل رابط الحملة."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     const selected =
         CAMPAIGN_PRICES[
             platform
         ]?.[taskType];
-
-
+ 
+ 
     if (!selected) {
-
+ 
         showToast(
-            T().invalidCampaignType
+            "نوع الحملة غير صحيح."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     /*
        يجب أن تكون الكمية من مضاعفات الوحدة.
-
+ 
        مثال:
        YouTube subscribers = 10
        YouTube views = 100
     */
-
+ 
     if (
         quantity %
         selected.unitQuantity !==
         0
     ) {
-
+ 
         showToast(
-
-            T().multiple(selected.unitQuantity)
-
+ 
+            `الكمية يجب أن تكون من مضاعفات ${selected.unitQuantity}.`
+ 
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     /*
        سعر المعلن.
-
+ 
        مثال:
        10 مشتركين = 2 USDT
        100 مشاهدة = 6 USDT
     */
-
+ 
     const units =
         quantity /
         selected.unitQuantity;
-
-
+ 
+ 
     const advertiserPrice =
         units *
         selected.advertiserPrice;
-
-
+ 
+ 
     /*
        مكافأة المستخدم:
        0.02 USDT لكل تنفيذ
     */
-
+ 
     const rewardUSDT =
         USER_REWARD_USDT;
-
-
+ 
+ 
     /*
        إجمالي المبلغ الذي سيذهب
        للمستخدمين عند تنفيذ كامل الكمية.
-
+ 
        مثال:
        10 تنفيذات × 0.02 = 0.20 USDT
     */
-
+ 
     const totalUserRewardsUSDT =
         quantity *
         rewardUSDT;
-
-
+ 
+ 
     /*
        تحويل مكافأة التنفيذ إلى Earnings.
-
+ 
        0.02 / 0.01 = 2 Earnings
     */
-
+ 
     const reward =
         Math.round(
             rewardUSDT /
             USDT_PER_EARNING
         );
-
-
+ 
+ 
     /*
        الـBackend الحالي يتعامل مع
        budget على أنه ميزانية المكافآت
        التي سيتم حجزها من رصيد منشئ المهمة.
-
+ 
        لذلك نرسل إجمالي مكافآت المستخدمين،
        وليس سعر المعلن الكامل.
-
+ 
        مثال:
        10 تنفيذات × 2 Earnings = 20 Earnings
     */
-
+ 
     const budget =
         Math.round(
             quantity *
             reward
         );
-
-
+ 
+ 
     const platformName =
         PLATFORM_NAMES[platform];
-
-
+ 
+ 
     const typeName =
         TYPE_NAMES[taskType];
-
-
+ 
+ 
     const confirmMessage =
-
+ 
         `📢 ملخص الحملة\n\n` +
-
+ 
         `المنصة: ${platformName}\n` +
-
+ 
         `نوع المهمة: ${typeName}\n` +
-
+ 
         `الكمية: ${quantity}\n\n` +
-
+ 
         `💰 سعر المعلن: ${advertiserPrice.toFixed(2)} USDT\n` +
-
+ 
         `🎁 مكافأة المستخدم: ${rewardUSDT.toFixed(2)} USDT لكل تنفيذ\n` +
-
+ 
         `💵 إجمالي مكافآت المستخدمين: ${totalUserRewardsUSDT.toFixed(2)} USDT\n\n` +
-
+ 
         `هل تريد إنشاء الحملة؟`;
-
-
+ 
+ 
     if (!confirm(confirmMessage)) {
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         setLoading(true);
-
-
+ 
+ 
         await api(
-
+ 
             "/api/tasks",
-
+ 
             {
-
+ 
                 method:"POST",
-
+ 
                 body:JSON.stringify({
-
+ 
                     title:
-
+ 
                         title,
-
-
+ 
+ 
                     link:
-
+ 
                         link,
-
-
+ 
+ 
                     reward:
-
+ 
                         reward,
-
-
+ 
+ 
                     budget:
-
+ 
                         budget
-
+ 
                 })
-
+ 
             }
-
+ 
         );
-
-
+ 
+ 
         closeTaskModal();
-
-
+ 
+ 
         resetCampaignForm();
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().campaignCreated
+            "تم إنشاء الحملة بنجاح ✅"
         );
-
-
+ 
+ 
     } catch (error) {
-
+ 
         console.error(
             "Campaign creation error:",
             error
         );
-
-
+ 
+ 
         showToast(
-
+ 
             error.message ||
-
-            T().campaignFailed
-
+ 
+            "تعذر إنشاء الحملة."
+ 
         );
-
+ 
     } finally {
-
+ 
         setLoading(false);
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    اسم الزر في النافذة
 ========================= */
-
+ 
 async function saveCampaign() {
-
+ 
     return saveNewTask();
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تنظيف نموذج الحملة
 ========================= */
-
+ 
 function resetCampaignForm() {
-
+ 
     const platform =
         document.getElementById(
             "campaignPlatform"
         );
-
-
+ 
+ 
     const type =
         document.getElementById(
             "campaignType"
         );
-
-
+ 
+ 
     const quantity =
         document.getElementById(
             "campaignQuantity"
         );
-
-
+ 
+ 
     const title =
         document.getElementById(
             "campaignTitle"
         );
-
-
+ 
+ 
     const link =
         document.getElementById(
             "campaignLink"
         );
-
-
+ 
+ 
     if (platform) {
-
+ 
         platform.value = "";
-
+ 
     }
-
-
+ 
+ 
     if (type) {
-
+ 
         type.innerHTML =
-            '<option value="">'+T().chooseTaskType+'</option>';
-
+            '<option value="">اختر نوع المهمة</option>';
+ 
     }
-
-
+ 
+ 
     if (quantity) {
-
+ 
         quantity.value = "";
-
+ 
     }
-
-
+ 
+ 
     if (title) {
-
+ 
         title.value = "";
-
+ 
     }
-
-
+ 
+ 
     if (link) {
-
+ 
         link.value = "";
-
+ 
     }
-
-
+ 
+ 
     calculateCampaignPreview();
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    السحب
 ========================= */
-
+ 
 async function requestWithdraw() {
-
+ 
     const address =
         document.getElementById(
             "wallet-address"
         ).value.trim();
-
-
+ 
+ 
     const balance =
         Number(
             state.user?.usdt_balance || 0
         );
-
-
+ 
+ 
     if (!address) {
-
+ 
         return showToast(
-            T().walletRequired
+            "أدخل عنوان المحفظة."
         );
-
+ 
     }
-
-
+ 
+ 
     if (balance < 2) {
-
+ 
         return showToast(
-            T().minWithdraw
+            "الحد الأدنى للسحب هو 2 USDT."
         );
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         await api(
-
+ 
             "/api/withdrawals",
-
+ 
             {
-
+ 
                 method:"POST",
-
+ 
                 body:JSON.stringify({
-
+ 
                     address
-
+ 
                 })
-
+ 
             }
-
+ 
         );
-
-
+ 
+ 
         document.getElementById(
             "wallet-address"
         ).value = "";
-
-
+ 
+ 
         await refresh();
-
-
+ 
+ 
         showToast(
-            T().withdrawCreated
+            "تم إنشاء طلب السحب وحالته Pending."
         );
-
+ 
     } catch (e) {
-
+ 
         showToast(e.message);
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    نسخ رابط الإحالة
 ========================= */
-
+ 
 async function copyRefLink() {
-
+ 
     const value =
         document.getElementById(
             "ref-link"
         ).value;
-
-
+ 
+ 
     if (
         !value ||
-        value === T().unavailable
+        value === "غير متاح حالياً"
     ) {
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     try {
-
+ 
         await navigator.clipboard.writeText(
             value
         );
-
-
+ 
+ 
         showToast(
-            T().copyDone
+            "تم نسخ رابط الإحالة."
         );
-
+ 
     } catch {
-
+ 
         const input =
             document.getElementById(
                 "ref-link"
             );
-
-
+ 
+ 
         input.select();
-
-
+ 
+ 
         document.execCommand(
             "copy"
         );
-
-
+ 
+ 
         showToast(
-            T().copyDone
+            "تم نسخ رابط الإحالة."
         );
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    الإعدادات واللغة والمظهر
 ========================= */
-
-const I18N = {
+ 
+const SETTINGS_TRANSLATIONS = {
     ar: {
-        appTitle:"Rayan Coin", homeTitle:"لوحة أرباح Rayan Coin", homeSubtitle:"تابع رصيدك وإنجازاتك اليومية مباشرة.",
-        completed:"المكتمل", earnings:"Earnings", usdt:"USDT", recentWithdrawals:"لا توجد عمليات سحب حديثة للعرض.",
-        dailyCheckin:"تسجيل الحضور اليومي", loadingCheckin:"جارٍ تحميل بيانات الحضور...", totalAttendance:(d,s)=>`إجمالي الحضور: ${d} يوم | التسلسل الحالي: ${s} يوم`,
-        addCampaign:"إضافة حملة", addCampaignDesc:"أنشئ حملة جديدة بميزانية محددة.", officialGuide:"الدليل الرسمي", guideDesc:"تعرف على طريقة استخدام المنصة.",
-        followX:"متابعة حسابنا على X", joinChannel:"انضم للقناة الرسمية", reward:"مكافأة:", execute:"تنفيذ", join:"انضمام", done:"تم", register:"تسجيل",
-        taskCenter:"مركز المهام والمكافآت", taskCenterDesc:"المهام والإعلانات المتاحة يتم تحميلها من السيرفر.", dailyAds:"الإعلانات اليومية", remainingToday:"المتبقي اليوم",
-        watchRewardAd:"مشاهدة إعلان مكافأة", noAdsToday:"لا توجد إعلانات متبقية اليوم", noTasks:"لا توجد مهام متاحة حالياً.",
-        adgemTitle:"عروض ومكافآت AdGem 🎁", adgemDesc:"أكمل العروض المتاحة واربح Earnings إضافية.", adgemRewards:"مكافآت حسب العرض", viewOffers:"عرض العروض", adgemModal:"🎁 عروض AdGem", close:"إغلاق", directIfMissing:"إذا لم تظهر العروض،", openDirect:"افتحها مباشرة",
-        leaderboard:"لوحة المتصدرين", leaderboardDesc:"الترتيب الحقيقي من قاعدة البيانات.", loadingLeaderboard:"جارٍ تحميل الترتيب...", noLeaderboard:"لا توجد بيانات تصنيف بعد.", user:(id)=>`مستخدم ${id||""}`,
-        account:"حسابي والإعدادات", langLabel:"لغة التطبيق", countryLabel:"البلد / المنطقة", dark:"الوضع الداكن", light:"الوضع الفاتح", themeDesc:"حفظ المظهر على هذا الجهاز.",
-        referrals:"إحالات الأصدقاء", referralDesc:"رابط الإحالة يتم توليده من Telegram ID الحقيقي.", copyReferral:"نسخ رابط الإحالة", unavailable:"غير متاح حالياً",
-        withdraw:"سحب الأرباح USDT", availableBalance:"الرصيد المتاح للسحب:", walletAddress:"عنوان محفظتك", withdrawRequest:"إرسال طلب السحب",
-        newCampaign:"🚀 إنشاء حملة جديدة", newCampaignDesc:"اختر المنصة ونوع المهمة والكمية، وسيظهر السعر والمكافأة تلقائيًا.", platform:"المنصة", choosePlatform:"اختر المنصة", taskType:"نوع المهمة", chooseTaskType:"اختر نوع المهمة", quantity:"الكمية المطلوبة", example10:"مثال: 10", campaignTitle:"عنوان الحملة", exampleCampaign:"مثال: اشترك في قناتي", campaignLink:"رابط الحملة", quantityShort:"الكمية", rewardPerExecution:"مكافأة المستخدم لكل تنفيذ", totalUserRewards:"إجمالي مكافآت المستخدمين", advertiserPrice:"سعر المعلن", cancel:"إلغاء", createCampaign:"🚀 إنشاء الحملة",
-        task:"مهمة", taskReward:(n)=>`+${n} Earnings`, remainingBudget:(n)=>` · الميزانية المتبقية: ${n}`,
-        languageSaved:"تم حفظ الإعدادات.", copyDone:"تم نسخ رابط الإحالة.", serverError:"حدث خطأ في الاتصال بالسيرفر.", telegramIdError:"تعذر تحديد Telegram User ID.",
-        taskCompleted:"تم تسجيل إنجاز المهمة وإضافة المكافأة.", fixedRecorded:"تم فتح المهمة وتسجيلها لدى السيرفر.", fixedConnection:"تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.", dailyDone:"تم تسجيل حضورك اليومي.",
-        adOpened:"تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر.", adConnection:"تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر.", noServerData:"لا توجد بيانات من السيرفر بعد.",
-        chooseType:"اختر نوع المهمة.", validQuantity:"أدخل كمية صحيحة.", enterTitle:"أدخل عنوان الحملة.", enterLink:"أدخل رابط الحملة.", invalidCampaignType:"نوع الحملة غير صحيح.", multiple:(n)=>`الكمية يجب أن تكون من مضاعفات ${n}.`,
-        campaignSummary:(p,t,q,price,r,total)=>`📢 ملخص الحملة\n\nالمنصة: ${p}\nنوع المهمة: ${t}\nالكمية: ${q}\n\n💰 سعر المعلن: ${price.toFixed(2)} USDT\n🎁 مكافأة المستخدم: ${r.toFixed(2)} USDT لكل تنفيذ\n💵 إجمالي مكافآت المستخدمين: ${total.toFixed(2)} USDT\n\nهل تريد إنشاء الحملة؟`,
-        campaignCreated:"تم إنشاء الحملة بنجاح ✅", campaignFailed:"تعذر إنشاء الحملة.", walletRequired:"أدخل عنوان المحفظة.", minWithdraw:"الحد الأدنى للسحب هو 2 USDT.", withdrawCreated:"تم إنشاء طلب السحب وحالته Pending.",
-        guide:"أكمل المهام، راقب رصيدك، ثم أرسل طلب السحب عند بلوغ الحد الأدنى.", apiDown:"تعذر الاتصال بالسيرفر. تأكد من تشغيل API.",
-        navHome:"الرئيسية", navTasks:"المهام", navRank:"التصنيف", navAccount:"حسابي",
-        langAr:"العربية", langEn:"English", langFr:"Français", countries:{DZ:"الجزائر",SA:"السعودية",EG:"مصر",MA:"المغرب",AE:"الإمارات",TN:"تونس",FR:"فرنسا",DE:"ألمانيا",TR:"تركيا",US:"الولايات المتحدة"},
-        platformNames:{youtube:"YouTube",instagram:"Instagram",tiktok:"TikTok"}, typeNames:{subscribers:"مشتركين",followers:"متابعين",views:"مشاهدات"}
+        langLabel: "لغة التطبيق",
+        countryLabel: "البلد / المنطقة",
+        darkLabel: "الوضع الداكن",
+        darkDesc: "حفظ المظهر على هذا الجهاز.",
+        navHome: "الرئيسية",
+        navTasks: "المهام",
+        navAccount: "حسابي",
+        saved: "تم حفظ الإعدادات."
     },
     en: {
-        appTitle:"Rayan Coin", homeTitle:"Rayan Coin Earnings", homeSubtitle:"Track your balance and daily achievements in real time.",
-        completed:"Completed", earnings:"Earnings", usdt:"USDT", recentWithdrawals:"No recent withdrawals to display.",
-        dailyCheckin:"Daily check-in", loadingCheckin:"Loading check-in data...", totalAttendance:(d,s)=>`Total check-ins: ${d} days | Current streak: ${s} days`,
-        addCampaign:"Add campaign", addCampaignDesc:"Create a new campaign with a defined budget.", officialGuide:"Official guide", guideDesc:"Learn how to use the platform.",
-        followX:"Follow our X account", joinChannel:"Join the official channel", reward:"Reward:", execute:"Execute", join:"Join", done:"Done", register:"Check in",
-        taskCenter:"Tasks & Rewards Center", taskCenterDesc:"Available tasks and ads are loaded from the server.", dailyAds:"Daily ads", remainingToday:"Remaining today",
-        watchRewardAd:"Watch rewarded ad", noAdsToday:"No ads remaining today", noTasks:"No tasks available right now.",
-        adgemTitle:"AdGem Offers & Rewards 🎁", adgemDesc:"Complete available offers and earn extra Earnings.", adgemRewards:"Rewards vary by offer", viewOffers:"View offers", adgemModal:"🎁 AdGem Offers", close:"Close", directIfMissing:"If the offers do not appear,", openDirect:"open them directly",
-        leaderboard:"Leaderboard", leaderboardDesc:"Real ranking from the database.", loadingLeaderboard:"Loading leaderboard...", noLeaderboard:"No leaderboard data yet.", user:(id)=>`User ${id||""}`,
-        account:"My Account & Settings", langLabel:"App language", countryLabel:"Country / Region", dark:"Dark mode", light:"Light mode", themeDesc:"Save the appearance on this device.",
-        referrals:"Friend referrals", referralDesc:"Your referral link is generated from your real Telegram ID.", copyReferral:"Copy referral link", unavailable:"Currently unavailable",
-        withdraw:"USDT Withdrawals", availableBalance:"Available balance:", walletAddress:"Wallet address", withdrawRequest:"Send withdrawal request",
-        newCampaign:"🚀 Create New Campaign", newCampaignDesc:"Choose the platform, task type and quantity; price and reward appear automatically.", platform:"Platform", choosePlatform:"Choose platform", taskType:"Task type", chooseTaskType:"Choose task type", quantity:"Required quantity", example10:"Example: 10", campaignTitle:"Campaign title", exampleCampaign:"Example: Subscribe to my channel", campaignLink:"Campaign link", quantityShort:"Quantity", rewardPerExecution:"User reward per execution", totalUserRewards:"Total user rewards", advertiserPrice:"Advertiser price", cancel:"Cancel", createCampaign:"🚀 Create campaign",
-        task:"Task", taskReward:(n)=>`+${n} Earnings`, remainingBudget:(n)=>` · Remaining budget: ${n}`,
-        languageSaved:"Settings saved.", copyDone:"Referral link copied.", serverError:"Server connection error.", telegramIdError:"Could not determine Telegram User ID.",
-        taskCompleted:"Task completed and reward added.", fixedRecorded:"Task opened and recorded by the server.", fixedConnection:"Link opened. Server connection is required to record it.", dailyDone:"Daily check-in recorded.",
-        adOpened:"Ad opened and view recorded by the server.", adConnection:"Ad opened. Server connection is required to record the view.", noServerData:"No server data yet.",
-        chooseType:"Choose a task type.", validQuantity:"Enter a valid quantity.", enterTitle:"Enter a campaign title.", enterLink:"Enter the campaign link.", invalidCampaignType:"Invalid campaign type.", multiple:(n)=>`Quantity must be a multiple of ${n}.`,
-        campaignSummary:(p,t,q,price,r,total)=>`📢 Campaign summary\n\nPlatform: ${p}\nTask type: ${t}\nQuantity: ${q}\n\n💰 Advertiser price: ${price.toFixed(2)} USDT\n🎁 User reward: ${r.toFixed(2)} USDT per execution\n💵 Total user rewards: ${total.toFixed(2)} USDT\n\nDo you want to create the campaign?`,
-        campaignCreated:"Campaign created successfully ✅", campaignFailed:"Could not create the campaign.", walletRequired:"Enter your wallet address.", minWithdraw:"Minimum withdrawal is 2 USDT.", withdrawCreated:"Withdrawal request created with status Pending.",
-        guide:"Complete tasks, watch your balance, then submit a withdrawal request when you reach the minimum.", apiDown:"Could not connect to the server. Make sure the API is running.",
-        navHome:"Home", navTasks:"Tasks", navRank:"Ranking", navAccount:"Account",
-        langAr:"Arabic", langEn:"English", langFr:"French", countries:{DZ:"Algeria",SA:"Saudi Arabia",EG:"Egypt",MA:"Morocco",AE:"United Arab Emirates",TN:"Tunisia",FR:"France",DE:"Germany",TR:"Türkiye",US:"United States"},
-        platformNames:{youtube:"YouTube",instagram:"Instagram",tiktok:"TikTok"}, typeNames:{subscribers:"Subscribers",followers:"Followers",views:"Views"}
+        langLabel: "App Language",
+        countryLabel: "Country / Region",
+        darkLabel: "Dark mode",
+        darkDesc: "Save the appearance on this device.",
+        navHome: "Home",
+        navTasks: "Tasks",
+        navAccount: "Account",
+        saved: "Settings saved."
     },
     fr: {
-        appTitle:"Rayan Coin", homeTitle:"Gains Rayan Coin", homeSubtitle:"Suivez votre solde et vos réalisations quotidiennes en temps réel.",
-        completed:"Terminées", earnings:"Earnings", usdt:"USDT", recentWithdrawals:"Aucun retrait récent à afficher.",
-        dailyCheckin:"Présence quotidienne", loadingCheckin:"Chargement des données de présence...", totalAttendance:(d,s)=>`Présences totales : ${d} jours | Série actuelle : ${s} jours`,
-        addCampaign:"Ajouter une campagne", addCampaignDesc:"Créez une nouvelle campagne avec un budget défini.", officialGuide:"Guide officiel", guideDesc:"Découvrez comment utiliser la plateforme.",
-        followX:"Suivre notre compte X", joinChannel:"Rejoindre le canal officiel", reward:"Récompense :", execute:"Exécuter", join:"Rejoindre", done:"Terminé", register:"Valider",
-        taskCenter:"Centre des tâches et récompenses", taskCenterDesc:"Les tâches et annonces disponibles sont chargées depuis le serveur.", dailyAds:"Annonces quotidiennes", remainingToday:"Restant aujourd’hui",
-        watchRewardAd:"Regarder une annonce récompensée", noAdsToday:"Aucune annonce restante aujourd’hui", noTasks:"Aucune tâche disponible pour le moment.",
-        adgemTitle:"Offres et récompenses AdGem 🎁", adgemDesc:"Complétez les offres disponibles et gagnez des Earnings supplémentaires.", adgemRewards:"Récompenses selon l’offre", viewOffers:"Voir les offres", adgemModal:"🎁 Offres AdGem", close:"Fermer", directIfMissing:"Si les offres ne s’affichent pas,", openDirect:"ouvrez-les directement",
-        leaderboard:"Classement", leaderboardDesc:"Classement réel depuis la base de données.", loadingLeaderboard:"Chargement du classement...", noLeaderboard:"Aucune donnée de classement pour le moment.", user:(id)=>`Utilisateur ${id||""}`,
-        account:"Mon compte et paramètres", langLabel:"Langue de l’application", countryLabel:"Pays / Région", dark:"Mode sombre", light:"Mode clair", themeDesc:"Enregistrer l’apparence sur cet appareil.",
-        referrals:"Parrainage d’amis", referralDesc:"Votre lien de parrainage est généré à partir de votre véritable ID Telegram.", copyReferral:"Copier le lien de parrainage", unavailable:"Indisponible actuellement",
-        withdraw:"Retraits USDT", availableBalance:"Solde disponible :", walletAddress:"Adresse du portefeuille", withdrawRequest:"Envoyer une demande de retrait",
-        newCampaign:"🚀 Créer une nouvelle campagne", newCampaignDesc:"Choisissez la plateforme, le type et la quantité ; le prix et la récompense s’affichent automatiquement.", platform:"Plateforme", choosePlatform:"Choisir la plateforme", taskType:"Type de tâche", chooseTaskType:"Choisir le type de tâche", quantity:"Quantité requise", example10:"Exemple : 10", campaignTitle:"Titre de la campagne", exampleCampaign:"Exemple : Abonnez-vous à ma chaîne", campaignLink:"Lien de la campagne", quantityShort:"Quantité", rewardPerExecution:"Récompense utilisateur par exécution", totalUserRewards:"Total des récompenses utilisateurs", advertiserPrice:"Prix annonceur", cancel:"Annuler", createCampaign:"🚀 Créer la campagne",
-        task:"Tâche", taskReward:(n)=>`+${n} Earnings`, remainingBudget:(n)=>` · Budget restant : ${n}`,
-        languageSaved:"Paramètres enregistrés.", copyDone:"Lien de parrainage copié.", serverError:"Erreur de connexion au serveur.", telegramIdError:"Impossible de déterminer l’ID Telegram.",
-        taskCompleted:"Tâche terminée et récompense ajoutée.", fixedRecorded:"Tâche ouverte et enregistrée par le serveur.", fixedConnection:"Lien ouvert. La connexion au serveur est nécessaire pour l’enregistrer.", dailyDone:"Présence quotidienne enregistrée.",
-        adOpened:"Annonce ouverte et vue enregistrée par le serveur.", adConnection:"Annonce ouverte. La connexion au serveur est nécessaire pour enregistrer la vue.", noServerData:"Aucune donnée du serveur pour le moment.",
-        chooseType:"Choisissez un type de tâche.", validQuantity:"Entrez une quantité valide.", enterTitle:"Entrez un titre de campagne.", enterLink:"Entrez le lien de la campagne.", invalidCampaignType:"Type de campagne invalide.", multiple:(n)=>`La quantité doit être un multiple de ${n}.`,
-        campaignSummary:(p,t,q,price,r,total)=>`📢 Résumé de la campagne\n\nPlateforme : ${p}\nType de tâche : ${t}\nQuantité : ${q}\n\n💰 Prix annonceur : ${price.toFixed(2)} USDT\n🎁 Récompense utilisateur : ${r.toFixed(2)} USDT par exécution\n💵 Total des récompenses utilisateurs : ${total.toFixed(2)} USDT\n\nVoulez-vous créer la campagne ?`,
-        campaignCreated:"Campagne créée avec succès ✅", campaignFailed:"Impossible de créer la campagne.", walletRequired:"Entrez l’adresse de votre portefeuille.", minWithdraw:"Le retrait minimum est de 2 USDT.", withdrawCreated:"Demande de retrait créée avec le statut Pending.",
-        guide:"Effectuez les tâches, surveillez votre solde, puis envoyez une demande de retrait lorsque vous atteignez le minimum.", apiDown:"Impossible de se connecter au serveur. Vérifiez que l’API fonctionne.",
-        navHome:"Accueil", navTasks:"Tâches", navRank:"Classement", navAccount:"Compte",
-        langAr:"Arabe", langEn:"Anglais", langFr:"Français", countries:{DZ:"Algérie",SA:"Arabie saoudite",EG:"Égypte",MA:"Maroc",AE:"Émirats arabes unis",TN:"Tunisie",FR:"France",DE:"Allemagne",TR:"Turquie",US:"États-Unis"},
-        platformNames:{youtube:"YouTube",instagram:"Instagram",tiktok:"TikTok"}, typeNames:{subscribers:"Abonnés",followers:"Abonnés",views:"Vues"}
+        langLabel: "Langue de l’application",
+        countryLabel: "Pays / Région",
+        darkLabel: "Mode sombre",
+        darkDesc: "Enregistrer l’apparence sur cet appareil.",
+        navHome: "Accueil",
+        navTasks: "Tâches",
+        navAccount: "Compte",
+        saved: "Paramètres enregistrés."
     }
 };
-
-function T(){ return I18N[["ar","en","fr"].includes(state.settings.lang)?state.settings.lang:"ar"]; }
-const TEXT_KEYS = {
-    "لوحة أرباح Rayan Coin":"homeTitle","تابع رصيدك وإنجازاتك اليومية مباشرة.":"homeSubtitle","المكتمل":"completed","لا توجد عمليات سحب حديثة للعرض.":"recentWithdrawals",
-    "تسجيل الحضور اليومي":"dailyCheckin","جارٍ تحميل بيانات الحضور...":"loadingCheckin","إضافة حملة":"addCampaign","أنشئ حملة جديدة بميزانية محددة.":"addCampaignDesc","الدليل الرسمي":"officialGuide","تعرف على طريقة استخدام المنصة.":"guideDesc",
-    "متابعة حسابنا على X":"followX","انضم للقناة الرسمية":"joinChannel","مكافأة:":"reward","مركز المهام والمكافآت":"taskCenter","المهام والإعلانات المتاحة يتم تحميلها من السيرفر.":"taskCenterDesc",
-    "الإعلانات اليومية":"dailyAds","المتبقي اليوم":"remainingToday","مشاهدة إعلان مكافأة":"watchRewardAd","لا توجد إعلانات متبقية اليوم":"noAdsToday","لا توجد مهام متاحة حالياً.":"noTasks",
-    "عروض ومكافآت AdGem 🎁":"adgemTitle","أكمل العروض المتاحة واربح Earnings إضافية.":"adgemDesc","مكافآت حسب العرض":"adgemRewards","عرض العروض":"viewOffers","🎁 عروض AdGem":"adgemModal","إغلاق":"close","إذا لم تظهر العروض،":"directIfMissing","افتحها مباشرة":"openDirect",
-    "لوحة المتصدرين":"leaderboard","الترتيب الحقيقي من قاعدة البيانات.":"leaderboardDesc","جارٍ تحميل الترتيب...":"loadingLeaderboard","لا توجد بيانات تصنيف بعد.":"noLeaderboard","حسابي والإعدادات":"account","لغة التطبيق":"langLabel","البلد / المنطقة":"countryLabel",
-    "الوضع الداكن":"dark","حفظ المظهر على هذا الجهاز.":"themeDesc","إحالات الأصدقاء":"referrals","رابط الإحالة يتم توليده من Telegram ID الحقيقي.":"referralDesc","نسخ رابط الإحالة":"copyReferral","غير متاح حالياً":"unavailable",
-    "سحب الأرباح USDT":"withdraw","الرصيد المتاح للسحب:":"availableBalance","عنوان محفظتك":"walletAddress","إرسال طلب السحب":"withdrawRequest","🚀 إنشاء حملة جديدة":"newCampaign",
-    "اختر المنصة ونوع المهمة والكمية، وسيظهر السعر والمكافأة تلقائيًا.":"newCampaignDesc","المنصة":"platform","اختر المنصة":"choosePlatform","نوع المهمة":"taskType","اختر نوع المهمة":"chooseTaskType","الكمية المطلوبة":"quantity","مثال: 10":"example10",
-    "عنوان الحملة":"campaignTitle","مثال: اشترك في قناتي":"exampleCampaign","رابط الحملة":"campaignLink","الكمية":"quantityShort","مكافأة المستخدم لكل تنفيذ":"rewardPerExecution","إجمالي مكافآت المستخدمين":"totalUserRewards","سعر المعلن":"advertiserPrice","إلغاء":"cancel","🚀 إنشاء الحملة":"createCampaign",
-    "الرئيسية":"navHome","المهام":"navTasks","التصنيف":"navRank","حسابي":"navAccount"
-};
-const translationNodes = new WeakMap();
-function translateStaticDom(){
-    const lang=T();
-    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node=>{
-        const raw=node.nodeValue, trimmed=raw.trim();
-        let key=translationNodes.get(node) || TEXT_KEYS[trimmed];
-        if(!key || typeof lang[key]!=="string") return;
-        translationNodes.set(node,key);
-        node.nodeValue=raw.replace(trimmed,lang[key]);
-    });
-    document.querySelectorAll("input,textarea").forEach(el=>{
-        if(!el.dataset.i18nPlaceholder){
-            if(el.placeholder==="مثال: 10") el.dataset.i18nPlaceholder="example10";
-            else if(el.placeholder==="مثال: اشترك في قناتي") el.dataset.i18nPlaceholder="exampleCampaign";
-        }
-        const key=el.dataset.i18nPlaceholder;
-        if(key && lang[key]) el.placeholder=lang[key];
-    });
-    const ls=document.getElementById("lang-select");
-    if(ls){ls.options[0].text=lang.langAr;ls.options[1].text=lang.langEn;ls.options[2].text=lang.langFr;}
-    const cs=document.getElementById("country-select");
-    if(cs) Array.from(cs.options).forEach(o=>{if(lang.countries[o.value])o.text=lang.countries[o.value];});
-}
-
+ 
 const COUNTRY_NAMES = {
     ar: { DZ:"الجزائر", SA:"السعودية", EG:"مصر", MA:"المغرب", AE:"الإمارات", TN:"تونس", FR:"فرنسا", DE:"ألمانيا", TR:"تركيا", US:"الولايات المتحدة" },
     en: { DZ:"Algeria", SA:"Saudi Arabia", EG:"Egypt", MA:"Morocco", AE:"United Arab Emirates", TN:"Tunisia", FR:"France", DE:"Germany", TR:"Türkiye", US:"United States" },
     fr: { DZ:"Algérie", SA:"Arabie saoudite", EG:"Égypte", MA:"Maroc", AE:"Émirats arabes unis", TN:"Tunisie", FR:"France", DE:"Allemagne", TR:"Turquie", US:"États-Unis" }
 };
-
+ 
 function saveSettingsLocal() {
     try {
         localStorage.setItem("rayan_coin_settings", JSON.stringify(state.settings));
     } catch (_) {}
 }
-
+ 
 function loadSettingsLocal() {
     try {
         const raw = localStorage.getItem("rayan_coin_settings");
@@ -3838,172 +3628,235 @@ function loadSettingsLocal() {
         }
     } catch (_) {}
 }
-
+ 
 async function changeLanguage(lang) {
     state.settings.lang = ["ar","en","fr"].includes(lang) ? lang : "ar";
     saveSettingsLocal();
     applySettings();
+ 
     try {
-        await api("/api/settings", {method:"PATCH", body:JSON.stringify({lang:state.settings.lang})});
-        showToast(T().languageSaved);
-    } catch(e) { showToast(e.message); }
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({lang: state.settings.lang})
+        });
+    } catch(e) {
+        showToast(e.message);
+    }
 }
-
+ 
 async function changeCountry(country) {
     state.settings.country = country || "DZ";
     saveSettingsLocal();
     applySettings();
-    try { await api("/api/settings", {method:"PATCH", body:JSON.stringify({country:state.settings.country})}); showToast(T().languageSaved); }
-    catch(e) { showToast(e.message); }
+ 
+    try {
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({country: state.settings.country})
+        });
+        showToast(SETTINGS_TRANSLATIONS[state.settings.lang || "ar"].saved);
+    } catch(e) {
+        showToast(e.message);
+    }
 }
-
+ 
 async function toggleTheme(enabled) {
     state.settings.darkMode = Boolean(enabled);
     saveSettingsLocal();
     applySettings();
-    try { await api("/api/settings", {method:"PATCH", body:JSON.stringify({darkMode:state.settings.darkMode})}); }
-    catch(e) { showToast(e.message); }
+ 
+    try {
+        await api("/api/settings", {
+            method:"PATCH",
+            body:JSON.stringify({darkMode: state.settings.darkMode})
+        });
+    } catch(e) {
+        showToast(e.message);
+    }
 }
-
+ 
 function applySettings() {
-    const lang=T();
-    document.documentElement.lang=state.settings.lang;
-    document.documentElement.dir=state.settings.lang==="ar"?"rtl":"ltr";
-    document.documentElement.style.colorScheme=state.settings.darkMode===false?"light":"dark";
-    document.body.dataset.theme=state.settings.darkMode===false?"light":"dark";
-    const ls=document.getElementById("lang-select"), cs=document.getElementById("country-select"), tt=document.getElementById("theme-toggle");
-    if(ls) ls.value=state.settings.lang; if(cs) cs.value=state.settings.country||"DZ"; if(tt) tt.checked=state.settings.darkMode!==false;
-    const ids={"settings-lang-label":"langLabel","settings-country-label":"countryLabel","theme-desc":"themeDesc","nav-home-label":"navHome","nav-tasks-label":"navTasks","nav-account-label":"navAccount"};
-    Object.entries(ids).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&lang[key])el.textContent=lang[key];});
-    const theme=document.getElementById("theme-label"); if(theme) theme.textContent=state.settings.darkMode===false?lang.light:lang.dark;
-    translateStaticDom();
+    const lang = ["ar","en","fr"].includes(state.settings.lang)
+        ? state.settings.lang
+        : "ar";
+    const t = SETTINGS_TRANSLATIONS[lang];
+ 
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+ 
+    const langSelect = document.getElementById("lang-select");
+    const countrySelect = document.getElementById("country-select");
+    const themeToggle = document.getElementById("theme-toggle");
+ 
+    if (langSelect) langSelect.value = lang;
+    if (countrySelect) countrySelect.value = state.settings.country || "DZ";
+    if (themeToggle) themeToggle.checked = state.settings.darkMode !== false;
+ 
+    document.body.dataset.theme = state.settings.darkMode === false ? "light" : "dark";
+    document.documentElement.style.colorScheme = state.settings.darkMode === false ? "light" : "dark";
+ 
+    const langLabel = document.getElementById("settings-lang-label");
+    const countryLabel = document.getElementById("settings-country-label");
+    const themeLabel = document.getElementById("theme-label");
+    const themeDesc = document.getElementById("theme-desc");
+    const navHome = document.getElementById("nav-home-label");
+    const navTasks = document.getElementById("nav-tasks-label");
+    const navAccount = document.getElementById("nav-account-label");
+ 
+    if (langLabel) langLabel.textContent = t.langLabel;
+    if (countryLabel) countryLabel.textContent = t.countryLabel;
+    if (themeLabel) themeLabel.textContent = t.darkLabel;
+    if (themeDesc) themeDesc.textContent = t.darkDesc;
+    if (navHome) navHome.textContent = t.navHome;
+    if (navTasks) navTasks.textContent = t.navTasks;
+    if (navAccount) navAccount.textContent = t.navAccount;
+ 
+    if (countrySelect) {
+        const names = COUNTRY_NAMES[lang];
+        Array.from(countrySelect.options).forEach(option => {
+            if (names[option.value]) option.textContent = names[option.value];
+        });
+    }
 }
-
+ 
 /* =========================
    الدليل
 ========================= */
-
+ 
 function showGuide() {
-
+ 
     showToast(
-
-        T().guide
-
+ 
+        "أكمل المهام، راقب رصيدك، ثم أرسل طلب السحب عند بلوغ الحد الأدنى."
+ 
     );
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    حماية HTML
 ========================= */
-
+ 
 function escapeHtml(value) {
-
+ 
     return String(
         value ?? ""
     )
-
+ 
         .replaceAll(
             "&",
             "&amp;"
         )
-
+ 
         .replaceAll(
             "<",
             "&lt;"
         )
-
+ 
         .replaceAll(
             ">",
             "&gt;"
         )
-
+ 
         .replaceAll(
             '"',
             "&quot;"
         )
-
+ 
         .replaceAll(
             "'",
             "&#039;"
         );
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تحديث كامل
 ========================= */
-
+ 
 async function refresh() {
-
+ 
     setLoading(true);
-
-
+ 
+ 
     try {
-
+ 
         await Promise.all([
-
+ 
             loadMe(),
-
+ 
             loadTasks()
-
+ 
         ]);
-
+ 
     } catch(e) {
-
+ 
         showToast(
             e.message
         );
-
+ 
     } finally {
-
+ 
         setLoading(false);
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================
    تشغيل التطبيق
 ========================= */
-
+ 
 (async function init(){
-
+ 
     loadSettingsLocal();
     applySettings();
-
+ 
     try {
-
+ 
         await refresh();
-
+ 
     } catch(e) {
-
+ 
         showToast(
-            T().apiDown
+            "تعذر الاتصال بالسيرفر. تأكد من تشغيل API."
         );
-
-
+ 
+ 
         const streakInfo =
             document.getElementById(
                 "streak-info"
             );
-
-
+ 
+ 
         if (streakInfo) {
-
+ 
             streakInfo.textContent =
-                T().noServerData;
-
+                "لا توجد بيانات من السيرفر بعد.";
+ 
         }
-
+ 
+    } finally {
+ 
+        const bootLoader =
+            document.getElementById("boot-loader");
+ 
+        if (bootLoader) {
+            bootLoader.classList.add("hide");
+            setTimeout(() => bootLoader.remove(), 500);
+        }
+ 
     }
-
+ 
 })();
-
+ 
 </script>
-
+ 
 </body>
 </html>
+ 
+
+
