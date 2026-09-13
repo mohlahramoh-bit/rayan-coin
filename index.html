@@ -3036,24 +3036,41 @@ async function completeTask(
  
 async function openFixedTask(type) {
     const link = TASK_LINKS[type];
+    const doneKey = type === "x" ? "x_done" : "telegram_done";
+
+    if (state.user?.fixed_tasks?.[doneKey]) {
+        showToast("هذه المهمة مكتملة بالفعل.");
+        return;
+    }
 
     if (type === "x") {
         if (link) window.open(link, "_blank", "noopener,noreferrer");
         try {
             const data = await api("/api/x/start");
+            if (data?.already_completed) {
+                await refresh();
+                showToast("تم — هذه المهمة مكتملة سابقاً.");
+                return;
+            }
             if (!data?.authorization_url) throw new Error("تعذر بدء تحقق X.");
             window.location.href = data.authorization_url;
-        } catch (e) { showToast(e.message || "تعذر بدء تحقق X."); }
+        } catch (e) {
+            showToast(e.message || "تعذر بدء تحقق X.");
+        }
         return;
     }
 
     if (link) window.open(link, "_blank", "noopener,noreferrer");
     try {
-        await api("/api/tasks/fixed/telegram/complete", {method:"POST"});
+        const data = await api("/api/tasks/fixed/telegram/complete", {method:"POST"});
         await refresh();
-        showToast("تم فتح المهمة وتسجيلها لدى السيرفر.");
+        showToast(
+            data?.already_completed
+                ? "تم — هذه المهمة مكتملة سابقاً."
+                : "تم التحقق من الانضمام وإضافة المكافأة."
+        );
     } catch (e) {
-        showToast("تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.");
+        showToast(e.message || "تعذر تسجيل المهمة.");
     }
 }
 
@@ -3187,7 +3204,7 @@ function openTimeWall() { if (window._timewallUrl) window.open(window._timewallU
 
 async function watchAd() {
     window.open(ADSTERAA_LINK, "_blank", "noopener,noreferrer");
-    showToast("تم فتح الإعلان. تُضاف المكافأة فقط بعد تأكيد مزود الإعلانات.");
+    showToast("تم فتح الإعلان. يُحتسب فقط بعد تأكيد مزود الإعلانات إلى السيرفر.");
 }
 
 
