@@ -9,6 +9,7 @@ import sys
 import time
 from urllib.parse import parse_qsl
 
+import aiohttp
 import libsql
 
 from aiohttp import web
@@ -70,6 +71,22 @@ CAMPAIGN_PAYMENT_CURRENCY = "USDT"
 # CAMPAIGN PRICING - Rayan Coin
 # ============================================================
 
+# ============================================================
+# CPAGRIP (JSON Offer Feed)
+# ============================================================
+# من لوحتك في CPAGrip -> Offer Tools -> JSON Offer Feed
+CPAGRIP_USER_ID = os.getenv("CPAGRIP_USER_ID", "2555621").strip()
+CPAGRIP_PUBLIC_KEY = os.getenv("CPAGRIP_PUBLIC_KEY", "33f0332dc23e35b590a21f4acb6ee5d8").strip()
+
+CPAGRIP_FEED_URL = "https://www.cpagrip.com/common/offer_feed_json.php"
+
+# نسبة اللي تروح للمستخدم من قيمة عرض CPAGrip (0.25 = 25%، والباقي 75% لك).
+CPAGRIP_USER_SHARE = float(os.getenv("CPAGRIP_USER_SHARE", "0.25"))
+
+# كلمة السر اللي بتحطينها في CPAGrip -> Postback Tools -> Global Postback
+# (خانة "Password (Optional)") — تأكد إنها نفسها بالضبط بالمكانين.
+CPAGRIP_POSTBACK_PASSWORD = os.getenv("CPAGRIP_POSTBACK_PASSWORD", "rayan_cpagrip_7f3d9")
+
 CAMPAIGN_PRICES = {
     "youtube": {
         "subscribers": {
@@ -107,6 +124,46 @@ CAMPAIGN_PRICES = {
             "unit_quantity": 100,
             "advertiser_price": 3.00,
             "user_reward": 0.02,
+        },
+    },
+
+    "telegram": {
+        "joins": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.00,
+            "user_reward": 0.02,
+        },
+    },
+
+    "discord": {
+        "joins": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.20,
+            "user_reward": 0.02,
+        },
+    },
+
+    "facebook": {
+        "followers": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.50,
+            "user_reward": 0.02,
+        },
+    },
+
+    "snapchat": {
+        "followers": {
+            "unit_quantity": 10,
+            "advertiser_price": 1.50,
+            "user_reward": 0.02,
+        },
+    },
+
+    "apps": {
+        "installs": {
+            "unit_quantity": 10,
+            "advertiser_price": 3.00,
+            "user_reward": 0.03,
         },
     },
 }
@@ -404,6 +461,22 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_adgem_conversions_status
         ON adgem_conversions(status);
+
+        CREATE TABLE IF NOT EXISTS cpagrip_conversions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversion_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            payout_usd REAL NOT NULL DEFAULT 0,
+            reward INTEGER NOT NULL DEFAULT 0,
+            offer_id TEXT DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'approved',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            UNIQUE(conversion_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_cpagrip_conversions_user
+        ON cpagrip_conversions(user_id);
         CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id);
         CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id);
         """)
@@ -894,6 +967,143 @@ async def api_tasks(request):
         } for r in rows]
 
         return web.json_response({"tasks": tasks})
+
+
+async def api_cpagrip_offers(request):
+    """يجيب قائمة عروض CPAGrip الحقيقية (JSON Offer Feed) مع تمرير معرف المستخدم كـ tracking_id."""
+    uid = auth_user(request)
+
+    if not CPAGRIP_USER_ID or not CPAGRIP_PUBLIC_KEY:
+        raise web.HTTPServiceUnavailable(
+            text=json.dumps({"detail": "CPAGrip غير مُفعّل على السيرفر بعد"}),
+            content_type="application/json"
+        )
+
+    visitor_ip = (request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+                  or request.remote or "")
+
+    params = {
+        "user_id": CPAGRIP_USER_ID,
+        "pubkey": CPAGRIP_PUBLIC_KEY,
+        "tracking_id": str(uid),
+        "ip": visitor_ip,
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(CPAGRIP_FEED_URL, params=params, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                data = await resp.json(content_type=None)
+    except Exception:
+        logging.exception("Failed to fetch CPAGrip offer feed")
+        raise web.HTTPBadGateway(
+            text=json.dumps({"detail": "تعذر جلب عروض CPAGrip حالياً"}),
+            content_type="application/json"
+        )
+
+    # ⚠️ شكل استجابة CPAGrip قد يختلف قليلاً (offers مقابل data مثلاً) — عدّلي
+    # هذا السطر لو رجعت البيانات باسم حقل مختلف حسب المثال الحقيقي عندك.
+    raw_offers = data.get("offers") if isinstance(data, dict) else data
+
+    offers = []
+    for o in (raw_offers or []):
+        try:
+            full_payout = float(o.get("amount") or o.get("payout") or 0)
+        except (TypeError, ValueError):
+            full_payout = 0.0
+
+        user_payout = round(full_payout * CPAGRIP_USER_SHARE, 2)
+
+        offers.append({
+            "id": o.get("id"),
+            "title": o.get("title") or o.get("name"),
+            "description": o.get("description", ""),
+            "payout": user_payout,
+            "link": o.get("link") or o.get("url"),
+            "icon": o.get("picture") or o.get("icon", ""),
+        })
+
+    return web.json_response({"ok": True, "offers": offers})
+
+
+async def api_cpagrip_postback(request):
+    """
+    يستقبل تأكيد إنجاز العرض من CPAGrip (Global Postback).
+
+    حسب لوحتك الحقيقية: CPAGrip يرسل POST فيه (password, payout, offer_id,
+    tracking_id) — ما فيه رقم عملية فريد، فنبني واحد بأنفسنا من
+    tracking_id+offer_id لمنع التكرار.
+    """
+    data = await request.post()
+
+    password = str(data.get("password", "")).strip()
+    if CPAGRIP_POSTBACK_PASSWORD and password != CPAGRIP_POSTBACK_PASSWORD:
+        logging.warning("Invalid CPAGrip postback password")
+        raise web.HTTPUnauthorized(text="Invalid password")
+
+    user_id_raw = str(data.get("tracking_id", "")).strip()
+    offer_id = str(data.get("offer_id", "")).strip()
+    payout_raw = str(data.get("payout", "0")).strip()
+
+    if not user_id_raw or not user_id_raw.isdigit():
+        raise web.HTTPBadRequest(text="Invalid tracking_id")
+
+    user_id = int(user_id_raw)
+    # ما فيه رقم عملية فريد من CPAGrip، فنبني واحد: مستخدم + عرض.
+    conversion_id = f"{user_id_raw}-{offer_id}"
+
+    try:
+        payout_usd = float(payout_raw)
+    except (TypeError, ValueError):
+        payout_usd = 0.0
+
+    # نديك 75% من قيمة العرض ونعطي المستخدم 25% فقط.
+    user_share_usd = payout_usd * CPAGRIP_USER_SHARE
+    reward = int(round(user_share_usd / USDT_PER_EARNING))
+
+    if reward <= 0:
+        return web.json_response({"ok": True, "rewarded": False, "reason": "zero_reward"})
+
+    with db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+
+        user = conn.execute(
+            "SELECT user_id FROM users WHERE user_id=?", (user_id,)
+        ).fetchone()
+
+        if not user:
+            conn.rollback()
+            raise web.HTTPNotFound(text="User not found")
+
+        try:
+            conn.execute(
+                """INSERT INTO cpagrip_conversions
+                   (conversion_id, user_id, payout_usd, reward, offer_id, status)
+                   VALUES (?,?,?,?,?,'approved')""",
+                (conversion_id, user_id, payout_usd, reward, offer_id)
+            )
+        except Exception as e:
+            if not is_unique_violation(e):
+                raise
+            conn.commit()
+            return web.json_response({"ok": True, "rewarded": False, "duplicate": True})
+
+        add_balance(conn, user_id, reward, earned=True)
+        conn.commit()
+
+    asyncio.create_task(notify_user(
+        user_id,
+        f"🎁 <b>مكافأة جديدة!</b>\n\n"
+        f"أنجزت عرض CPAGrip وربحت <b>{reward} Earnings</b>."
+    ))
+
+    logging.info(
+        "CPAGrip reward credited: user=%s reward=%s payout=%s conversion=%s",
+        user_id, reward, payout_usd, conversion_id
+    )
+
+    return web.json_response({"ok": True, "rewarded": True, "reward": reward})
+
+
 async def api_offers(request):
     uid = auth_user(request)
 
@@ -1059,9 +1269,43 @@ async def api_my_campaign_payments(request):
     return web.json_response({"payments": [dict(r) for r in rows]})
 
 
+async def verify_telegram_join(link: str, user_id: int):
+    """
+    يحاول التحقق فعلياً من انضمام المستخدم لقناة تيليجرام عبر البوت (لازم البوت
+    يكون أدمن في تلك القناة حتى يقدر يتحقق).
+    يرجّع True/False لو قدر يتحقق، أو None لو ما قدر (رابط غير صالح، البوت مو
+    أدمن في القناة...) — وفي هذي الحالة نثق بالمستخدم زي باقي المنصات.
+    """
+    if not BOT_INSTANCE or not link:
+        return None
+    m = re.search(r"t\.me/([A-Za-z0-9_]+)", link)
+    if not m:
+        return None
+    channel = "@" + m.group(1)
+    try:
+        member = await BOT_INSTANCE.get_chat_member(channel, user_id)
+        return member.status in ("member", "administrator", "creator")
+    except Exception:
+        return None
+
+
 async def api_complete_task(request):
     uid = auth_user(request)
     task_id = int(request.match_info["task_id"])
+
+    with db() as conn:
+        precheck_task = conn.execute(
+            "SELECT platform, link FROM tasks WHERE id=? AND status='active'",
+            (task_id,)
+        ).fetchone()
+
+    if precheck_task and precheck_task["platform"] == "telegram":
+        verified = await verify_telegram_join(precheck_task["link"], uid)
+        if verified is False:
+            raise web.HTTPBadRequest(
+                text=json.dumps({"detail": "لازم تنضم للقناة أولاً ثم ارجع أكّد المهمة"}),
+                content_type="application/json"
+            )
 
     with db() as conn:
         conn.execute("BEGIN IMMEDIATE")
@@ -1704,6 +1948,8 @@ async def create_app():
     app.router.add_get("/api/tasks", api_tasks)
     app.router.add_get("/api/offers", api_offers)
     app.router.add_post("/api/adgem/postback", api_adgem_postback)
+    app.router.add_get("/api/cpagrip/offers", api_cpagrip_offers)
+    app.router.add_post("/api/cpagrip/postback", api_cpagrip_postback)
     app.router.add_post("/api/tasks", api_create_task)
     app.router.add_post("/api/campaign-payments/{payment_id}/submit", api_submit_campaign_payment)
     app.router.add_get("/api/campaign-payments", api_my_campaign_payments)
