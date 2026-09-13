@@ -2155,6 +2155,20 @@ async def api_admin_campaign_payment_verify_chain(request):
     return web.json_response({"ok": ok, "confirmations": confirmations, "reason": reason})
 
 
+
+async def api_admin_dashboard(request):
+    """Small protected endpoint used by the frontend to detect/show the admin dashboard."""
+    require_admin(request)
+    with db() as conn:
+        pending = conn.execute("SELECT COUNT(*) AS c FROM campaign_payments WHERE status='pending'").fetchone()
+        active = conn.execute("SELECT COUNT(*) AS c FROM tasks WHERE status='active'").fetchone()
+    return web.json_response({
+        "ok": True,
+        "admin": True,
+        "pending_campaign_payments": int(pending[0] if pending else 0),
+        "active_campaigns": int(active[0] if active else 0),
+    })
+
 async def api_admin_campaign_payments(request):
     require_admin(request)
     with db() as conn:
@@ -2618,6 +2632,7 @@ async def create_app():
     app.router.add_post("/api/withdrawals", api_withdraw)
     app.router.add_get("/api/withdrawals", api_my_withdrawals)
     app.router.add_get("/api/admin/withdrawals", api_admin_withdrawals)
+    app.router.add_get("/api/admin/dashboard", api_admin_dashboard)
     app.router.add_get("/api/admin/campaign-payments", api_admin_campaign_payments)
     app.router.add_patch("/api/admin/campaign-payments/{payment_id}", api_admin_campaign_payment_status)
     app.router.add_post("/api/admin/campaign-payments/{payment_id}/verify-chain", api_admin_campaign_payment_verify_chain)
