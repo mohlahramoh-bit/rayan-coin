@@ -1011,6 +1011,18 @@
 
             <div id="cpagrip-offers-list"></div>
 
+        <div class="card">
+            <h2 class="card-title">عروض Lootably</h2>
+            <p class="card-subtitle">عروض حقيقية، والمكافآت لا تُضاف إلا بعد تأكيد Lootably من السيرفر.</p>
+            <div id="lootably-offers-list"><p class="card-subtitle">جارٍ التحميل...</p></div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">TimeWall</h2>
+            <p id="timewall-status" class="card-subtitle">جارٍ التحقق من توفر TimeWall...</p>
+            <button id="timewall-open-btn" class="btn btn-blue btn-block" onclick="openTimeWall()" disabled>فتح عروض TimeWall</button>
+        </div>
+
         </div>
  
         <div id="tasks-list"></div>
@@ -1201,6 +1213,10 @@
             >
                 نسخ رابط الإحالة
             </button>
+
+            <div id="referral-status" class="card-subtitle" style="margin-top:10px;line-height:1.8">
+                جارٍ تحميل حالة الإحالة...
+            </div>
  
         </div>
  
@@ -2573,6 +2589,16 @@ function renderUser() {
     ).value =
  
         referral || "غير متاح حالياً";
+
+    const refBox = document.getElementById("referral-status");
+    const ref = u.referral || {};
+    if (refBox) {
+        const days = Number(ref.activity_days || 0);
+        const required = Number(ref.required_days || 2);
+        const invited = Number(ref.invited || 0);
+        const reward = Number(ref.reward_usdt || 0);
+        refBox.textContent = `الإحالات: ${invited} • نشاط المدعو: ${days}/${required} يوم • مكافأة الإحالة: ${reward.toFixed(2)} USDT بعد إكمال يومين مختلفين.`;
+    }
  
 }
  
@@ -2965,62 +2991,29 @@ async function completeTask(
 ========================= */
  
 async function openFixedTask(type) {
- 
-    const link =
-        TASK_LINKS[type];
- 
- 
-    if (link) {
- 
-        window.open(
-            link,
-            "_blank",
-            "noopener,noreferrer"
-        );
- 
+    const link = TASK_LINKS[type];
+
+    if (type === "x") {
+        if (link) window.open(link, "_blank", "noopener,noreferrer");
+        try {
+            const data = await api("/api/x/start");
+            if (!data?.authorization_url) throw new Error("تعذر بدء تحقق X.");
+            window.location.href = data.authorization_url;
+        } catch (e) { showToast(e.message || "تعذر بدء تحقق X."); }
+        return;
     }
- 
- 
+
+    if (link) window.open(link, "_blank", "noopener,noreferrer");
     try {
- 
-        const url =
- 
-            type === "x"
- 
-                ? "/api/tasks/fixed/x/complete"
- 
-                : "/api/tasks/fixed/telegram/complete";
- 
- 
-        await api(
- 
-            url,
- 
-            {
-                method:"POST"
-            }
- 
-        );
- 
- 
+        await api("/api/tasks/fixed/telegram/complete", {method:"POST"});
         await refresh();
- 
- 
-        showToast(
-            "تم فتح المهمة وتسجيلها لدى السيرفر."
-        );
- 
+        showToast("تم فتح المهمة وتسجيلها لدى السيرفر.");
     } catch (e) {
- 
-        showToast(
-            "تم فتح الرابط. التسجيل يحتاج اتصال السيرفر."
-        );
- 
+        showToast("تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.");
     }
- 
 }
- 
- 
+
+
 /* =========================
    الحضور اليومي
 ========================= */
@@ -3115,50 +3108,45 @@ async function loadCpagripOffers() {
 }
 
 
-async function watchAd() {
- 
-    window.open(
- 
-        ADSTERAA_LINK,
- 
-        "_blank",
- 
-        "noopener,noreferrer"
- 
-    );
- 
- 
+async function loadLootablyOffers() {
+    const container = document.getElementById("lootably-offers-list");
+    if (!container) return;
     try {
- 
-        await api(
- 
-            "/api/ads/watch",
- 
-            {
-                method:"POST"
-            }
- 
-        );
- 
- 
-        await refresh();
- 
- 
-        showToast(
-            "تم فتح الإعلان وتسجيل المشاهدة لدى السيرفر."
-        );
- 
-    } catch (e) {
- 
-        showToast(
-            "تم فتح الإعلان. تسجيل المشاهدة يحتاج اتصال السيرفر."
-        );
- 
+        const data = await api("/api/lootably/offers");
+        const offers = data?.offers || [];
+        if (!offers.length) { container.innerHTML = '<p class="card-subtitle">لا توجد عروض Lootably متاحة حالياً.</p>'; return; }
+        container.innerHTML = "";
+        offers.forEach(offer => {
+            const row = document.createElement("div"); row.className = "task";
+            const title = String(offer.title || "عرض");
+            const reward = Number(offer.reward_usdt || 0).toFixed(2);
+            row.innerHTML = `<div class="task-info"><div class="task-title">${title}</div><div class="task-reward">${reward} USDT</div></div><a class="btn btn-yellow" href="${offer.link || '#'}" target="_blank" rel="noopener noreferrer">ابدأ</a>`;
+            container.appendChild(row);
+        });
+    } catch {
+        container.innerHTML = '<p class="card-subtitle">Lootably غير متاح حالياً أو ما زال الحساب بانتظار الموافقة.</p>';
     }
- 
 }
- 
- 
+
+async function loadTimeWallConfig() {
+    const status = document.getElementById("timewall-status");
+    const btn = document.getElementById("timewall-open-btn");
+    if (!status || !btn) return;
+    try {
+        const data = await api("/api/timewall/config");
+        if (data.enabled && data.url) { window._timewallUrl = data.url; status.textContent = "TimeWall متاح. المكافآت تُسجّل فقط من postback موثوق."; btn.disabled = false; }
+        else { status.textContent = "TimeWall ما زال بانتظار تفعيل رابط الـPlacement من لوحة TimeWall."; btn.disabled = true; }
+    } catch { status.textContent = "TimeWall غير متاح حالياً."; btn.disabled = true; }
+}
+
+function openTimeWall() { if (window._timewallUrl) window.open(window._timewallUrl, "_blank", "noopener,noreferrer"); }
+
+async function watchAd() {
+    window.open(ADSTERAA_LINK, "_blank", "noopener,noreferrer");
+    showToast("تم فتح الإعلان. تُضاف المكافأة فقط بعد تأكيد مزود الإعلانات.");
+}
+
+
 /* =========================
    إنشاء الحملة
 ========================= */
@@ -3766,151 +3754,25 @@ async function copyRefLink() {
 ========================= */
  
 const SETTINGS_TRANSLATIONS = {
-    ar: {
-        langLabel: "لغة التطبيق",
-        countryLabel: "البلد / المنطقة",
-        darkLabel: "الوضع الداكن",
-        darkDesc: "حفظ المظهر على هذا الجهاز.",
-        navHome: "الرئيسية",
-        navTasks: "المهام",
-        navAccount: "حسابي",
-        saved: "تم حفظ الإعدادات."
-    },
-    en: {
-        langLabel: "App Language",
-        countryLabel: "Country / Region",
-        darkLabel: "Dark mode",
-        darkDesc: "Save the appearance on this device.",
-        navHome: "Home",
-        navTasks: "Tasks",
-        navAccount: "Account",
-        saved: "Settings saved."
-    },
-    fr: {
-        langLabel: "Langue de l’application",
-        countryLabel: "Pays / Région",
-        darkLabel: "Mode sombre",
-        darkDesc: "Enregistrer l’apparence sur cet appareil.",
-        navHome: "Accueil",
-        navTasks: "Tâches",
-        navAccount: "Compte",
-        saved: "Paramètres enregistrés."
-    }
+ ar:{langLabel:"لغة التطبيق",countryLabel:"البلد / المنطقة",darkLabel:"الوضع الداكن",darkDesc:"حفظ المظهر على هذا الجهاز.",navHome:"الرئيسية",navTasks:"المهام",navAccount:"حسابي",saved:"تم حفظ الإعدادات."},
+ en:{langLabel:"App Language",countryLabel:"Country / Region",darkLabel:"Dark mode",darkDesc:"Save the appearance on this device.",navHome:"Home",navTasks:"Tasks",navAccount:"Account",saved:"Settings saved."},
+ fr:{langLabel:"Langue de l’application",countryLabel:"Pays / Région",darkLabel:"Mode sombre",darkDesc:"Enregistrer l’apparence sur cet appareil.",navHome:"Accueil",navTasks:"Tâches",navAccount:"Compte",saved:"Paramètres enregistrés."}
 };
- 
-const COUNTRY_NAMES = {
-    ar: { DZ:"الجزائر", SA:"السعودية", EG:"مصر", MA:"المغرب", AE:"الإمارات", TN:"تونس", FR:"فرنسا", DE:"ألمانيا", TR:"تركيا", US:"الولايات المتحدة" },
-    en: { DZ:"Algeria", SA:"Saudi Arabia", EG:"Egypt", MA:"Morocco", AE:"United Arab Emirates", TN:"Tunisia", FR:"France", DE:"Germany", TR:"Türkiye", US:"United States" },
-    fr: { DZ:"Algérie", SA:"Arabie saoudite", EG:"Égypte", MA:"Maroc", AE:"Émirats arabes unis", TN:"Tunisie", FR:"France", DE:"Allemagne", TR:"Turquie", US:"États-Unis" }
-};
- 
-function saveSettingsLocal() {
-    try {
-        localStorage.setItem("rayan_coin_settings", JSON.stringify(state.settings));
-    } catch (_) {}
-}
- 
-function loadSettingsLocal() {
-    try {
-        const raw = localStorage.getItem("rayan_coin_settings");
-        if (!raw) return;
-        const saved = JSON.parse(raw);
-        if (saved && typeof saved === "object") {
-            state.settings = { ...state.settings, ...saved };
-        }
-    } catch (_) {}
-}
- 
-async function changeLanguage(lang) {
-    state.settings.lang = ["ar","en","fr"].includes(lang) ? lang : "ar";
-    saveSettingsLocal();
-    applySettings();
- 
-    try {
-        await api("/api/settings", {
-            method:"PATCH",
-            body:JSON.stringify({lang: state.settings.lang})
-        });
-    } catch(e) {
-        showToast(e.message);
-    }
-}
- 
-async function changeCountry(country) {
-    state.settings.country = country || "DZ";
-    saveSettingsLocal();
-    applySettings();
- 
-    try {
-        await api("/api/settings", {
-            method:"PATCH",
-            body:JSON.stringify({country: state.settings.country})
-        });
-        showToast(SETTINGS_TRANSLATIONS[state.settings.lang || "ar"].saved);
-    } catch(e) {
-        showToast(e.message);
-    }
-}
- 
-async function toggleTheme(enabled) {
-    state.settings.darkMode = Boolean(enabled);
-    saveSettingsLocal();
-    applySettings();
- 
-    try {
-        await api("/api/settings", {
-            method:"PATCH",
-            body:JSON.stringify({darkMode: state.settings.darkMode})
-        });
-    } catch(e) {
-        showToast(e.message);
-    }
-}
- 
-function applySettings() {
-    const lang = ["ar","en","fr"].includes(state.settings.lang)
-        ? state.settings.lang
-        : "ar";
-    const t = SETTINGS_TRANSLATIONS[lang];
- 
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
- 
-    const langSelect = document.getElementById("lang-select");
-    const countrySelect = document.getElementById("country-select");
-    const themeToggle = document.getElementById("theme-toggle");
- 
-    if (langSelect) langSelect.value = lang;
-    if (countrySelect) countrySelect.value = state.settings.country || "DZ";
-    if (themeToggle) themeToggle.checked = state.settings.darkMode !== false;
- 
-    document.body.dataset.theme = state.settings.darkMode === false ? "light" : "dark";
-    document.documentElement.style.colorScheme = state.settings.darkMode === false ? "light" : "dark";
- 
-    const langLabel = document.getElementById("settings-lang-label");
-    const countryLabel = document.getElementById("settings-country-label");
-    const themeLabel = document.getElementById("theme-label");
-    const themeDesc = document.getElementById("theme-desc");
-    const navHome = document.getElementById("nav-home-label");
-    const navTasks = document.getElementById("nav-tasks-label");
-    const navAccount = document.getElementById("nav-account-label");
- 
-    if (langLabel) langLabel.textContent = t.langLabel;
-    if (countryLabel) countryLabel.textContent = t.countryLabel;
-    if (themeLabel) themeLabel.textContent = t.darkLabel;
-    if (themeDesc) themeDesc.textContent = t.darkDesc;
-    if (navHome) navHome.textContent = t.navHome;
-    if (navTasks) navTasks.textContent = t.navTasks;
-    if (navAccount) navAccount.textContent = t.navAccount;
- 
-    if (countrySelect) {
-        const names = COUNTRY_NAMES[lang];
-        Array.from(countrySelect.options).forEach(option => {
-            if (names[option.value]) option.textContent = names[option.value];
-        });
-    }
-}
- 
+const COUNTRY_NAMES={ar:{DZ:"الجزائر",SA:"السعودية",EG:"مصر",MA:"المغرب",AE:"الإمارات",TN:"تونس",FR:"فرنسا",DE:"ألمانيا",TR:"تركيا",US:"الولايات المتحدة"},en:{DZ:"Algeria",SA:"Saudi Arabia",EG:"Egypt",MA:"Morocco",AE:"United Arab Emirates",TN:"Tunisia",FR:"France",DE:"Germany",TR:"Türkiye",US:"United States"},fr:{DZ:"Algérie",SA:"Arabie saoudite",EG:"Égypte",MA:"Maroc",AE:"Émirats arabes unis",TN:"Tunisie",FR:"France",DE:"Allemagne",TR:"Turquie",US:"États-Unis"}};
+const COUNTRY_LANGUAGE={DZ:"ar",MA:"ar",TN:"ar",EG:"ar",SA:"ar",AE:"ar",FR:"fr",DE:"en",TR:"en",US:"en"};
+const FULL_TRANSLATIONS={
+ "أكمل المهام واربح USDT":{en:"Complete tasks and earn USDT",fr:"Effectuez des tâches et gagnez des USDT"},"جاري التحميل":{en:"Loading",fr:"Chargement"},"لوحة أرباح Rayan Coin":{en:"Rayan Coin Earnings Dashboard",fr:"Tableau des gains Rayan Coin"},"تابع رصيدك وإنجازاتك اليومية مباشرة.":{en:"Track your balance and daily achievements.",fr:"Suivez votre solde et vos réalisations quotidiennes."},"المكتمل":{en:"Completed",fr:"Terminé"},"لا توجد عمليات سحب حديثة للعرض.":{en:"No recent withdrawals to display.",fr:"Aucun retrait récent à afficher."},"تسجيل الحضور اليومي":{en:"Daily check-in",fr:"Présence quotidienne"},"إضافة حملة":{en:"Add campaign",fr:"Ajouter une campagne"},"الدليل الرسمي":{en:"Official guide",fr:"Guide officiel"},"متابعة حسابنا على X":{en:"Follow our X account",fr:"Suivre notre compte X"},"انضم للقناة الرسمية":{en:"Join the official channel",fr:"Rejoindre la chaîne officielle"},"مركز المهام والمكافآت":{en:"Tasks & rewards center",fr:"Centre des tâches et récompenses"},"الإعلانات اليومية":{en:"Daily ads",fr:"Annonces quotidiennes"},"المتبقي اليوم":{en:"Remaining today",fr:"Restant aujourd’hui"},"مشاهدة إعلان مكافأة":{en:"Watch rewarded ad",fr:"Regarder une annonce récompensée"},"لوحة المتصدرين":{en:"Leaderboard",fr:"Classement"},"حسابي والإعدادات":{en:"Account & settings",fr:"Compte et paramètres"},"إحالات الأصدقاء":{en:"Friend referrals",fr:"Parrainage d’amis"},"نسخ رابط الإحالة":{en:"Copy referral link",fr:"Copier le lien de parrainage"},"عروض Lootably":{en:"Lootably offers",fr:"Offres Lootably"},"فتح عروض TimeWall":{en:"Open TimeWall offers",fr:"Ouvrir les offres TimeWall"},"سحب الأرباح USDT":{en:"USDT withdrawals",fr:"Retraits USDT"},"الرصيد المتاح للسحب:":{en:"Available balance:",fr:"Solde disponible :"},"عنوان محفظتك":{en:"Wallet address",fr:"Adresse du portefeuille"},"إرسال طلب السحب":{en:"Send withdrawal request",fr:"Envoyer la demande de retrait"},"🚀 إنشاء حملة جديدة":{en:"🚀 Create new campaign",fr:"🚀 Créer une campagne"},"المنصة":{en:"Platform",fr:"Plateforme"},"نوع المهمة":{en:"Task type",fr:"Type de tâche"},"الكمية المطلوبة":{en:"Required quantity",fr:"Quantité demandée"},"عنوان الحملة":{en:"Campaign title",fr:"Titre de la campagne"},"رابط الحملة":{en:"Campaign link",fr:"Lien de la campagne"},"مكافأة المستخدم لكل تنفيذ":{en:"User reward per execution",fr:"Récompense utilisateur par exécution"},"إجمالي مكافآت المستخدمين":{en:"Total user rewards",fr:"Total des récompenses utilisateurs"},"سعر المعلن":{en:"Advertiser price",fr:"Prix annonceur"},"إلغاء":{en:"Cancel",fr:"Annuler"},"🚀 إنشاء الحملة":{en:"🚀 Create campaign",fr:"🚀 Créer la campagne"},"💳 دفع الحملة":{en:"💳 Campaign payment",fr:"💳 Paiement de la campagne"},"المبلغ المطلوب":{en:"Required amount",fr:"Montant requis"},"الشبكة":{en:"Network",fr:"Réseau"},"عنوان الدفع":{en:"Payment address",fr:"Adresse de paiement"},"نسخ":{en:"Copy",fr:"Copier"},"إغلاق":{en:"Close",fr:"Fermer"},"إرسال الدفع":{en:"Submit payment",fr:"Envoyer le paiement"}};
+Object.assign(FULL_TRANSLATIONS,{
+"جارٍ تحميل بيانات الحضور...":{en:"Loading check-in data...",fr:"Chargement des données de présence..."},"تم":{en:"Done",fr:"Terminé"},"تسجيل":{en:"Check in",fr:"Enregistrer"},"تنفيذ":{en:"Start",fr:"Exécuter"},"انضمام":{en:"Join",fr:"Rejoindre"},"غير متاح حالياً":{en:"Currently unavailable",fr:"Indisponible actuellement"},"مهمة":{en:"Task",fr:"Tâche"},"لا توجد مهام متاحة حالياً.":{en:"No tasks are currently available.",fr:"Aucune tâche n’est disponible actuellement."},"جارٍ تحميل الترتيب...":{en:"Loading ranking...",fr:"Chargement du classement..."},"لا توجد بيانات تصنيف بعد.":{en:"No ranking data yet.",fr:"Aucune donnée de classement pour le moment."},"لا توجد عروض متاحة حالياً.":{en:"No offers are currently available.",fr:"Aucune offre n’est disponible actuellement."},"تعذر تحميل عروض CPAGrip حالياً.":{en:"Unable to load CPAGrip offers right now.",fr:"Impossible de charger les offres CPAGrip actuellement."},"أدخل عنوان المحفظة.":{en:"Enter your wallet address.",fr:"Entrez votre adresse de portefeuille."},"الحد الأدنى للسحب هو 2 USDT.":{en:"The minimum withdrawal is 2 USDT.",fr:"Le retrait minimum est de 2 USDT."},"تم إنشاء طلب السحب وحالته Pending.":{en:"Withdrawal request created and is Pending.",fr:"Demande de retrait créée, statut Pending."},"تم نسخ رابط الإحالة.":{en:"Referral link copied.",fr:"Lien de parrainage copié."},"تم نسخ عنوان الدفع.":{en:"Payment address copied.",fr:"Adresse de paiement copiée."},"أدخل Transaction Hash صحيح لشبكة BSC.":{en:"Enter a valid BSC Transaction Hash.",fr:"Entrez un Transaction Hash BSC valide."},"تم إرسال الدفع للمراجعة بنجاح.":{en:"Payment submitted for review.",fr:"Paiement envoyé pour vérification."},"تعذر إرسال الدفع.":{en:"Unable to submit payment.",fr:"Impossible d’envoyer le paiement."},"تم إنشاء الحملة وبانتظار الدفع.":{en:"Campaign created and awaiting payment.",fr:"Campagne créée, en attente de paiement."},"تعذر إنشاء الحملة.":{en:"Unable to create campaign.",fr:"Impossible de créer la campagne."},"اختر المنصة أولاً.":{en:"Choose a platform first.",fr:"Choisissez d’abord une plateforme."},"اختر نوع المهمة.":{en:"Choose the task type.",fr:"Choisissez le type de tâche."},"أدخل كمية صحيحة.":{en:"Enter a valid quantity.",fr:"Entrez une quantité valide."},"أدخل عنوان الحملة.":{en:"Enter the campaign title.",fr:"Entrez le titre de la campagne."},"أدخل رابط الحملة.":{en:"Enter the campaign link.",fr:"Entrez le lien de la campagne."},"نوع الحملة غير صحيح.":{en:"Invalid campaign type.",fr:"Type de campagne invalide."},"تم تسجيل إنجاز المهمة وإضافة المكافأة.":{en:"Task completed and reward added.",fr:"Tâche terminée et récompense ajoutée."},"تم فتح المهمة وتسجيلها لدى السيرفر.":{en:"Task opened and recorded by the server.",fr:"Tâche ouverte et enregistrée par le serveur."},"تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.":{en:"Link opened. Server connection is required to record it.",fr:"Lien ouvert. Une connexion au serveur est nécessaire pour l’enregistrer."},"تم تسجيل حضورك اليومي.":{en:"Daily check-in recorded.",fr:"Présence quotidienne enregistrée."},"تعذر الاتصال بالسيرفر. تأكد من تشغيل API.":{en:"Unable to connect to the server. Check the API.",fr:"Impossible de se connecter au serveur. Vérifiez l’API."}});
+
+function t(key,fallback=""){return SETTINGS_TRANSLATIONS[state.settings.lang]?.[key]||fallback||key;}
+function translateTextNodes(root=document.body){const lang=state.settings.lang;if(lang==="ar")return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const a=[];let n;while(n=w.nextNode())a.push(n);a.forEach(x=>{const raw=x.nodeValue.trim();if(FULL_TRANSLATIONS[raw]?.[lang])x.nodeValue=x.nodeValue.replace(raw,FULL_TRANSLATIONS[raw][lang]);});}
+function saveSettingsLocal(){try{localStorage.setItem("rayan_coin_settings",JSON.stringify(state.settings));}catch(_){}}
+function loadSettingsLocal(){try{const raw=localStorage.getItem("rayan_coin_settings");if(!raw)return;const saved=JSON.parse(raw);if(saved&&typeof saved==="object")state.settings={...state.settings,...saved};}catch(_){}}
+async function changeLanguage(lang){state.settings.lang=["ar","en","fr"].includes(lang)?lang:"ar";saveSettingsLocal();applySettings();try{await api("/api/settings",{method:"PATCH",body:JSON.stringify({lang:state.settings.lang})});window.location.reload();}catch(e){showToast(e.message);}}
+async function changeCountry(country){state.settings.country=country||"DZ";state.settings.lang=COUNTRY_LANGUAGE[state.settings.country]||state.settings.lang||"en";saveSettingsLocal();applySettings();try{await api("/api/settings",{method:"PATCH",body:JSON.stringify({country:state.settings.country,lang:state.settings.lang})});window.location.reload();}catch(e){showToast(e.message);}}
+async function toggleTheme(enabled){state.settings.darkMode=Boolean(enabled);saveSettingsLocal();applySettings();try{await api("/api/settings",{method:"PATCH",body:JSON.stringify({darkMode:state.settings.darkMode})});}catch(e){showToast(e.message);}}
+function applySettings(){const lang=["ar","en","fr"].includes(state.settings.lang)?state.settings.lang:"ar";state.settings.lang=lang;document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";const ls=document.getElementById("lang-select"),cs=document.getElementById("country-select"),tt=document.getElementById("theme-toggle");if(ls)ls.value=lang;if(cs)cs.value=state.settings.country||"DZ";if(tt)tt.checked=state.settings.darkMode!==false;document.body.dataset.theme=state.settings.darkMode===false?"light":"dark";document.documentElement.style.colorScheme=state.settings.darkMode===false?"light":"dark";const ids={"settings-lang-label":"langLabel","settings-country-label":"countryLabel","theme-label":"darkLabel","theme-desc":"darkDesc","nav-home-label":"navHome","nav-tasks-label":"navTasks","nav-account-label":"navAccount"};Object.entries(ids).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=t(key);});if(cs){const names=COUNTRY_NAMES[lang];Array.from(cs.options).forEach(o=>{if(names[o.value])o.textContent=names[o.value];});}translateTextNodes();}
 /* =========================
    الدليل
 ========================= */
@@ -3984,6 +3846,8 @@ async function refresh() {
         ]);
 
         loadCpagripOffers();
+    loadLootablyOffers();
+    loadTimeWallConfig();
  
     } catch(e) {
  
