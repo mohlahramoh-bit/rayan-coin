@@ -998,6 +998,20 @@
             </button>
  
         </div>
+
+        <div class="card">
+
+            <h2 class="card-title">
+                عروض ومكافآت CPAGrip
+            </h2>
+
+            <p class="card-subtitle">
+                أكمل أي عرض تحته وربح Earnings إضافية. المكافأة تتأكد تلقائياً من CPAGrip.
+            </p>
+
+            <div id="cpagrip-offers-list"></div>
+
+        </div>
  
         <div id="tasks-list"></div>
  
@@ -1389,6 +1403,26 @@
                 <option value="tiktok">
                     TikTok
                 </option>
+
+                <option value="telegram">
+                    Telegram (قناة)
+                </option>
+
+                <option value="discord">
+                    Discord
+                </option>
+
+                <option value="facebook">
+                    Facebook
+                </option>
+
+                <option value="snapchat">
+                    Snapchat
+                </option>
+
+                <option value="apps">
+                    تطبيقات (تثبيت)
+                </option>
  
             </select>
  
@@ -1759,6 +1793,66 @@ const CAMPAIGN_PRICES = {
  
         }
  
+    },
+
+    telegram: {
+
+        joins: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.00
+
+        }
+
+    },
+
+    discord: {
+
+        joins: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.20
+
+        }
+
+    },
+
+    facebook: {
+
+        followers: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.50
+
+        }
+
+    },
+
+    snapchat: {
+
+        followers: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 1.50
+
+        }
+
+    },
+
+    apps: {
+
+        installs: {
+
+            unitQuantity: 10,
+
+            advertiserPrice: 3.00
+
+        }
+
     }
  
 };
@@ -1770,7 +1864,17 @@ const PLATFORM_NAMES = {
  
     instagram: "Instagram",
  
-    tiktok: "TikTok"
+    tiktok: "TikTok",
+
+    telegram: "Telegram",
+
+    discord: "Discord",
+
+    facebook: "Facebook",
+
+    snapchat: "Snapchat",
+
+    apps: "تطبيقات"
  
 };
  
@@ -1781,7 +1885,11 @@ const TYPE_NAMES = {
  
     followers: "متابعين",
  
-    views: "مشاهدات"
+    views: "مشاهدات",
+
+    joins: "انضمام",
+
+    installs: "تثبيت"
  
 };
  
@@ -2952,6 +3060,61 @@ async function completeDailyTask() {
    الإعلان
 ========================= */
  
+/* =========================
+   CPAGrip
+========================= */
+
+async function loadCpagripOffers() {
+
+    const container = document.getElementById("cpagrip-offers-list");
+
+    if (!container) return;
+
+    try {
+
+        const data = await api("/api/cpagrip/offers");
+        const offers = data?.offers || [];
+
+        if (!offers.length) {
+
+            container.innerHTML =
+                '<p class="card-subtitle">لا توجد عروض متاحة حالياً.</p>';
+
+            return;
+
+        }
+
+        container.innerHTML = "";
+
+        offers.forEach(offer => {
+
+            const row = document.createElement("div");
+            row.className = "task";
+
+            row.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${offer.title || "عرض"}</div>
+                    <div class="task-reward">${offer.payout || "0"}$</div>
+                </div>
+                <a class="btn btn-yellow" href="${offer.link}" target="_blank" rel="noopener noreferrer">
+                    ابدأ
+                </a>
+            `;
+
+            container.appendChild(row);
+
+        });
+
+    } catch (e) {
+
+        container.innerHTML =
+            '<p class="card-subtitle">تعذر تحميل عروض CPAGrip حالياً.</p>';
+
+    }
+
+}
+
+
 async function watchAd() {
  
     window.open(
@@ -3819,6 +3982,8 @@ async function refresh() {
             loadTasks()
  
         ]);
+
+        loadCpagripOffers();
  
     } catch(e) {
  
