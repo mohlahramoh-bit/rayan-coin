@@ -1177,10 +1177,10 @@ async def api_cpagrip_offers(request):
         or ""
     )
 
-    # CPAGrip's JSON feed uses `key`, not `pubkey`.
+    # CPAGrip's public/client-side JSON feed uses `pubkey`.
     params = {
         "user_id": CPAGRIP_USER_ID,
-        "key": CPAGRIP_PUBLIC_KEY,
+        "pubkey": CPAGRIP_PUBLIC_KEY,
         "tracking_id": str(uid),
         "ip": visitor_ip,
     }
