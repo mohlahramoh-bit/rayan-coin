@@ -95,6 +95,8 @@ CAMPAIGN_PAYMENT_CURRENCY = os.getenv("CAMPAIGN_PAYMENT_CURRENCY", "USDT").strip
 # من لوحتك في CPAGrip -> Offer Tools -> JSON Offer Feed
 CPAGRIP_USER_ID = os.getenv("CPAGRIP_USER_ID", "").strip()
 CPAGRIP_PUBLIC_KEY = os.getenv("CPAGRIP_PUBLIC_KEY", "").strip()
+# CPAGrip JSON feed calls the credential parameter "key". Keep the env name
+# CPAGRIP_PUBLIC_KEY for compatibility with the existing Render setup.
 
 CPAGRIP_FEED_URL = "https://www.cpagrip.com/common/offer_feed_json.php"
 
@@ -1160,58 +1162,113 @@ async def api_tasks(request):
 
 
 async def api_cpagrip_offers(request):
-    """يجيب قائمة عروض CPAGrip الحقيقية (JSON Offer Feed) مع تمرير معرف المستخدم كـ tracking_id."""
+    """Load CPAGrip's live JSON offer feed for the authenticated Telegram user."""
     uid = auth_user(request)
 
     if not CPAGRIP_USER_ID or not CPAGRIP_PUBLIC_KEY:
         raise web.HTTPServiceUnavailable(
-            text=json.dumps({"detail": "CPAGrip غير مُفعّل على السيرفر بعد"}),
+            text=json.dumps({"detail": "CPAGrip غير مُفعّل: أضف CPAGRIP_USER_ID و CPAGRIP_PUBLIC_KEY في Render"}),
             content_type="application/json"
         )
 
-    visitor_ip = (request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-                  or request.remote or "")
+    visitor_ip = (
+        request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        or request.remote
+        or ""
+    )
 
+    # CPAGrip's JSON feed uses `key`, not `pubkey`.
     params = {
         "user_id": CPAGRIP_USER_ID,
-        "pubkey": CPAGRIP_PUBLIC_KEY,
+        "key": CPAGRIP_PUBLIC_KEY,
         "tracking_id": str(uid),
         "ip": visitor_ip,
     }
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(CPAGRIP_FEED_URL, params=params, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                data = await resp.json(content_type=None)
+            async with session.get(
+                CPAGRIP_FEED_URL,
+                params=params,
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as resp:
+                raw_text = await resp.text()
+                try:
+                    data = json.loads(raw_text)
+                except json.JSONDecodeError:
+                    logging.error("CPAGrip returned non-JSON status=%s body=%s", resp.status, raw_text[:500])
+                    raise web.HTTPBadGateway(
+                        text=json.dumps({"detail": "CPAGrip أعاد استجابة غير صالحة"}),
+                        content_type="application/json",
+                    )
+
+                if resp.status != 200:
+                    message = data.get("message") if isinstance(data, dict) else None
+                    logging.error("CPAGrip feed HTTP %s: %s", resp.status, str(data)[:800])
+                    raise web.HTTPBadGateway(
+                        text=json.dumps({"detail": f"CPAGrip رفض الطلب: {message or 'HTTP ' + str(resp.status)}"}),
+                        content_type="application/json",
+                    )
+    except web.HTTPException:
+        raise
     except Exception:
         logging.exception("Failed to fetch CPAGrip offer feed")
         raise web.HTTPBadGateway(
-            text=json.dumps({"detail": "تعذر جلب عروض CPAGrip حالياً"}),
+            text=json.dumps({"detail": "تعذر الاتصال بـ CPAGrip حالياً"}),
             content_type="application/json"
         )
 
-    # ⚠️ شكل استجابة CPAGrip قد يختلف قليلاً (offers مقابل data مثلاً) — عدّلي
-    # هذا السطر لو رجعت البيانات باسم حقل مختلف حسب المثال الحقيقي عندك.
-    raw_offers = data.get("offers") if isinstance(data, dict) else data
+    # CPAGrip has used a few wrappers over time: offers, data.offers, or a raw list.
+    raw_offers = []
+    if isinstance(data, list):
+        raw_offers = data
+    elif isinstance(data, dict):
+        if isinstance(data.get("offers"), list):
+            raw_offers = data["offers"]
+        elif isinstance(data.get("data"), dict) and isinstance(data["data"].get("offers"), list):
+            raw_offers = data["data"]["offers"]
+        elif isinstance(data.get("data"), list):
+            raw_offers = data["data"]
 
     offers = []
-    for o in (raw_offers or []):
+    for o in raw_offers:
+        if not isinstance(o, dict):
+            continue
+
         try:
-            full_payout = float(o.get("amount") or o.get("payout") or 0)
+            full_payout = float(
+                o.get("payout")
+                or o.get("amount")
+                or o.get("revenue")
+                or 0
+            )
         except (TypeError, ValueError):
             full_payout = 0.0
 
-        user_payout = round(full_payout * CPAGRIP_USER_SHARE, 2)
+        user_payout = round(max(0.0, full_payout) * CPAGRIP_USER_SHARE, 4)
+        title = str(o.get("title") or o.get("name") or "عرض CPAGrip").strip()
+        link = str(o.get("link") or o.get("url") or o.get("tracking_url") or "").strip()
+
+        # If CPAGrip returns a placeholder in the tracking link, bind it to this user.
+        for placeholder in ("{tracking_id}", "{user_id}", "{userid}"):
+            link = link.replace(placeholder, str(uid))
+
+        if not link:
+            continue
 
         offers.append({
-            "id": o.get("id"),
-            "title": o.get("title") or o.get("name"),
+            "id": o.get("offer_id") or o.get("id"),
+            "title": title,
             "description": o.get("description", ""),
             "payout": user_payout,
-            "link": o.get("link") or o.get("url"),
-            "icon": o.get("picture") or o.get("icon", ""),
+            "reward_usdt": user_payout,
+            "link": link,
+            "icon": o.get("picture") or o.get("icon") or o.get("image") or "",
+            "countries": o.get("accepted_countries") or o.get("countries") or "",
+            "category": o.get("category") or "",
         })
 
+    logging.info("CPAGrip offers loaded: user=%s count=%s", uid, len(offers))
     return web.json_response({"ok": True, "offers": offers})
 
 
@@ -1298,33 +1355,94 @@ async def api_cpagrip_postback(request):
 async def api_lootably_offers(request):
     uid = auth_user(request)
     if not LOOTABLY_API_KEY or not LOOTABLY_PLACEMENT_ID:
-        raise web.HTTPServiceUnavailable(text=json.dumps({"detail":"Lootably غير مُفعّل بعد"}), content_type="application/json")
-    ip = (request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or request.remote or "")
+        raise web.HTTPServiceUnavailable(
+            text=json.dumps({"detail": "Lootably غير مُفعّل: أضف LOOTABLY_API_KEY و LOOTABLY_PLACEMENT_ID في Render"}),
+            content_type="application/json"
+        )
+
+    ip = (
+        request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        or request.remote
+        or ""
+    )
     body = {
         "apiKey": LOOTABLY_API_KEY,
         "placementID": LOOTABLY_PLACEMENT_ID,
-        "userData": {"userID": str(uid), "userAgentHeader": request.headers.get("User-Agent", ""), "ipAddress": ip},
+        "userData": {
+            "userID": str(uid),
+            "userAgentHeader": request.headers.get("User-Agent", ""),
+            "ipAddress": ip,
+        },
     }
+
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post("https://api.lootably.com/api/v2/offers/get", json=body, timeout=aiohttp.ClientTimeout(total=12)) as resp:
-                data = await resp.json(content_type=None)
-                if resp.status != 200 or not data.get("success"):
-                    raise RuntimeError(str(data))
+            async with session.post(
+                "https://api.lootably.com/api/v2/offers/get",
+                json=body,
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as resp:
+                raw_text = await resp.text()
+                try:
+                    data = json.loads(raw_text)
+                except json.JSONDecodeError:
+                    logging.error("Lootably returned non-JSON status=%s body=%s", resp.status, raw_text[:500])
+                    raise web.HTTPBadGateway(
+                        text=json.dumps({"detail": "Lootably أعاد استجابة غير صالحة"}),
+                        content_type="application/json",
+                    )
+
+                if resp.status != 200 or data.get("success") is not True:
+                    message = data.get("message") if isinstance(data, dict) else None
+                    logging.error("Lootably offers failed HTTP %s: %s", resp.status, str(data)[:1000])
+                    raise web.HTTPBadGateway(
+                        text=json.dumps({"detail": f"Lootably: {message or 'الـPlacement أو API Key غير صالح'}"}),
+                        content_type="application/json",
+                    )
+    except web.HTTPException:
+        raise
     except Exception:
         logging.exception("Lootably offers request failed")
-        raise web.HTTPBadGateway(text=json.dumps({"detail":"تعذر تحميل عروض Lootably حالياً"}), content_type="application/json")
+        raise web.HTTPBadGateway(
+            text=json.dumps({"detail": "تعذر الاتصال بـ Lootably حالياً"}),
+            content_type="application/json"
+        )
+
+    data_block = data.get("data") or {}
+    raw_offers = data_block.get("offers", []) if isinstance(data_block, dict) else []
     offers = []
-    for o in data.get("data", {}).get("offers", []):
+
+    for o in raw_offers:
+        if not isinstance(o, dict):
+            continue
+        link = str(o.get("link") or "").strip()
+        for placeholder in ("{userID}", "{USER_ID}", "{userid}"):
+            link = link.replace(placeholder, str(uid))
+        if not link:
+            continue
+
+        try:
+            reward_usdt = float(o.get("currencyReward") or 0)
+        except (TypeError, ValueError):
+            reward_usdt = 0.0
+        try:
+            payout_usd = float(o.get("revenue") or 0)
+        except (TypeError, ValueError):
+            payout_usd = 0.0
+
         offers.append({
             "id": o.get("offerID"),
-            "title": o.get("name"),
+            "title": o.get("name") or "عرض Lootably",
             "description": o.get("description", ""),
             "icon": o.get("image", ""),
-            "link": o.get("link", ""),
-            "reward_usdt": float(o.get("currencyReward") or 0),
-            "payout_usd": float(o.get("revenue") or 0),
+            "link": link,
+            "reward_usdt": reward_usdt,
+            "payout_usd": payout_usd,
+            "category": o.get("categories", []),
+            "device": o.get("devices", []),
         })
+
+    logging.info("Lootably offers loaded: user=%s count=%s request_id=%s", uid, len(offers), data_block.get("requestID") if isinstance(data_block, dict) else "")
     return web.json_response({"ok": True, "offers": offers})
 
 
@@ -1380,8 +1498,17 @@ async def api_lootably_webhook(request):
 
 
 async def api_timewall_config(request):
-    auth_user(request)
-    return web.json_response({"ok": True, "enabled": bool(TIMEWALL_PLACEMENT_URL), "url": TIMEWALL_PLACEMENT_URL})
+    uid = auth_user(request)
+    url = TIMEWALL_PLACEMENT_URL
+    if url:
+        for placeholder in ("{USER_ID}", "{userID}", "{userid}", "{USERID}"):
+            url = url.replace(placeholder, str(uid))
+    return web.json_response({
+        "ok": True,
+        "enabled": bool(url),
+        "url": url,
+        "message": "TimeWall متاح" if url else "أضف رابط Placement من لوحة TimeWall إلى TIMEWALL_PLACEMENT_URL في Render",
+    })
 
 
 async def api_timewall_postback(request):
@@ -1446,6 +1573,25 @@ async def api_timewall_postback(request):
             conn.execute("UPDATE users SET balance=MAX(0,balance+?) WHERE user_id=?", (reward, uid))
         conn.commit()
     return web.Response(text="ok")
+
+
+async def api_providers_status(request):
+    auth_user(request)
+    return web.json_response({
+        "ok": True,
+        "cpagrip": {
+            "configured": bool(CPAGRIP_USER_ID and CPAGRIP_PUBLIC_KEY),
+            "postback_configured": bool(CPAGRIP_POSTBACK_PASSWORD),
+        },
+        "lootably": {
+            "configured": bool(LOOTABLY_API_KEY and LOOTABLY_PLACEMENT_ID),
+            "webhook_configured": bool(LOOTABLY_POSTBACK_SECRET),
+        },
+        "timewall": {
+            "configured": bool(TIMEWALL_PLACEMENT_URL),
+            "postback_configured": bool(TIMEWALL_POSTBACK_SECRET),
+        },
+    })
 
 
 async def api_offers(request):
@@ -1727,16 +1873,6 @@ def _pkce_challenge(verifier: str) -> str:
 
 async def api_x_start(request):
     uid = auth_user(request)
-
-    # مهمة X ثابتة: مرة واحدة فقط طوال عمر الحساب.
-    with db() as conn:
-        already_done = conn.execute(
-            "SELECT 1 FROM fixed_completions WHERE user_id=? AND kind='x'",
-            (uid,)
-        ).fetchone()
-    if already_done:
-        return web.json_response({"ok": True, "already_completed": True})
-
     if not X_CLIENT_ID or not X_REDIRECT_URI:
         raise web.HTTPServiceUnavailable(
             text=json.dumps({"detail": "تحقق X غير مفعّل على السيرفر بعد."}),
@@ -1855,20 +1991,6 @@ async def api_fixed_complete(request):
             text=json.dumps({"detail": "مهمة X تحتاج التحقق من حساب X أولاً."}),
             content_type="application/json"
         )
-
-    # المهمة الثابتة تُنجز مرة واحدة فقط طوال عمر الحساب.
-    # إذا أُنجزت سابقاً، لا نعيد التحقق ولا نعيد المكافأة حتى لو غادر المستخدم القناة.
-    with db() as conn:
-        already_done = conn.execute(
-            "SELECT 1 FROM fixed_completions WHERE user_id=? AND kind=?",
-            (uid, kind)
-        ).fetchone()
-    if already_done:
-        return web.json_response({
-            "ok": True,
-            "already_completed": True,
-            "reward": 0
-        })
 
     verified = await verify_telegram_join(TELEGRAM_URL, uid)
     if not verified:
@@ -2634,6 +2756,7 @@ async def create_app():
     app.router.add_get("/api/me", api_me)
     app.router.add_get("/api/tasks", api_tasks)
     app.router.add_get("/api/offers", api_offers)
+    app.router.add_get("/api/providers/status", api_providers_status)
     app.router.add_post("/api/adgem/postback", api_adgem_postback)
     app.router.add_get("/api/x/start", api_x_start)
     app.router.add_get("/api/x/callback", api_x_callback)
