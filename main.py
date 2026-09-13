@@ -2411,7 +2411,7 @@ BOT_TRANSLATIONS = {
         "profile": "👤 معلومات الحساب", "back": "⬅️ عودة", "tasks_msg": "🎯 <b>المهام</b>\n\nافتح التطبيق لعرض المهام الحقيقية وتنفيذها وتسجيل المكافآت.",
         "welcome_again": "مرحباً بك مجدداً يا {name} في <b>Rayan Coin</b>! 🪙",
         "approved": "تمت الموافقة على دفعة حملتك!", "rejected": "تعذّر تأكيد دفعة حملتك.",
-        "active": bt(payment["owner_id"], "active"), "pay_help": bt(payment["owner_id"], "pay_help")
+        "active": "حملتك الآن نشطة ومرئية للمستخدمين.", "pay_help": "تحقق من Transaction Hash وتواصل معنا إذا احتجت للمساعدة."
     },
     "en": {
         "welcome": "Welcome {name} to Rayan Coin! 🪙\n\nYour account has been registered. Open the app to view your real data.",
