@@ -1727,6 +1727,16 @@ def _pkce_challenge(verifier: str) -> str:
 
 async def api_x_start(request):
     uid = auth_user(request)
+
+    # مهمة X ثابتة: مرة واحدة فقط طوال عمر الحساب.
+    with db() as conn:
+        already_done = conn.execute(
+            "SELECT 1 FROM fixed_completions WHERE user_id=? AND kind='x'",
+            (uid,)
+        ).fetchone()
+    if already_done:
+        return web.json_response({"ok": True, "already_completed": True})
+
     if not X_CLIENT_ID or not X_REDIRECT_URI:
         raise web.HTTPServiceUnavailable(
             text=json.dumps({"detail": "تحقق X غير مفعّل على السيرفر بعد."}),
@@ -1845,6 +1855,20 @@ async def api_fixed_complete(request):
             text=json.dumps({"detail": "مهمة X تحتاج التحقق من حساب X أولاً."}),
             content_type="application/json"
         )
+
+    # المهمة الثابتة تُنجز مرة واحدة فقط طوال عمر الحساب.
+    # إذا أُنجزت سابقاً، لا نعيد التحقق ولا نعيد المكافأة حتى لو غادر المستخدم القناة.
+    with db() as conn:
+        already_done = conn.execute(
+            "SELECT 1 FROM fixed_completions WHERE user_id=? AND kind=?",
+            (uid, kind)
+        ).fetchone()
+    if already_done:
+        return web.json_response({
+            "ok": True,
+            "already_completed": True,
+            "reward": 0
+        })
 
     verified = await verify_telegram_join(TELEGRAM_URL, uid)
     if not verified:
