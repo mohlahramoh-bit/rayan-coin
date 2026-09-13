@@ -1040,7 +1040,8 @@
                 أكمل أي عرض تحته وربح Earnings إضافية. المكافأة تتأكد تلقائياً من CPAGrip.
             </p>
 
-            <div id="cpagrip-offers-list"></div>
+            <div id="cpagrip-offers-list"><p class="card-subtitle">جارٍ تحميل عروض CPAGrip...</p></div>
+        </div>
 
         <div class="card">
             <h2 class="card-title">عروض Lootably</h2>
@@ -3036,41 +3037,24 @@ async function completeTask(
  
 async function openFixedTask(type) {
     const link = TASK_LINKS[type];
-    const doneKey = type === "x" ? "x_done" : "telegram_done";
-
-    if (state.user?.fixed_tasks?.[doneKey]) {
-        showToast("هذه المهمة مكتملة بالفعل.");
-        return;
-    }
 
     if (type === "x") {
         if (link) window.open(link, "_blank", "noopener,noreferrer");
         try {
             const data = await api("/api/x/start");
-            if (data?.already_completed) {
-                await refresh();
-                showToast("تم — هذه المهمة مكتملة سابقاً.");
-                return;
-            }
             if (!data?.authorization_url) throw new Error("تعذر بدء تحقق X.");
             window.location.href = data.authorization_url;
-        } catch (e) {
-            showToast(e.message || "تعذر بدء تحقق X.");
-        }
+        } catch (e) { showToast(e.message || "تعذر بدء تحقق X."); }
         return;
     }
 
     if (link) window.open(link, "_blank", "noopener,noreferrer");
     try {
-        const data = await api("/api/tasks/fixed/telegram/complete", {method:"POST"});
+        await api("/api/tasks/fixed/telegram/complete", {method:"POST"});
         await refresh();
-        showToast(
-            data?.already_completed
-                ? "تم — هذه المهمة مكتملة سابقاً."
-                : "تم التحقق من الانضمام وإضافة المكافأة."
-        );
+        showToast("تم فتح المهمة وتسجيلها لدى السيرفر.");
     } catch (e) {
-        showToast(e.message || "تعذر تسجيل المهمة.");
+        showToast("تم فتح الرابط. التسجيل يحتاج اتصال السيرفر.");
     }
 }
 
@@ -3118,74 +3102,82 @@ async function completeDailyTask() {
    CPAGrip
 ========================= */
 
-async function loadCpagripOffers() {
-
-    const container = document.getElementById("cpagrip-offers-list");
-
-    if (!container) return;
-
-    try {
-
-        const data = await api("/api/cpagrip/offers");
-        const offers = data?.offers || [];
-
-        if (!offers.length) {
-
-            container.innerHTML =
-                '<p class="card-subtitle">لا توجد عروض متاحة حالياً.</p>';
-
-            return;
-
-        }
-
-        container.innerHTML = "";
-
-        offers.forEach(offer => {
-
-            const row = document.createElement("div");
-            row.className = "task";
-
-            row.innerHTML = `
-                <div class="task-info">
-                    <div class="task-title">${offer.title || "عرض"}</div>
-                    <div class="task-reward">${offer.payout || "0"}$</div>
-                </div>
-                <a class="btn btn-yellow" href="${offer.link}" target="_blank" rel="noopener noreferrer">
-                    ابدأ
-                </a>
-            `;
-
-            container.appendChild(row);
-
-        });
-
-    } catch (e) {
-
-        container.innerHTML =
-            '<p class="card-subtitle">تعذر تحميل عروض CPAGrip حالياً.</p>';
-
-    }
-
+function escapeOfferText(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
+function renderProviderError(container, name, error) {
+    const message = error?.message || "تعذر تحميل العروض حالياً.";
+    container.innerHTML = `
+        <p class="card-subtitle">${escapeOfferText(name)}: ${escapeOfferText(message)}</p>
+        <button class="btn btn-blue btn-block" type="button" onclick="reloadProviderOffers()">إعادة المحاولة</button>
+    `;
+}
+
+async function loadCpagripOffers() {
+    const container = document.getElementById("cpagrip-offers-list");
+    if (!container) return;
+    container.innerHTML = '<p class="card-subtitle">جارٍ تحميل عروض CPAGrip...</p>';
+    try {
+        const data = await api("/api/cpagrip/offers");
+        const offers = Array.isArray(data?.offers) ? data.offers : [];
+        if (!offers.length) {
+            container.innerHTML = '<p class="card-subtitle">لا توجد عروض CPAGrip متاحة لهذا المستخدم/البلد حالياً.</p>';
+            return;
+        }
+        container.innerHTML = "";
+        offers.forEach(offer => {
+            const row = document.createElement("div");
+            row.className = "task";
+            const reward = Number(offer.reward_usdt ?? offer.payout ?? 0).toFixed(2);
+            row.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${escapeOfferText(offer.title || "عرض CPAGrip")}</div>
+                    <div class="task-meta">${escapeOfferText(offer.description || "")}</div>
+                    <div class="task-reward">${reward} USDT</div>
+                </div>
+                <a class="btn btn-yellow" href="${escapeOfferText(offer.link || "#")}" target="_blank" rel="noopener noreferrer">ابدأ</a>
+            `;
+            container.appendChild(row);
+        });
+    } catch (e) {
+        renderProviderError(container, "CPAGrip", e);
+    }
+}
 
 async function loadLootablyOffers() {
     const container = document.getElementById("lootably-offers-list");
     if (!container) return;
+    container.innerHTML = '<p class="card-subtitle">جارٍ تحميل عروض Lootably...</p>';
     try {
         const data = await api("/api/lootably/offers");
-        const offers = data?.offers || [];
-        if (!offers.length) { container.innerHTML = '<p class="card-subtitle">لا توجد عروض Lootably متاحة حالياً.</p>'; return; }
+        const offers = Array.isArray(data?.offers) ? data.offers : [];
+        if (!offers.length) {
+            container.innerHTML = '<p class="card-subtitle">لا توجد عروض Lootably متاحة لهذا المستخدم حالياً.</p>';
+            return;
+        }
         container.innerHTML = "";
         offers.forEach(offer => {
-            const row = document.createElement("div"); row.className = "task";
-            const title = String(offer.title || "عرض");
+            const row = document.createElement("div");
+            row.className = "task";
             const reward = Number(offer.reward_usdt || 0).toFixed(2);
-            row.innerHTML = `<div class="task-info"><div class="task-title">${title}</div><div class="task-reward">${reward} USDT</div></div><a class="btn btn-yellow" href="${offer.link || '#'}" target="_blank" rel="noopener noreferrer">ابدأ</a>`;
+            row.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${escapeOfferText(offer.title || "عرض Lootably")}</div>
+                    <div class="task-meta">${escapeOfferText(offer.description || "")}</div>
+                    <div class="task-reward">${reward} USDT</div>
+                </div>
+                <a class="btn btn-yellow" href="${escapeOfferText(offer.link || "#")}" target="_blank" rel="noopener noreferrer">ابدأ</a>
+            `;
             container.appendChild(row);
         });
-    } catch {
-        container.innerHTML = '<p class="card-subtitle">Lootably غير متاح حالياً أو ما زال الحساب بانتظار الموافقة.</p>';
+    } catch (e) {
+        renderProviderError(container, "Lootably", e);
     }
 }
 
@@ -3195,16 +3187,39 @@ async function loadTimeWallConfig() {
     if (!status || !btn) return;
     try {
         const data = await api("/api/timewall/config");
-        if (data.enabled && data.url) { window._timewallUrl = data.url; status.textContent = "TimeWall متاح. المكافآت تُسجّل فقط من postback موثوق."; btn.disabled = false; }
-        else { status.textContent = "TimeWall ما زال بانتظار تفعيل رابط الـPlacement من لوحة TimeWall."; btn.disabled = true; }
-    } catch { status.textContent = "TimeWall غير متاح حالياً."; btn.disabled = true; }
+        if (data.enabled && data.url) {
+            window._timewallUrl = data.url;
+            status.textContent = "TimeWall متاح. المكافآت تُسجّل فقط بعد تأكيد postback من السيرفر.";
+            btn.disabled = false;
+        } else {
+            window._timewallUrl = "";
+            status.textContent = data.message || "أضف رابط Placement في Render أولاً.";
+            btn.disabled = true;
+        }
+    } catch (e) {
+        window._timewallUrl = "";
+        status.textContent = e.message || "TimeWall غير متاح حالياً.";
+        btn.disabled = true;
+    }
 }
 
-function openTimeWall() { if (window._timewallUrl) window.open(window._timewallUrl, "_blank", "noopener,noreferrer"); }
+function openTimeWall() {
+    if (window._timewallUrl) {
+        window.open(window._timewallUrl, "_blank", "noopener,noreferrer");
+    }
+}
+
+async function reloadProviderOffers() {
+    await Promise.allSettled([
+        loadCpagripOffers(),
+        loadLootablyOffers(),
+        loadTimeWallConfig(),
+    ]);
+}
 
 async function watchAd() {
     window.open(ADSTERAA_LINK, "_blank", "noopener,noreferrer");
-    showToast("تم فتح الإعلان. يُحتسب فقط بعد تأكيد مزود الإعلانات إلى السيرفر.");
+    showToast("تم فتح الإعلان. تُضاف المكافأة فقط بعد تأكيد مزود الإعلانات.");
 }
 
 
@@ -4044,9 +4059,11 @@ async function refresh() {
         // يظهر زر الإدارة تلقائياً فقط للحساب المصرح له.
         await loadAdminCampaignPayments();
 
-        loadCpagripOffers();
-    loadLootablyOffers();
-    loadTimeWallConfig();
+        await Promise.allSettled([
+            loadCpagripOffers(),
+            loadLootablyOffers(),
+            loadTimeWallConfig(),
+        ]);
  
     } catch(e) {
  
